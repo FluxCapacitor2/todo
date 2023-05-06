@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../data.db"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  projects      Project[]
+  sessions      Session[]
+  tasks         Task[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Project {
+  id       String    @id @default(cuid())
+  name     String
+  ownerId  String
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  sections Section[]
+}
+
+model Section {
+  id        Int     @id @default(autoincrement())
+  name      String
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks     Task[]
+}
+
+model Task {
+  id           Int       @id @default(autoincrement())
+  name         String
+  description  String
+  priority     Int       @default(1)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  completed    Boolean   @default(false)
+  startDate    DateTime  @default(now())
+  dueDate      DateTime?
+  sectionId    Int?
+  parentTaskId Int?
+  ownerId      String
+  owner        User      @relation(fields: [ownerId], references: [id])
+  parentTask   Task?     @relation("SubTasks", fields: [parentTaskId], references: [id])
+  subTasks     Task[]    @relation("SubTasks")
+  section      Section?  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  labels       Label[]   @relation("LabelToTask")
+}
+
+model Label {
+  id    String @id @default(cuid())
+  name  String
+  color String
+  tasks Task[] @relation("LabelToTask")
+}
