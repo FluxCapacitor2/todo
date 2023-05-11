@@ -23,8 +23,8 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
       })
   );
 
-  const url = process.env.BASE_URL
-    ? `${process.env.BASE_URL}/api/trpc/`
+  const url = process.env.NEXT_PUBLIC_BASE_URL
+    ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/trpc/`
     : "http://localhost:3000/api/trpc/";
 
   const [trpcClient] = useState(() =>
