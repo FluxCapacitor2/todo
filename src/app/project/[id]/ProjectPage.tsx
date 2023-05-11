@@ -1,15 +1,15 @@
 "use client";
 
-import { Button } from "@/components/Button";
-import { Spinner } from "@/components/Spinner";
+import { Button } from "@/components/ui/Button";
+import { Spinner } from "@/components/ui/Spinner";
 import { trpc } from "@/util/trpc/trpc";
 import { Project, Section, Task } from "@prisma/client";
 import { useRef, useState } from "react";
 import { MdDelete, MdEdit, MdMenu } from "react-icons/md";
-import { AddSectionTask } from "./AddTask";
-import { TaskCard } from "./TaskCard";
+import { AddSectionTask } from "../../../components/task/AddTask";
+import { TaskCard } from "@/components/task/TaskCard";
 import { Menu } from "@headlessui/react";
-import { MenuItem, MenuItems } from "@/components/CustomMenu";
+import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
 
 export const ProjectPage = ({
   project,

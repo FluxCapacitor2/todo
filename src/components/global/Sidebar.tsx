@@ -4,12 +4,11 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { trpc } from "@/util/trpc/trpc";
 import Link from "next/link";
-import { Spinner } from "./Spinner";
+import { Spinner } from "@/components/ui/Spinner";
 import { Project } from "@prisma/client";
-import { FormEvent, useRef } from "react";
-import { Button } from "./Button";
+import { Button } from "@/components/ui/Button";
 import clsx from "clsx";
-import { MdClose, MdDelete, MdHome } from "react-icons/md";
+import { MdDelete, MdHome } from "react-icons/md";
 
 export const Sidebar = ({
   initialData,
@@ -24,21 +23,23 @@ export const Sidebar = ({
 
   return (
     <aside className="flex flex-col gap-8 h-screen bg-gray-200 dark:bg-gray-900 p-6">
-      <div className="flex gap-2 items-center">
+      <div className="flex items-center w-48">
         {session.status === "authenticated" ? (
-          <>
-            {session?.data?.user?.image && (
-              <Image
-                src={session.data.user.image}
-                alt="User profile image"
-                width={32}
-                height={32}
-                className="rounded-full"
-                unoptimized
-              />
-            )}
-            <p className="font-bold text-sm">{session?.data?.user?.name}</p>
-          </>
+          <Link href="/profile">
+            <div className="flex gap-2 items-center">
+              {session?.data?.user?.image && (
+                <Image
+                  src={session.data.user.image}
+                  alt="User profile image"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                  unoptimized
+                />
+              )}
+              <p className="font-bold text-sm">{session?.data?.user?.name}</p>
+            </div>
+          </Link>
         ) : (
           <>
             <Link className="font-medium underline" href="/signin">
@@ -72,45 +73,7 @@ export const Sidebar = ({
           ))}
         </>
       )}
-
-      <NewProject />
     </aside>
-  );
-};
-
-const NewProject = () => {
-  const ref = useRef<HTMLInputElement | null>(null);
-  const utils = trpc.useContext();
-
-  const { mutateAsync, isLoading } = trpc.projects.create.useMutation();
-
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (ref.current) {
-      await mutateAsync({ name: ref.current.value });
-      ref.current.value = "";
-    }
-    utils.projects.list.invalidate();
-  };
-
-  return (
-    <form className="relative" onSubmit={submit}>
-      <input
-        type="text"
-        placeholder="New project..."
-        className="bg-transparent p-2 outline-none border-b border-b-gray-600 focus:border-b-white"
-        ref={ref}
-        disabled={isLoading}
-      />
-      <Button
-        variant="subtle"
-        className="absolute inset-y-1 right-0"
-        type="submit"
-        disabled={isLoading}
-      >
-        +
-      </Button>
-    </form>
   );
 };
 

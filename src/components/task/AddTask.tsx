@@ -1,21 +1,26 @@
-import { Button } from "@/components/Button";
+import { Button } from "@/components/ui/Button";
 import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
 import { useState, useRef } from "react";
+import { toast } from "react-hot-toast";
 import { MdCancel, MdSend } from "react-icons/md";
+import { SelectField } from "../ui/SelectField";
+import { TextArea, TextField } from "../ui/TextField";
 
 export const AddSectionTask = ({
   sectionId,
   projectId,
 }: {
-  sectionId: number;
+  sectionId?: number;
   projectId: string;
 }) => {
   const utils = trpc.useContext();
   const { mutateAsync } = trpc.tasks.create.useMutation();
   return (
     <AddTask
-      onAdd={async ({ name, description }) => {
+      projectId={projectId}
+      section={sectionId}
+      onAdd={async ({ name, description, sectionId }) => {
         await mutateAsync({ name, description, sectionId });
         utils.projects.get.invalidate(projectId);
       }}
@@ -23,11 +28,19 @@ export const AddSectionTask = ({
   );
 };
 
-export const AddSubtask = ({ parentTaskId }: { parentTaskId: number }) => {
+export const AddSubtask = ({
+  projectId,
+  parentTaskId,
+}: {
+  projectId: string;
+  parentTaskId: number;
+}) => {
   const utils = trpc.useContext();
   const { mutateAsync } = trpc.tasks.addSubtask.useMutation();
   return (
     <AddTask
+      sectionEditable={false}
+      projectId={projectId}
       onAdd={async ({ name, description }) => {
         await mutateAsync({
           id: parentTaskId,
@@ -42,32 +55,49 @@ export const AddSubtask = ({ parentTaskId }: { parentTaskId: number }) => {
 
 const AddTask = ({
   onAdd,
+  projectId,
+  section: defaultSection,
+  sectionEditable = true,
 }: {
   onAdd: ({
     name,
     description,
+    sectionId,
   }: {
     name: string;
     description: string;
+    sectionId: number;
   }) => Promise<void>;
+  projectId: string;
+  section?: number;
+  sectionEditable?: boolean;
 }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const { data, isLoading, isError } = trpc.projects.get.useQuery(projectId);
+
   const [focused, setFocused] = useState(false);
 
   const form = useRef<HTMLFormElement | null>(null);
   const nameField = useRef<HTMLInputElement | null>(null);
+  const descField = useRef<HTMLTextAreaElement | null>(null);
+  const sectionField = useRef<HTMLSelectElement | null>(null);
 
   const reset = () => {
     form.current!.reset();
-    setName("");
-    setDescription("");
   };
 
   const newTask = async () => {
+    if (!sectionField.current?.value) {
+      toast.error("Please select a section to add the task to!");
+      return;
+    }
+    if (!nameField.current?.value) {
+      toast.error("Title must not be empty!");
+      return;
+    }
     await onAdd({
-      name,
-      description,
+      name: nameField.current!.value,
+      description: descField.current!.value,
+      sectionId: parseInt(sectionField.current!.value),
     });
     reset();
     nameField.current?.focus();
@@ -77,9 +107,9 @@ const AddTask = ({
     <form
       ref={form}
       className={clsx(
-        "w-min p-2 my-2 flex flex-col gap-2",
+        "min-w-min flex flex-col gap-2",
         focused &&
-          "bg-white dark:bg-black border-gray-600 border rounded-lg min-w-full"
+          "p-2 bg-white dark:bg-black border-gray-600 border rounded-lg min-w-full"
       )}
       onSubmit={async (e) => {
         e.preventDefault();
@@ -91,24 +121,34 @@ const AddTask = ({
         if (form.current?.contains(e.relatedTarget)) {
           return;
         }
-        if (name.trim() === "" && description.trim() === "") {
+        if (
+          !nameField.current?.value.trim() &&
+          !descField.current?.value.trim()
+        ) {
           setFocused(false);
         }
       }}
     >
-      <input
-        type="text"
+      <TextField
         placeholder={focused ? "Name" : "Add a new task..."}
         className="bg-transparent rounded-md p-1"
-        onChange={(e) => setName(e.target.value)}
         ref={nameField}
       />
       {focused && (
         <>
-          <textarea
+          {sectionEditable && (
+            <SelectField ref={sectionField} defaultValue={defaultSection}>
+              {data?.sections.map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.name}
+                </option>
+              ))}
+            </SelectField>
+          )}
+          <TextArea
+            ref={descField}
             placeholder="Description"
             className="bg-transparent rounded-md p-1 h-16"
-            onChange={(e) => setDescription(e.target.value)}
             onKeyDown={async (e) => {
               if (e.ctrlKey && e.key == "Enter") {
                 await newTask();

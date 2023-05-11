@@ -1,13 +1,14 @@
 "use client";
 
-import { Button } from "@/components/Button";
+import { Button } from "@/components/ui/Button";
 import { Project, Section, Task } from "@prisma/client";
 import { CalendarDay, useDatePicker } from "@rehookify/datepicker";
-import { Fragment, MouseEvent, useState } from "react";
-import { MdArrowBack, MdArrowForward, MdCancel, MdCheck } from "react-icons/md";
-import { TaskCard } from "../TaskCard";
-import { Spinner } from "@/components/Spinner";
+import { Fragment, useState } from "react";
+import { MdArrowBack, MdArrowForward, MdCalendarToday } from "react-icons/md";
+import { TaskCard } from "@/components/task/TaskCard";
+import { Spinner } from "@/components/ui/Spinner";
 import { trpc } from "@/util/trpc/trpc";
+import clsx from "clsx";
 
 export const CalendarPage = ({
   project,
@@ -18,6 +19,7 @@ export const CalendarPage = ({
   const {
     data: { weekDays, calendars },
     propGetters: { previousMonthButton, nextMonthButton },
+    actions: { setMonth },
   } = useDatePicker({
     selectedDates,
     onDatesChange,
@@ -33,27 +35,26 @@ export const CalendarPage = ({
 
   const { year, month, days } = calendars[0];
 
-  const onDayClick = (evt: MouseEvent<HTMLElement>, date: Date) => {
-    evt.stopPropagation();
-
-    console.log(date);
-  };
-
   return (
-    <section className="max-w-6xl mx-auto m-4">
+    <section className="px-4 mx-auto m-4">
       <header>
-        <div className="flex justify-between items-center mb-6">
-          <Button variant="subtle" {...previousMonthButton()}>
-            <MdArrowBack />
-          </Button>
-          <div>
-            <p className="text-xl font-bold">
-              {month} {year}
-            </p>
+        <div className="flex flex-col items-center gap-4 mb-6">
+          <p className="text-3xl -mt-12 font-bold">
+            {month} {year}
+          </p>
+          <div className="flex gap-2">
+            <Button variant="subtle" {...previousMonthButton()}>
+              <MdArrowBack />
+            </Button>
+
+            <Button variant="subtle" onClick={() => setMonth(new Date())}>
+              <MdCalendarToday /> Today
+            </Button>
+
+            <Button variant="subtle" {...nextMonthButton()}>
+              <MdArrowForward />
+            </Button>
           </div>
-          <Button variant="subtle" {...nextMonthButton()}>
-            <MdArrowForward />
-          </Button>
         </div>
         <ul className="grid grid-cols-7">
           {weekDays.map((day) => (
@@ -63,7 +64,10 @@ export const CalendarPage = ({
       </header>
       <ul className="grid grid-cols-7">
         {days.map((dpDay) => (
-          <li key={`${year}-${month}-${dpDay.day}-${dpDay.inCurrentMonth}`}>
+          <li
+            key={`${year}-${month}-${dpDay.day}-${dpDay.inCurrentMonth}`}
+            className="overflow-auto"
+          >
             <DailyTaskList day={dpDay} project={data} />
           </li>
         ))}
@@ -80,8 +84,17 @@ const DailyTaskList = ({
   day: CalendarDay;
 }) => {
   return (
-    <div className="py-2">
-      <h3 className="text-xl font-light text-gray-500">{day.day}</h3>
+    <div className={clsx("py-2 h-28", day.now && "bg-gray-200")}>
+      <h3
+        className={clsx(
+          "text-sm font-mono",
+          day.now
+            ? "text-black dark:text-white font-bold"
+            : "text-gray-500 font-light"
+        )}
+      >
+        {day.day}
+      </h3>
       {project.sections.map((section) => (
         <Fragment key={section.id}>
           {section.tasks
@@ -92,6 +105,7 @@ const DailyTaskList = ({
                 key={task.id}
                 projectId={project.id}
                 isListItem
+                details={false}
               />
             ))}
         </Fragment>

@@ -1,9 +1,28 @@
+import { ViewSelector } from "@/components/project/ViewSelector";
 import { authOptions, ExtSession } from "@/pages/api/auth/[...nextauth]";
 import { prisma } from "@/util/prisma";
 import { getServerSession } from "next-auth";
-import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { ReactNode } from "react";
+
+export const generateMetadata = async ({
+  params: { id },
+}: {
+  params: { id: string };
+}) => {
+  const meta = await prisma.project.findFirst({
+    where: { id },
+    select: { name: true },
+  });
+
+  if (!meta) {
+    notFound();
+  }
+
+  return {
+    title: meta.name,
+  };
+};
 
 export async function getProject(id: string) {
   const session = (await getServerSession(authOptions)) as ExtSession;
@@ -44,29 +63,8 @@ export default async function Layout({
   return (
     <main className="px-6 pt-4">
       <h1 className="text-2xl font-bold mb-2">{project.name}</h1>
-      <div className="flex">
-        <PillButton href={`/project/${id}`}>Project</PillButton>
-        <PillButton href={`/project/${id}/list`}>List</PillButton>
-        <PillButton href={`/project/${id}/calendar`}>Calendar</PillButton>
-      </div>
+      <ViewSelector id={id} />
       {children}
     </main>
   );
 }
-
-const PillButton = ({
-  children,
-  href,
-}: {
-  children: ReactNode;
-  href: string;
-}) => {
-  return (
-    <Link
-      href={href}
-      className="first:rounded-l-full last:rounded-r-full bg-gray-900 hover:bg-gray-800 px-3 py-1"
-    >
-      <button>{children}</button>
-    </Link>
-  );
-};

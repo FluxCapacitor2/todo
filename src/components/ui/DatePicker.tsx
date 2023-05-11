@@ -1,6 +1,6 @@
 import { MouseEvent, useState } from "react";
 import { useDatePicker } from "@rehookify/datepicker";
-import { Button } from "./Button";
+import { Button } from "@/components/ui/Button";
 import { MdArrowBack, MdArrowForward, MdCancel, MdCheck } from "react-icons/md";
 import clsx from "clsx";
 

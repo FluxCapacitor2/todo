@@ -1,9 +1,10 @@
 "use client";
 
 import { Project, Section, Task } from "@prisma/client";
-import { TaskCard } from "../TaskCard";
+import { TaskCard } from "@/components/task/TaskCard";
 import { trpc } from "@/util/trpc/trpc";
-import { Spinner } from "@/components/Spinner";
+import { Spinner } from "@/components/ui/Spinner";
+import { AddSectionTask } from "@/components/task/AddTask";
 
 export const ListPage = ({
   project,
@@ -28,7 +29,7 @@ export const ListPage = ({
     });
 
   return (
-    <section className=" mx-auto m-4">
+    <section className="max-w-xl mx-auto m-4">
       <ul className="flex flex-col gap-2">
         {tasks.map((task) => (
           <TaskCard
@@ -38,6 +39,7 @@ export const ListPage = ({
             isListItem
           />
         ))}
+        <AddSectionTask projectId={project.id} />
       </ul>
     </section>
   );

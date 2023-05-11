@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:../data.db"
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model Account {
@@ -23,6 +24,7 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -31,18 +33,44 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  projects      Project[]
-  sessions      Session[]
-  tasks         Task[]
+  id                   String              @id @default(cuid())
+  name                 String?
+  email                String?             @unique
+  emailVerified        DateTime?
+  image                String?
+  accounts             Account[]
+  projects             Project[]
+  sessions             Session[]
+  tasks                Task[]
+  notificationTokens   NotificationToken[]
+  pendingNotifications NotificationJob[]
+}
+
+model NotificationToken {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  generatedAt DateTime @default(now())
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+
+  @@index([userId])
+}
+
+model NotificationJob {
+  id          String   @id @default(cuid())
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  time        DateTime
+  title       String
+  description String
+  url         String
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -59,6 +87,8 @@ model Project {
   ownerId  String
   owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   sections Section[]
+
+  @@index([ownerId])
 }
 
 model Section {
@@ -67,6 +97,8 @@ model Section {
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   tasks     Task[]
+
+  @@index([projectId])
 }
 
 model Task {
@@ -83,10 +115,14 @@ model Task {
   parentTaskId Int?
   ownerId      String
   owner        User      @relation(fields: [ownerId], references: [id])
-  parentTask   Task?     @relation("SubTasks", fields: [parentTaskId], references: [id])
+  parentTask   Task?     @relation("SubTasks", fields: [parentTaskId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   subTasks     Task[]    @relation("SubTasks")
   section      Section?  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   labels       Label[]   @relation("LabelToTask")
+
+  @@index([ownerId])
+  @@index([sectionId])
+  @@index([parentTaskId])
 }
 
 model Label {

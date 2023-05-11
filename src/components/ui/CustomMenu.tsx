@@ -1,6 +1,5 @@
 import { Menu, Transition } from "@headlessui/react";
-import clsx from "clsx";
-import { Fragment, HTMLProps, PropsWithChildren } from "react";
+import { Fragment, PropsWithChildren } from "react";
 import { MdClose } from "react-icons/md";
 
 export const MenuItems = (props: PropsWithChildren<{}>) => {

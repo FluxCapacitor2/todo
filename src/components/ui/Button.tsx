@@ -3,10 +3,12 @@ import { ButtonHTMLAttributes, forwardRef } from "react";
 
 const styles = {
   primary:
-    "text-white bg-blue-500 dark:bg-black dark:outline dark:outline-blue-500 dark:hover:bg-gray-900",
+    "text-white bg-primary-500 dark:bg-primary-700 dark:hover:bg-gray-900",
   subtle:
     "bg-black/[.08] hover:bg-black/[.15] dark:bg-gray-800 dark:hover:bg-gray-700",
   flat: "hover:bg-gray-100 dark:hover:bg-white/10",
+  danger:
+    "bg-red-500 dark:bg-red-700 dark:hover:bg-red-800 text-white hover:bg-red-600",
 };
 
 export const Button = forwardRef<

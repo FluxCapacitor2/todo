@@ -12,7 +12,11 @@ export const SignInButton = ({
     <button
       key={provider.id}
       className="bg-white text-black flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 transition-colors hover:bg-gray-200 dark:hover:bg-gray-300"
-      onClick={() => signIn(provider.id)}
+      onClick={async () => {
+        window.location.href = "https://youtube.com";
+        console.log("Signing in with ", provider.id);
+        await signIn(provider.id);
+      }}
     >
       <Image
         src={`https://authjs.dev/img/providers/${provider.id}.svg`}

@@ -3,7 +3,7 @@
 import { Transition } from "@headlessui/react";
 import { useIsFetching, useIsMutating } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { MdBrowserUpdated, MdUpdate } from "react-icons/md";
+import { MdBrowserUpdated } from "react-icons/md";
 
 export const FetchingIndicators = () => {
   const fetching = useIsFetching();

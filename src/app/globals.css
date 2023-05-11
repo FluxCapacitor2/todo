@@ -5,3 +5,9 @@
 body {
   @apply dark:bg-black dark:text-white;
 }
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}

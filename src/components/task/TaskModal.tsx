@@ -1,5 +1,5 @@
-import { CustomDialog, DialogTitle } from "@/components/CustomDialog";
-import { Spinner } from "@/components/Spinner";
+import { CustomDialog, DialogTitle } from "@/components/ui/CustomDialog";
+import { Spinner } from "@/components/ui/Spinner";
 import { Task } from "@prisma/client";
 import {
   MdArrowBack,
@@ -8,13 +8,14 @@ import {
   MdStart,
   MdWork,
 } from "react-icons/md";
-import { DatePickerPopover } from "./DatePickerPopover";
+import { DatePickerPopover } from "@/app/project/[id]/DatePickerPopover";
 import { TaskCard, format } from "./TaskCard";
-import { RemirrorEditor } from "@/components/RemirrorEditor";
-import { Button } from "@/components/Button";
+import { RemirrorEditor } from "@/components/ui/RemirrorEditor";
+import { Button } from "@/components/ui/Button";
 import { trpc } from "@/util/trpc/trpc";
 import { AddSubtask } from "./AddTask";
 import clsx from "clsx";
+import { TextField } from "../ui/TextField";
 
 export const TaskModal = ({
   modalShown,
@@ -56,9 +57,12 @@ export const TaskModal = ({
           checked={task.completed}
           className="w-6 h-6"
         />
-        <span className={clsx(task.completed && "text-gray-500 line-through")}>
-          {task.name}
-        </span>
+        <TextField
+          flat
+          value={task.name}
+          onChange={(e) => setTask({ ...task, name: e.target.value })}
+          className={clsx(task.completed && "text-gray-500 line-through")}
+        />
       </DialogTitle>
       <div className="mt-4 mb-6 max-h-96 overflow-scroll outline-none">
         <RemirrorEditor
@@ -145,7 +149,7 @@ export const TaskModal = ({
                 isListItem
               />
             ))}
-            <AddSubtask parentTaskId={task.id} />
+            <AddSubtask projectId={projectId} parentTaskId={task.id} />
           </div>
         </>
       ) : loadingSubTasks ? (

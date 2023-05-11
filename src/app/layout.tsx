@@ -1,15 +1,19 @@
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import { Sidebar } from "@/components/Sidebar";
-import { TrpcProvider } from "@/components/TrpcProvider";
+import { Sidebar } from "@/components/global/Sidebar";
+import { TrpcProvider } from "@/components/global/TrpcProvider";
 import { getServerSession } from "next-auth";
 import { ExtSession, authOptions } from "@/pages/api/auth/[...nextauth]";
-import { InnerLayout } from "@/components/InnerLayout";
+import { InnerLayout } from "@/components/global/InnerLayout";
 import { prisma } from "@/util/prisma";
-import { FetchingIndicators } from "@/components/FetchingIndicators";
+import { FetchingIndicators } from "@/components/global/FetchingIndicators";
 
 export const metadata = {
-  title: "Todo App",
+  title: {
+    template: "%s | Todo App",
+    default: "Todo App",
+  },
+  manifest: "/manifest.webmanifest",
 };
 
 export default async function RootLayout({
@@ -21,8 +25,8 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <InnerLayout session={await getServerSession(authOptions)}>
-          <TrpcProvider>
+        <TrpcProvider>
+          <InnerLayout session={await getServerSession(authOptions)}>
             <div className="flex">
               {session !== null && (
                 <Sidebar
@@ -35,8 +39,8 @@ export default async function RootLayout({
               <FetchingIndicators />
             </div>
             <Toaster position="top-right" />
-          </TrpcProvider>
-        </InnerLayout>
+          </InnerLayout>
+        </TrpcProvider>
       </body>
     </html>
   );

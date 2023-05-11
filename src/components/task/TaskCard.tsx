@@ -1,14 +1,23 @@
-import { Button } from "@/components/Button";
-import { MenuItem, MenuItems } from "@/components/CustomMenu";
-import { Spinner } from "@/components/Spinner";
+import { Button } from "@/components/ui/Button";
+import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
+import { Spinner } from "@/components/ui/Spinner";
 import { trpc } from "@/util/trpc/trpc";
 import { Menu } from "@headlessui/react";
 import { Task } from "@prisma/client";
-import { createContext, useEffect, useMemo, useRef, useState } from "react";
-import { MdMoreHoriz, MdDelete } from "react-icons/md";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { MdMoreHoriz, MdDelete, MdCalendarToday } from "react-icons/md";
 import { TaskModal } from "./TaskModal";
 import clsx from "clsx";
 import { ReactNode } from "react";
+import { debounce } from "throttle-debounce";
+import { useDebounce } from "use-debounce";
 
 export const format = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
@@ -43,6 +52,12 @@ export const TaskWrapper = ({
   const { mutateAsync: updateAsync, isLoading: isSaving } =
     trpc.tasks.update.useMutation();
 
+  const [debouncedTask] = useDebounce(task, 500, {
+    leading: true,
+    trailing: true,
+    maxWait: 2500,
+  });
+
   // eslint-disable-next-line
   const invalidateParent = useMemo(() => utils.tasks.get.invalidate, []);
 
@@ -52,16 +67,16 @@ export const TaskWrapper = ({
         initialRender.current = false;
         return;
       } else {
-        await updateAsync({
-          ...task,
-          dueDate: task.dueDate ?? undefined,
+        updateAsync({
+          ...debouncedTask,
+          dueDate: debouncedTask.dueDate ?? undefined,
         });
-        if (task.parentTaskId) {
-          invalidateParent({ id: task.parentTaskId });
+        if (debouncedTask.parentTaskId) {
+          invalidateParent({ id: debouncedTask.parentTaskId });
         }
       }
     })();
-  }, [task, updateAsync, invalidateParent]);
+  }, [debouncedTask, updateAsync, invalidateParent]);
 
   return (
     <TaskContext.Provider value={{ task, setTask, isSaving }}>
@@ -76,10 +91,12 @@ export const TaskCard = ({
   task: inTask,
   projectId,
   isListItem,
+  details,
 }: {
   task: Task;
   projectId: string;
   isListItem?: boolean;
+  details?: boolean;
 }) => {
   const [modalShown, setModalShown] = useState(false);
 
@@ -89,10 +106,9 @@ export const TaskCard = ({
         <>
           <div
             className={clsx(
-              "p-2 group flex justify-between gap-2 cursor-pointer",
-              isListItem
-                ? "border-b border-gray-600 rounded-sm"
-                : "border border-gray-600 hover:bg-white/30 rounded-md max-w-[17.5rem]"
+              "p-2 group flex justify-between gap-2 cursor-pointer relative",
+              !isListItem &&
+                "border border-gray-600 hover:bg-white/30 rounded-md max-w-[17.5rem]"
             )}
           >
             <div>
@@ -106,17 +122,38 @@ export const TaskCard = ({
               <p className="font-bold flex justify-between w-full items-center">
                 <span
                   className={clsx(
-                    task.completed && "text-gray-500 line-through"
+                    task.completed && "text-gray-500 line-through line-clamp-1"
                   )}
                 >
                   {task.name}
                 </span>
                 {isSaving && <Spinner />}
               </p>
-              {!isListItem && <p className="text-sm">{task.description}</p>}
+              {details && (
+                <>
+                  <p
+                    className={clsx(
+                      isListItem
+                        ? "line-clamp-1 text-gray-500"
+                        : "line-clamp-2",
+                      "text-sm"
+                    )}
+                  >
+                    {task.description}
+                  </p>
+                  {task.dueDate && (
+                    <p className="flex gap-2 items-center">
+                      <MdCalendarToday />
+                      {format.format(task.dueDate)}
+                    </p>
+                  )}
+                </>
+              )}
             </div>
 
-            <TaskMenuButton task={task} projectId={projectId} />
+            <div className="absolute top-1 right-1">
+              <TaskMenuButton task={task} projectId={projectId} />
+            </div>
           </div>
           <TaskModal
             {...{

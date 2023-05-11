@@ -1,5 +1,5 @@
-import { PopoverPanel } from "@/components/CustomPopover";
-import { DatePicker } from "@/components/DatePicker";
+import { PopoverPanel } from "@/components/ui/CustomPopover";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { Popover } from "@headlessui/react";
 import { PropsWithChildren } from "react";
 
