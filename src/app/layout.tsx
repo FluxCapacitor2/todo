@@ -24,7 +24,7 @@ export default async function RootLayout({
   const session = (await getServerSession(authOptions)) as ExtSession;
   return (
     <html lang="en">
-      <body>
+      <body className="ui-focus-visible:overflow-hidden">
         <TrpcProvider>
           <InnerLayout session={await getServerSession(authOptions)}>
             <div className="flex">

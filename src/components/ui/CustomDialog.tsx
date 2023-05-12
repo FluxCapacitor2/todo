@@ -11,7 +11,7 @@ export const CustomDialog = ({
 }>) => {
   return (
     <Transition appear show={opened} as={Fragment}>
-      <Dialog onClose={close} className="relative z-10">
+      <Dialog onClose={close} className="fixed inset-0 md:relative z-10">
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -21,10 +21,10 @@ export const CustomDialog = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 -z-50 bg-black/40" />
+          <div className="hidden md:block fixed inset-0 -z-50 bg-black/40" />
         </Transition.Child>
         <Transition.Child
-          as={Fragment}
+          as="div"
           enter="ease-out duration-200"
           enterFrom="opacity-0 translate-x-4"
           enterTo="opacity-100 scale-100"
@@ -32,7 +32,12 @@ export const CustomDialog = ({
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 translate-x-4"
         >
-          <div className="fixed inset-y-0 w-screen md:w-1/3 md:min-w-[42rem] right-0 overflow-y-auto">
+          {/* Mobile */}
+          <div className="block md:hidden max-w-[100vw] bg-white dark:bg-gray-900 p-4">
+            {children}
+          </div>
+          {/* Desktop */}
+          <div className="hidden md:block fixed inset-y-0 w-1/3 min-w-[42rem] right-0 overflow-y-auto">
             <div className="flex items-center justify-center">
               <Dialog.Panel className="w-full min-h-screen overflow-y-scroll bg-white dark:bg-gray-900 p-8">
                 {children}
