@@ -26,7 +26,7 @@ export const ProjectPage = ({
 
   return (
     <>
-      <div className="flex">
+      <div className="flex overflow-x-scroll">
         {data.sections.map((section) => (
           <Section key={section.id} section={section} projectId={data.id} />
         ))}
