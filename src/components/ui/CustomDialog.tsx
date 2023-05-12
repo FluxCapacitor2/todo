@@ -11,7 +11,7 @@ export const CustomDialog = ({
 }>) => {
   return (
     <Transition appear show={opened} as={Fragment}>
-      <Dialog onClose={close} className="fixed inset-0 md:relative z-10">
+      <Dialog onClose={close} className="relative z-10">
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -24,7 +24,7 @@ export const CustomDialog = ({
           <div className="hidden md:block fixed inset-0 -z-50 bg-black/40" />
         </Transition.Child>
         <Transition.Child
-          as="div"
+          as={Fragment}
           enter="ease-out duration-200"
           enterFrom="opacity-0 translate-x-4"
           enterTo="opacity-100 scale-100"
