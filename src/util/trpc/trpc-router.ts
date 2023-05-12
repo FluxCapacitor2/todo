@@ -19,7 +19,7 @@ export const appRouter = t.router({
   tasks: tasksRouter(t),
   user: t.router({
     addToken: t.procedure.input(z.string()).mutation(async ({ input, ctx }) => {
-      await prisma.user.update({
+      const res = await prisma.user.update({
         where: {
           id: ctx.session.id,
         },
@@ -37,7 +37,34 @@ export const appRouter = t.router({
           },
         },
       });
-      return undefined;
+    }),
+    removeToken: t.procedure
+      .input(z.string())
+      .mutation(async ({ input, ctx }) => {
+        const res = await prisma.user.update({
+          where: {
+            id: ctx.session.id,
+          },
+          data: {
+            notificationTokens: {
+              delete: {
+                token: input,
+              },
+            },
+          },
+        });
+      }),
+    getTokens: t.procedure.query(async ({ input, ctx }) => {
+      return (
+        await prisma.user.findFirst({
+          where: {
+            id: ctx.session.id,
+          },
+          select: {
+            notificationTokens: true,
+          },
+        })
+      )?.notificationTokens;
     }),
   }),
 });

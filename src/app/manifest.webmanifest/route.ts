@@ -4,8 +4,8 @@ export const GET = () => {
   "name": "Todo App",
   "icons": [
     {
-      "src": "vercel.svg",
-      "type": "image/svg+xml",
+      "src": "icon.png",
+      "type": "image/png",
       "sizes": "512x512"
     }
   ],

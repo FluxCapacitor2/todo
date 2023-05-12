@@ -35,7 +35,7 @@ export default async function RootLayout({
                   })}
                 />
               )}
-              <div className="w-full">{children}</div>
+              <div className="w-full mt-3">{children}</div>
               <FetchingIndicators />
             </div>
             <Toaster position="top-right" />

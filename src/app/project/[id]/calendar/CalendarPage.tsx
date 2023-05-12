@@ -36,10 +36,10 @@ export const CalendarPage = ({
   const { year, month, days } = calendars[0];
 
   return (
-    <section className="px-4 mx-auto m-4">
+    <section className="md:px-4 mx-auto md:m-4">
       <header>
         <div className="flex flex-col items-center gap-4 mb-6">
-          <p className="text-3xl -mt-12 font-bold">
+          <p className="text-3xl lg:-mt-12 font-bold">
             {month} {year}
           </p>
           <div className="flex gap-2">

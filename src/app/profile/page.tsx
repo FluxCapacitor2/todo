@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { SignOutButton } from "./SignOutButton";
+import { RequestNotificationPermission } from "./RequestNotificationPermission";
+import Link from "next/link";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -27,7 +29,16 @@ export default async function ProfilePage() {
           <p>{session.user.email}</p>
         </div>
       </div>
-      <SignOutButton />
+      <div className="flex flex-col gap-2 w-full sm:max-w-max">
+        <RequestNotificationPermission />
+        <SignOutButton />
+      </div>
+      <Link
+        href="https://www.flaticon.com/free-icons/foursquare-check-in"
+        className="mt-12 text-sm underline"
+      >
+        App icon created by hqrloveq on Flaticon
+      </Link>
     </main>
   );
 }
