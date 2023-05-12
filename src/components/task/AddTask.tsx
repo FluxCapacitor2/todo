@@ -86,7 +86,7 @@ const AddTask = ({
   };
 
   const newTask = async () => {
-    if (!sectionField.current?.value) {
+    if (sectionEditable && !sectionField.current?.value) {
       toast.error("Please select a section to add the task to!");
       return;
     }
