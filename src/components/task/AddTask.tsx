@@ -21,6 +21,7 @@ export const AddSectionTask = ({
       projectId={projectId}
       section={sectionId}
       onAdd={async ({ name, description, sectionId }) => {
+        if (!sectionId) return; // should never happen
         await mutateAsync({ name, description, sectionId });
         utils.projects.get.invalidate(projectId);
       }}
@@ -66,7 +67,7 @@ const AddTask = ({
   }: {
     name: string;
     description: string;
-    sectionId: number;
+    sectionId: number | null;
   }) => Promise<void>;
   projectId: string;
   section?: number;
@@ -97,7 +98,7 @@ const AddTask = ({
     await onAdd({
       name: nameField.current!.value,
       description: descField.current!.value,
-      sectionId: parseInt(sectionField.current!.value),
+      sectionId: sectionEditable ? parseInt(sectionField.current!.value) : null,
     });
     reset();
     nameField.current?.focus();
