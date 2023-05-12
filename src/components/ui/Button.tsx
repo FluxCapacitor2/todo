@@ -24,7 +24,7 @@ export const Button = forwardRef<
       className={clsx(
         props.className,
         styles[variant],
-        "rounded-md px-3 py-2 flex justify-center items-center gap-2 font-medium whitespace-nowrap transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+        "flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-3 py-2 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-25"
       )}
     />
   );

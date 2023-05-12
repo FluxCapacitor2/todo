@@ -15,7 +15,7 @@ export default async function ProfilePage() {
 
   return (
     <main className="px-6 pt-4">
-      <div className="flex gap-2 items-center mb-8">
+      <div className="mb-8 flex items-center gap-2">
         <Image
           width={48}
           height={48}
@@ -29,7 +29,7 @@ export default async function ProfilePage() {
           <p>{session.user.email}</p>
         </div>
       </div>
-      <div className="flex flex-col gap-2 w-full sm:max-w-max">
+      <div className="flex w-full flex-col gap-2 sm:max-w-max">
         <RequestNotificationPermission />
         <SignOutButton />
       </div>

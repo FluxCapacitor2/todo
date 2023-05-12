@@ -56,10 +56,10 @@ const Section = ({
 
   return (
     <div
-      className="flex flex-col mr-4 p-2 h-[calc(100vh-4rem)] rounded-lg"
+      className="mr-4 flex h-[calc(100vh-4rem)] flex-col rounded-lg p-2"
       key={section.id}
     >
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <SectionName
           id={section.id}
           initialName={section.name}
@@ -112,7 +112,7 @@ const SectionName = ({
         <input
           type="text"
           ref={textField}
-          className="h-6 w-60 bg-transparent font-bold rounded-md p-1"
+          className="h-6 w-60 rounded-md bg-transparent p-1 font-bold"
           value={name}
           onChange={(e) => {
             setName(e.target.value);

@@ -107,9 +107,9 @@ const AddTask = ({
     <form
       ref={form}
       className={clsx(
-        "min-w-min flex flex-col gap-2",
+        "flex min-w-min flex-col gap-2",
         focused &&
-          "p-2 bg-white dark:bg-black border-gray-600 border rounded-lg min-w-full"
+          "min-w-full rounded-lg border border-gray-600 bg-white p-2 dark:bg-black"
       )}
       onSubmit={async (e) => {
         e.preventDefault();
@@ -131,7 +131,7 @@ const AddTask = ({
     >
       <TextField
         placeholder={focused ? "Name" : "Add a new task..."}
-        className="bg-transparent rounded-md p-1"
+        className="rounded-md bg-transparent p-1"
         ref={nameField}
       />
       {focused && (
@@ -148,14 +148,14 @@ const AddTask = ({
           <TextArea
             ref={descField}
             placeholder="Description"
-            className="bg-transparent rounded-md p-1 h-16"
+            className="h-16 rounded-md bg-transparent p-1"
             onKeyDown={async (e) => {
               if (e.ctrlKey && e.key == "Enter") {
                 await newTask();
               }
             }}
           />
-          <div className="self-end flex gap-2">
+          <div className="flex gap-2 self-end">
             <Button
               variant="subtle"
               onClick={() => {

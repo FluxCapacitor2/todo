@@ -29,7 +29,7 @@ export const ListPage = ({
     });
 
   return (
-    <section className="max-w-xl mx-auto m-4">
+    <section className="m-4 mx-auto max-w-xl">
       <ul className="flex flex-col gap-2">
         {tasks.map((task) => (
           <TaskCard

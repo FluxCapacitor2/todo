@@ -34,14 +34,14 @@ export const Sidebar = ({
     <div>
       <aside
         className={clsx(
-          shown ? "flex absolute inset-0 z-20" : "hidden",
-          "flex-col gap-8 h-screen bg-gray-200 dark:bg-gray-900 p-6 md:flex"
+          shown ? "absolute inset-0 z-20 flex" : "hidden",
+          "h-screen flex-col gap-8 bg-gray-200 p-6 dark:bg-gray-900 md:flex"
         )}
       >
-        <div className="flex items-center w-48">
+        <div className="flex w-48 items-center">
           {session.status === "authenticated" ? (
             <Link href="/profile">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 {session?.data?.user?.image && (
                   <Image
                     src={session.data.user.image}
@@ -52,7 +52,7 @@ export const Sidebar = ({
                     unoptimized
                   />
                 )}
-                <p className="font-bold text-sm">{session?.data?.user?.name}</p>
+                <p className="text-sm font-bold">{session?.data?.user?.name}</p>
               </div>
             </Link>
           ) : (
@@ -64,7 +64,7 @@ export const Sidebar = ({
           )}
         </div>
         {isLoading ? (
-          <div className="flex justify-center items-center w-full h-24">
+          <div className="flex h-24 w-full items-center justify-center">
             <Spinner />
           </div>
         ) : isError ? (
@@ -74,7 +74,7 @@ export const Sidebar = ({
         ) : (
           <>
             <Link href="/">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <MdHome />
                 <p>Home</p>
               </div>
@@ -91,7 +91,7 @@ export const Sidebar = ({
         {shown && (
           <Button
             variant="flat"
-            className="absolute top-6 right-2"
+            className="absolute right-2 top-6"
             onClick={() => setShown(!shown)}
           >
             <MdClose />
@@ -100,7 +100,7 @@ export const Sidebar = ({
       </aside>
       <Button
         variant="flat"
-        className="block absolute top-1 left-3 md:hidden"
+        className="absolute left-3 top-1 block md:hidden"
         onClick={() => setShown(!shown)}
       >
         <MdMenu />
@@ -121,7 +121,7 @@ const ProjectItem = ({ name, id }: { name: string; id: string }) => {
   return (
     <div
       className={clsx(
-        "flex justify-between items-center",
+        "flex items-center justify-between",
         isLoading && "opacity-50"
       )}
     >

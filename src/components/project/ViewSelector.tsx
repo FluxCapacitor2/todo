@@ -38,7 +38,7 @@ const PillButton = ({
     <Link
       href={href}
       className={clsx(
-        "first:rounded-l-full last:rounded-r-full px-3 py-1 transition-colors",
+        "px-3 py-1 transition-colors first:rounded-l-full last:rounded-r-full",
         active
           ? "bg-primary-300 dark:bg-primary-800"
           : "bg-gray-200 hover:bg-gray-300 dark:bg-gray-900 dark:hover:bg-gray-800"

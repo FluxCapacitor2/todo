@@ -36,10 +36,10 @@ export const CalendarPage = ({
   const { year, month, days } = calendars[0];
 
   return (
-    <section className="md:px-4 mx-auto md:m-4">
+    <section className="mx-auto md:m-4 md:px-4">
       <header>
-        <div className="flex flex-col items-center gap-4 mb-6">
-          <p className="text-3xl lg:-mt-12 font-bold">
+        <div className="mb-6 flex flex-col items-center gap-4">
+          <p className="text-3xl font-bold lg:-mt-12">
             {month} {year}
           </p>
           <div className="flex gap-2">
@@ -84,13 +84,15 @@ const DailyTaskList = ({
   day: CalendarDay;
 }) => {
   return (
-    <div className={clsx("py-2 h-28", day.now && "bg-gray-200")}>
+    <div
+      className={clsx("h-28 py-2", day.now && "bg-gray-200 dark:bg-gray-800")}
+    >
       <h3
         className={clsx(
-          "text-sm font-mono",
+          "font-mono text-sm",
           day.now
-            ? "text-black dark:text-white font-bold"
-            : "text-gray-500 font-light"
+            ? "font-bold text-black dark:text-white"
+            : "font-light text-gray-500"
         )}
       >
         {day.day}

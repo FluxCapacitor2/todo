@@ -62,7 +62,7 @@ export default async function Layout({
 
   return (
     <main className="px-6 pt-4">
-      <h1 className="text-2xl font-bold mb-2">{project.name}</h1>
+      <h1 className="mb-2 text-2xl font-bold">{project.name}</h1>
       <ViewSelector id={id} />
       {children}
     </main>

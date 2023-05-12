@@ -106,23 +106,23 @@ export const TaskCard = ({
         <>
           <div
             className={clsx(
-              "p-2 group flex justify-between gap-2 cursor-pointer relative",
+              "group relative flex cursor-pointer justify-between gap-2 p-2",
               !isListItem &&
-                "border border-gray-600 hover:bg-white/30 rounded-md max-w-[17.5rem]"
+                "max-w-[17.5rem] rounded-md border border-gray-600 hover:bg-white/30"
             )}
           >
             <div>
               <TaskCheckbox />
             </div>
             <div
-              className="relative flex flex-col gap-2 w-full"
+              className="relative flex w-full flex-col gap-2"
               onClick={() => setModalShown(true)}
             >
               {/* Task name and description */}
-              <p className="font-bold flex justify-between w-full items-center">
+              <p className="flex w-full items-center justify-between font-bold">
                 <span
                   className={clsx(
-                    task.completed && "text-gray-500 line-through line-clamp-1"
+                    task.completed && "line-clamp-1 text-gray-500 line-through"
                   )}
                 >
                   {task.name}
@@ -142,7 +142,7 @@ export const TaskCard = ({
                     {task.description}
                   </p>
                   {task.dueDate && (
-                    <p className="flex gap-2 items-center">
+                    <p className="flex items-center gap-2">
                       <MdCalendarToday />
                       {format.format(task.dueDate)}
                     </p>
@@ -151,7 +151,7 @@ export const TaskCard = ({
               )}
             </div>
 
-            <div className="absolute top-1 right-1">
+            <div className="absolute right-1 top-1">
               <TaskMenuButton task={task} projectId={projectId} />
             </div>
           </div>

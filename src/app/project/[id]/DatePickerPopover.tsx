@@ -17,10 +17,10 @@ export const DatePickerPopover = ({
     <Popover className="relative">
       {({ open, close }) => (
         <>
-          <div className="flex gap-2 items-center">
+          <div className="flex items-center gap-2">
             <Popover.Button
               as="div"
-              className="w-full hover:underline cursor-pointer"
+              className="w-full cursor-pointer hover:underline"
             >
               {children}
             </Popover.Button>

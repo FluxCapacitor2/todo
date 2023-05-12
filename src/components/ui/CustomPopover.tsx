@@ -31,7 +31,7 @@ const WrapperDiv = forwardRef<
       {...props}
       className={clsx(
         props.className,
-        "overflow-hidden rounded-lg shadow-lg bg-gray-200 dark:bg-gray-950 p-4"
+        "overflow-hidden rounded-lg bg-gray-200 p-4 shadow-lg dark:bg-gray-950"
       )}
       ref={ref}
     >

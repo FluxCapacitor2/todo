@@ -13,7 +13,7 @@ export const MenuItems = (props: PropsWithChildren<{}>) => {
       leaveFrom="transform opacity-100 scale-100"
       leaveTo="transform opacity-0 scale-95"
     >
-      <Menu.Items className="z-10 absolute origin-top-right divide-y divide-gray-100 dark:divide-gray-600 rounded-md bg-gray-100 dark:bg-gray-800 shadow-lg focus:outline-none overflow-hidden">
+      <Menu.Items className="absolute z-10 origin-top-right divide-y divide-gray-100 overflow-hidden rounded-md bg-gray-100 shadow-lg focus:outline-none dark:divide-gray-600 dark:bg-gray-800">
         {props.children}
         <MenuItem>
           <MdClose /> Close
@@ -31,7 +31,7 @@ export const MenuItem = (
   return (
     <Menu.Item
       as="div"
-      className="hover:bg-gray-200 dark:hover:bg-white/10 flex gap-2 items-center p-2 transition-colors cursor-pointer select-none whitespace-nowrap"
+      className="flex cursor-pointer select-none items-center gap-2 whitespace-nowrap p-2 transition-colors hover:bg-gray-200 dark:hover:bg-white/10"
       onClick={onClick}
     >
       {children}

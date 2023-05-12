@@ -18,7 +18,7 @@ export const FetchingIndicators = () => {
   }, [mutating]);
 
   return (
-    <div className="fixed top-0 right-0 p-2 z-50">
+    <div className="fixed right-0 top-0 z-50 p-2">
       <Transition
         appear
         show={mutating > 0}

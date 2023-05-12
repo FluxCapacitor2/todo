@@ -21,7 +21,7 @@ export const CustomDialog = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="hidden md:block fixed inset-0 -z-50 bg-black/40" />
+          <div className="fixed inset-0 -z-50 hidden bg-black/40 md:block" />
         </Transition.Child>
         <Transition.Child
           as={Fragment}
@@ -32,9 +32,9 @@ export const CustomDialog = ({
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 translate-x-4"
         >
-          <div className="fixed inset-y-0 w-screen md:w-1/3 md:min-w-[42rem] right-0 overflow-y-auto">
+          <div className="fixed inset-y-0 right-0 w-screen overflow-y-auto md:w-1/3 md:min-w-[42rem]">
             <div className="flex items-center justify-center">
-              <Dialog.Panel className="w-full min-h-screen overflow-y-scroll bg-white dark:bg-gray-900 p-8">
+              <Dialog.Panel className="min-h-screen w-full overflow-y-scroll bg-white p-8 dark:bg-gray-900">
                 {children}
               </Dialog.Panel>
             </div>
@@ -46,7 +46,7 @@ export const CustomDialog = ({
 };
 
 export const DialogTitle = ({ children }: { children: ReactNode }) => (
-  <Dialog.Title className="text-3xl font-extrabold mb-4 flex items-center gap-2">
+  <Dialog.Title className="mb-4 flex items-center gap-2 text-3xl font-extrabold">
     {children}
   </Dialog.Title>
 );

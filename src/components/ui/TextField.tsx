@@ -17,8 +17,8 @@ export const TextField = forwardRef(
         className={clsx(
           className,
           !flat &&
-            "border border-b-4 border-gray-300 dark:border-gray-700 dark:focus:border-primary-700 focus:border-primary-500",
-          "rounded-md dark:bg-gray-900 p-3 h-10 min-w-[12rem] outline-none"
+            "border border-b-4 border-gray-300 focus:border-primary-500 dark:border-gray-700 dark:focus:border-primary-700",
+          "h-10 min-w-[12rem] rounded-md p-3 outline-none dark:bg-gray-900"
         )}
         {...rest}
       />
@@ -38,7 +38,7 @@ export const TextArea = forwardRef(
         ref={ref}
         className={clsx(
           className,
-          "rounded-md dark:bg-gray-900 p-3 h-10 min-w-[12rem] border border-b-4 border-gray-300 dark:border-gray-700 dark:focus:border-primary-700 outline-none focus:border-primary-500"
+          "h-10 min-w-[12rem] rounded-md border border-b-4 border-gray-300 p-3 outline-none focus:border-primary-500 dark:border-gray-700 dark:bg-gray-900 dark:focus:border-primary-700"
         )}
         {...rest}
       />

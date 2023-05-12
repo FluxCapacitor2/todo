@@ -11,7 +11,7 @@ export default async function Home() {
   }
 
   return (
-    <main className="max-w-prose mx-auto p-6 flex flex-col gap-4">
+    <main className="mx-auto flex max-w-prose flex-col gap-4 p-6">
       <ProjectCards />
     </main>
   );

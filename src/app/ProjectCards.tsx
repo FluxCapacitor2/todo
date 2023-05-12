@@ -31,7 +31,7 @@ export const ProjectCards = () => {
       ) : projects.length > 0 ? (
         <>
           <h2 className="text-2xl font-bold">Projects</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 justify-around w-full">
+          <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 md:grid-cols-3">
             {projects.map((project) => (
               <ProjectCard
                 key={project.id}
@@ -40,18 +40,18 @@ export const ProjectCards = () => {
               />
             ))}
             <div
-              className="bg-gray-50 hover:bg-gray-200 dark:hover:bg-gray-800 dark:bg-gray-950 cursor-pointer p-4 rounded-md"
+              className="cursor-pointer rounded-md bg-gray-50 p-4 hover:bg-gray-200 dark:bg-gray-950 dark:hover:bg-gray-800"
               onClick={() => setModalShown(true)}
             >
               <h2 className="text-lg font-bold">New Project</h2>
-              <div className="items-center my-2 flex gap-2">
+              <div className="my-2 flex items-center gap-2">
                 <MdAdd /> Create
               </div>
             </div>
           </div>
         </>
       ) : (
-        <div className="flex flex-col gap-4 items-center my-12">
+        <div className="my-12 flex flex-col items-center gap-4">
           <h2 className="text-2xl font-bold">No Projects</h2>
           <Button variant="primary" onClick={() => setModalShown(true)}>
             New Project
@@ -79,7 +79,7 @@ const ProjectCard = ({
   return (
     <Link href={`/project/${projectId}`}>
       <div
-        className="bg-gray-100 dark:bg-gray-900 p-4 rounded-md h-full"
+        className="h-full rounded-md bg-gray-100 p-4 dark:bg-gray-900"
         key={projectId}
       >
         <h2 className="text-lg font-medium">{data?.name ?? name}</h2>

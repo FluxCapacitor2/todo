@@ -39,7 +39,7 @@ export const TaskModal = ({
     <CustomDialog opened={modalShown} close={() => setModalShown(false)}>
       {fullTask?.parentTask?.name && (
         <a
-          className="font-medium flex gap-2 items-center"
+          className="flex items-center gap-2 font-medium"
           href="#"
           onClick={(e) => {
             e.preventDefault();
@@ -55,7 +55,7 @@ export const TaskModal = ({
           type="checkbox"
           onChange={(e) => setTask({ ...task, completed: e.target.checked })}
           checked={task.completed}
-          className="w-6 h-6"
+          className="h-6 w-6"
         />
         <TextField
           flat
@@ -64,7 +64,7 @@ export const TaskModal = ({
           className={clsx(task.completed && "text-gray-500 line-through")}
         />
       </DialogTitle>
-      <div className="mt-4 mb-6 max-h-96 overflow-scroll outline-none">
+      <div className="mb-6 mt-4 max-h-96 overflow-scroll outline-none">
         <RemirrorEditor
           editable={!isSaving}
           initialContent={task.description}
@@ -76,8 +76,8 @@ export const TaskModal = ({
         />
       </div>
 
-      <div className="flex gap-2 items-center">
-        <MdStart className="w-5 h-5 self-center" />
+      <div className="flex items-center gap-2">
+        <MdStart className="h-5 w-5 self-center" />
         <DatePickerPopover
           date={task.startDate}
           setDate={(date) => setTask({ ...task, startDate: date })}
@@ -85,8 +85,8 @@ export const TaskModal = ({
           Started {format.format(task.startDate)}
         </DatePickerPopover>
       </div>
-      <div className="flex gap-2 items-center">
-        <MdDateRange className="w-5 h-5 self-center" />
+      <div className="flex items-center gap-2">
+        <MdDateRange className="h-5 w-5 self-center" />
         <DatePickerPopover
           allow={(date) => date.getTime() > task.startDate.getTime()}
           date={task.dueDate}
@@ -100,16 +100,16 @@ export const TaskModal = ({
         </DatePickerPopover>
       </div>
 
-      <div className="flex gap-2 items-center">
-        <MdPerson className="w-5 h-5 self-center" />
+      <div className="flex items-center gap-2">
+        <MdPerson className="h-5 w-5 self-center" />
         You
       </div>
 
       {task.dueDate && new Date().getTime() < task.dueDate.getTime() && (
         <>
           <hr className="my-6" />
-          <div className="flex gap-2 items-center justify-between">
-            <span className="flex gap-3 items-center">
+          <div className="flex items-center justify-between gap-2">
+            <span className="flex items-center gap-3">
               <MdWork />
               Expected Progress:{" "}
               {Math.round(
@@ -119,7 +119,7 @@ export const TaskModal = ({
               %
             </span>
             <progress
-              className="rounded-full h-2"
+              className="h-2 rounded-full"
               value={
                 (new Date().getTime() - task.startDate.getTime()) /
                 (task.dueDate.getTime() - task.startDate.getTime())
@@ -140,7 +140,7 @@ export const TaskModal = ({
               {fullTask.subTasks.length} completed
             </p>
           )}
-          <div className="flex flex-col gap-4 mt-4">
+          <div className="mt-4 flex flex-col gap-4">
             {fullTask.subTasks.map((task) => (
               <TaskCard
                 task={task}
@@ -167,7 +167,7 @@ export const TaskModal = ({
       </div>
 
       {isSaving && (
-        <div className="flex gap-2 items-center text-gray-500 absolute bottom-2">
+        <div className="absolute bottom-2 flex items-center gap-2 text-gray-500">
           <Spinner /> Saving...
         </div>
       )}

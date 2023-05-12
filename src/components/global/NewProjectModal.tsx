@@ -30,7 +30,7 @@ export const NewProjectModal = ({
   return (
     <CustomDialog opened={open} close={close}>
       <DialogTitle>Create New Project</DialogTitle>
-      <p className="text-base my-4">
+      <p className="my-4 text-base">
         Projects are the way you organize tasks. Each project has its own set of
         tasks, which can be further separated by labels, sub-lists, and more.
       </p>

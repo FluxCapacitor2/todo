@@ -44,7 +44,7 @@ export const DatePicker = ({
   return (
     <section className="w-80">
       <header>
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <Button variant="subtle" {...previousMonthButton()}>
             <MdArrowBack />
           </Button>
@@ -52,7 +52,7 @@ export const DatePicker = ({
             <p className="text-xl font-bold">
               {month} {year}
             </p>
-            <p className="text-sm text-center">
+            <p className="text-center text-sm">
               {selectedDates.length > 0
                 ? format.format(selectedDates[0])
                 : "Select a Date"}
