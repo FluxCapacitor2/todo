@@ -125,7 +125,7 @@ export const tasksRouter = (t: MyTrpc) =>
         if (!task) {
           throw new TRPCError({ code: "NOT_FOUND" });
         }
-        return await prisma.task.update({
+        await prisma.task.update({
           where: {
             id: input.id,
           },
@@ -140,6 +140,7 @@ export const tasksRouter = (t: MyTrpc) =>
               ],
             },
           },
+          select: null,
         });
       }),
     get: t.procedure

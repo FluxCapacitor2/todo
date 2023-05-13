@@ -1,11 +1,23 @@
 import { Button } from "@/components/ui/Button";
 import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
-import { useState, useRef } from "react";
+import { produce } from "immer";
+import { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { MdCancel, MdSend } from "react-icons/md";
 import { SelectField } from "../ui/SelectField";
 import { TextArea, TextField } from "../ui/TextField";
+
+const defaultTask = {
+  completed: false,
+  createdAt: new Date(),
+  dueDate: null,
+  ownerId: "",
+  parentTaskId: null,
+  priority: 0,
+  startDate: null,
+  updatedAt: new Date(),
+};
 
 export const AddSectionTask = ({
   sectionId,
@@ -15,16 +27,57 @@ export const AddSectionTask = ({
   projectId: string;
 }) => {
   const utils = trpc.useContext();
-  const { mutateAsync } = trpc.tasks.create.useMutation();
+  const { mutateAsync } = trpc.tasks.create.useMutation({
+    onMutate: ({ sectionId, name, description }) => {
+      const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
+
+      utils.projects.get.cancel(projectId);
+
+      utils.projects.get.setData(projectId, (project) => {
+        if (!project) return undefined;
+        return produce(project, (project) => {
+          for (const section of project.sections) {
+            if (section.id === sectionId) {
+              section.tasks.push({
+                ...defaultTask,
+                id: newId,
+                sectionId,
+                name,
+                description: description ?? "",
+              });
+            }
+          }
+        });
+      });
+
+      return { newId };
+    },
+    onError: (error, { sectionId, name, description }, context) => {
+      toast.error("There was an error adding a new task!");
+      if (!context) return;
+
+      utils.projects.get.setData(projectId, (project) => {
+        if (!project) return undefined;
+        return produce(project, (project) => {
+          for (const section of project.sections) {
+            section.tasks = section.tasks.filter(
+              (it) => it.id !== context.newId
+            );
+          }
+        });
+      });
+    },
+    onSettled: () => {
+      utils.projects.get.invalidate(projectId);
+    },
+  });
   return (
     <AddTask
       projectId={projectId}
       section={sectionId}
-      onAdd={async ({ name, description, sectionId }) => {
-        if (!sectionId) return; // should never happen
-        await mutateAsync({ name, description, sectionId });
-        utils.projects.get.invalidate(projectId);
-      }}
+      onAdd={({ name, description, sectionId }) =>
+        mutateAsync({ name, description, sectionId: sectionId! })
+      }
     />
   );
 };
@@ -37,19 +90,57 @@ export const AddSubtask = ({
   parentTaskId: number;
 }) => {
   const utils = trpc.useContext();
-  const { mutateAsync } = trpc.tasks.addSubtask.useMutation();
+  const { mutateAsync } = trpc.tasks.addSubtask.useMutation({
+    onMutate: ({ name, id, description }) => {
+      const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
+
+      utils.tasks.get.cancel({ id: parentTaskId });
+      utils.tasks.get.setData({ id: parentTaskId }, (task) => {
+        if (!task) return undefined;
+        return {
+          ...task,
+          subTasks: [
+            ...task.subTasks,
+            {
+              ...defaultTask,
+              id: newId,
+              parentTaskId: id,
+              sectionId: null,
+              name,
+              description: description ?? "",
+            },
+          ],
+        };
+      });
+
+      return { newId };
+    },
+    onError: (error, { name, id, description }, context) => {
+      toast.error("There was an error adding that sub-task!");
+      if (!context) return;
+      utils.tasks.get.setData({ id }, (task) => {
+        if (!task) return undefined;
+        return {
+          ...task,
+          subTasks: task.subTasks.filter((it) => it.id !== context.newId),
+        };
+      });
+    },
+    onSettled: () => {
+      utils.tasks.get.invalidate({ id: parentTaskId });
+    },
+  });
   return (
     <AddTask
       sectionEditable={false}
       projectId={projectId}
-      onAdd={async ({ name, description }) => {
-        await mutateAsync({
+      onAdd={({ name, description }) =>
+        mutateAsync({
           id: parentTaskId,
           name,
           description,
-        });
-        utils.tasks.get.invalidate({ id: parentTaskId });
-      }}
+        })
+      }
     />
   );
 };
@@ -95,7 +186,7 @@ const AddTask = ({
       toast.error("Title must not be empty!");
       return;
     }
-    await onAdd({
+    onAdd({
       name: nameField.current!.value,
       description: descField.current!.value,
       sectionId: sectionEditable ? parseInt(sectionField.current!.value) : null,

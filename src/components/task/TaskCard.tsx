@@ -7,7 +7,9 @@ import { Menu } from "@headlessui/react";
 import { Task } from "@prisma/client";
 import clsx from "clsx";
 import { format } from "date-fns";
-import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { produce } from "immer";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { toast } from "react-hot-toast";
 import {
   MdCalendarToday,
   MdDelete,
@@ -37,7 +39,6 @@ export const TaskWrapper = ({
     initialRender.current = true; // Prevent the update from causing a mutation
   }, [inTask]);
 
-  const utils = trpc.useContext();
   const { mutateAsync: updateAsync, isLoading: isSaving } =
     trpc.tasks.update.useMutation();
 
@@ -46,9 +47,6 @@ export const TaskWrapper = ({
     trailing: true,
     maxWait: 2500,
   });
-
-  // eslint-disable-next-line
-  const invalidateParent = useMemo(() => utils.tasks.get.invalidate, []);
 
   useEffect(() => {
     (async () => {
@@ -61,12 +59,9 @@ export const TaskWrapper = ({
           dueDate: debouncedTask.dueDate ?? undefined,
           startDate: debouncedTask.startDate ?? undefined,
         });
-        if (debouncedTask.parentTaskId) {
-          invalidateParent({ id: debouncedTask.parentTaskId });
-        }
       }
     })();
-  }, [debouncedTask, updateAsync, invalidateParent]);
+  }, [debouncedTask, updateAsync]);
 
   return <>{children({ task, setTask, isSaving })}</>;
 };
@@ -92,6 +87,7 @@ export const TaskCard = ({
         <div
           className={clsx(
             "group relative flex cursor-pointer justify-between gap-2 p-2",
+            task.id < 0 && "pointer-events-none opacity-70",
             !isListItem &&
               "max-w-[20rem] rounded-md border border-gray-600 hover:bg-white/30"
           )}
@@ -185,15 +181,62 @@ export const TaskMenuButton = ({
   projectId: string;
 }) => {
   const utils = trpc.useContext();
-  const { mutateAsync: deleteAsync } = trpc.tasks.delete.useMutation();
-  const deleteTask = async () => {
-    await deleteAsync(task.id);
-    if (task.parentTaskId) {
-      utils.tasks.get.invalidate({ id: task.parentTaskId });
-    } else {
-      utils.projects.get.invalidate(projectId);
-    }
-  };
+  const { mutateAsync: deleteAsync } = trpc.tasks.delete.useMutation({
+    onMutate: async (id) => {
+      // Optimistic update
+      if (task.parentTaskId) {
+        utils.tasks.get.cancel({ id: task.parentTaskId });
+        utils.tasks.get.setData({ id: task.parentTaskId }, (task) => {
+          if (!task) return undefined;
+          return produce(task, (task) => {
+            task.subTasks = task.subTasks.filter((it) => it.id !== id);
+          });
+        });
+      } else {
+        utils.projects.get.cancel(projectId);
+        utils.projects.get.setData(projectId, (project) => {
+          if (!project) return undefined;
+          const newValue = produce(project, (project) => {
+            for (const section of project.sections) {
+              section.tasks = section.tasks.filter((task) => task.id !== id);
+            }
+          });
+          return newValue;
+        });
+      }
+
+      return { task };
+    },
+    onError: (error, id, context) => {
+      toast.error("There was an error deleting that task!");
+      if (task.parentTaskId) {
+        utils.tasks.get.setData({ id: task.parentTaskId }, (task) => {
+          if (!task) return undefined;
+          if (!context?.task) return task;
+          return { ...task, subTasks: [...task.subTasks, context.task] };
+        });
+      } else {
+        utils.projects.get.setData(projectId, (project) => {
+          if (!project) return undefined;
+          return produce(project, (project) => {
+            const section = project.sections.find(
+              (section) => section.id === task.sectionId
+            );
+            if (context?.task) {
+              section?.tasks?.push?.(context.task);
+            }
+          });
+        });
+      }
+    },
+    onSettled: (data) => {
+      if (task.parentTaskId) {
+        utils.tasks.get.invalidate({ id: task.parentTaskId });
+      } else {
+        utils.projects.get.invalidate(projectId);
+      }
+    },
+  });
 
   return (
     <Menu as={"div"}>
@@ -207,7 +250,7 @@ export const TaskMenuButton = ({
       </Menu.Button>
 
       <MenuItems>
-        <MenuItem onClick={deleteTask}>
+        <MenuItem onClick={() => deleteAsync(task.id)}>
           <MdDelete /> Delete Task
         </MenuItem>
         {task.dueDate && (

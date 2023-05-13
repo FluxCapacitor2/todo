@@ -1,5 +1,5 @@
 import { trpc } from "@/util/trpc/trpc";
-import { useRef, FormEvent } from "react";
+import { FormEvent, useRef } from "react";
 import { MdAddBox, MdCancel } from "react-icons/md";
 import { Button } from "../ui/Button";
 import { CustomDialog, DialogTitle } from "../ui/CustomDialog";
@@ -40,12 +40,10 @@ export const NewProjectModal = ({
           <Button variant="primary" type="submit" disabled={isLoading}>
             <MdAddBox />
             Create
-            {ref.current?.value}
           </Button>
           <Button variant="subtle" type="button" onClick={close}>
             <MdCancel />
             Cancel
-            {ref.current?.value}
           </Button>
         </div>
       </form>

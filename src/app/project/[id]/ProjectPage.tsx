@@ -8,7 +8,10 @@ import { TextField } from "@/components/ui/TextField";
 import { trpc } from "@/util/trpc/trpc";
 import { Menu } from "@headlessui/react";
 import { Project, Section, Task } from "@prisma/client";
+import clsx from "clsx";
+import { produce } from "immer";
 import { useRef, useState } from "react";
+import { toast } from "react-hot-toast";
 import { MdDelete, MdEdit, MdMenu } from "react-icons/md";
 import { AddSectionTask } from "../../../components/task/AddTask";
 
@@ -56,19 +59,52 @@ const Section = ({
 }) => {
   const utils = trpc.useContext();
 
-  const { mutateAsync } = trpc.sections.delete.useMutation();
+  const { mutateAsync: deleteSection } = trpc.sections.delete.useMutation({
+    onMutate: ({ id }) => {
+      const project = utils.projects.get.getData(projectId);
+      const index = project?.sections.findIndex((section) => section.id === id);
+      if (index === -1 || index === undefined) return;
+      const prevSection = project?.sections?.[index];
 
-  const deleteSection = async (id: number) => {
-    await mutateAsync({ id });
-    utils.projects.get.invalidate(projectId);
-  };
+      utils.projects.get.cancel(projectId);
+      utils.projects.get.setData(projectId, (project) => {
+        if (!project) return undefined;
+
+        const g = {
+          ...project,
+          sections: project.sections.filter((section) => section.id !== id),
+        };
+        return g;
+      });
+
+      return { prevSection, index };
+    },
+    onError: (error, { id }, context) => {
+      if (!context) return;
+      toast.error("There was an error deleting that section!");
+      utils.projects.get.setData(projectId, (project) => {
+        if (!project) return undefined;
+        return produce(project, (project) => {
+          project.sections.splice(context.index!, 0, context.prevSection!);
+        });
+      });
+    },
+    onSettled: () => {
+      utils.projects.get.invalidate(projectId);
+    },
+  });
 
   return (
     <div
       className="mr-4 flex h-[calc(100vh-6rem)] snap-center flex-col rounded-lg p-2"
       key={section.id}
     >
-      <div className="flex items-center justify-between">
+      <div
+        className={clsx(
+          "flex items-center justify-between",
+          section.id < 0 && "pointer-events-none opacity-70"
+        )}
+      >
         <SectionName
           id={section.id}
           initialName={section.name}
@@ -79,7 +115,7 @@ const Section = ({
             <MdMenu />
           </Menu.Button>
           <MenuItems>
-            <MenuItem onClick={() => deleteSection(section.id)}>
+            <MenuItem onClick={() => deleteSection({ id: section.id })}>
               <MdDelete /> Delete Section
             </MenuItem>
           </MenuItems>
@@ -145,7 +181,40 @@ const SectionName = ({
 
 const NewSection = ({ projectId }: { projectId: string }) => {
   const utils = trpc.useContext();
-  const { mutateAsync } = trpc.sections.create.useMutation();
+  const { mutateAsync } = trpc.sections.create.useMutation({
+    onMutate: ({ name, projectId }) => {
+      const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
+
+      utils.projects.get.cancel(projectId);
+      utils.projects.get.setData(projectId, (project) => {
+        if (!project) return undefined;
+        return {
+          ...project,
+          sections: [
+            ...project.sections,
+            { name: "New Section", id: newId, projectId, tasks: [] },
+          ],
+        };
+      });
+      return { newId };
+    },
+    onError: (error, variables, context) => {
+      toast.error("There was an error creating that section!");
+      if (!context) return;
+      utils.projects.get.setData(projectId, (project) => {
+        if (!project) return undefined;
+        return {
+          ...project,
+          sections: {
+            ...project.sections.filter((it) => it.id !== context.newId),
+          },
+        };
+      });
+    },
+    onSettled: () => {
+      utils.projects.get.invalidate(projectId);
+    },
+  });
 
   const newSection = async () => {
     await mutateAsync({
