@@ -10,7 +10,7 @@ export const GET = () => {
     }
   ],
   "start_url": "${process.env.NEXT_PUBLIC_BASE_URL}/",
-  "display": "minimal-ui",
+  "display": "fullscreen",
   "gcm_sender_id": "890377760325"
 }`);
 };
