@@ -1,15 +1,16 @@
 "use client";
 
+import { TaskCard } from "@/components/task/TaskCard";
 import { Button } from "@/components/ui/Button";
+import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
 import { Spinner } from "@/components/ui/Spinner";
+import { TextField } from "@/components/ui/TextField";
 import { trpc } from "@/util/trpc/trpc";
+import { Menu } from "@headlessui/react";
 import { Project, Section, Task } from "@prisma/client";
 import { useRef, useState } from "react";
 import { MdDelete, MdEdit, MdMenu } from "react-icons/md";
 import { AddSectionTask } from "../../../components/task/AddTask";
-import { TaskCard } from "@/components/task/TaskCard";
-import { Menu } from "@headlessui/react";
-import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
 
 export const ProjectPage = ({
   project,
@@ -26,7 +27,7 @@ export const ProjectPage = ({
 
   return (
     <>
-      <div className="flex overflow-x-scroll">
+      <div className="flex snap-x overflow-x-scroll">
         {data.sections.map((section) => (
           <Section key={section.id} section={section} projectId={data.id} />
         ))}
@@ -36,6 +37,14 @@ export const ProjectPage = ({
       </div>
     </>
   );
+};
+
+export const sortByDueDate = (tasks: Task[]) => {
+  return [...tasks].sort((a, b) => {
+    if (!a.dueDate) return -1;
+    if (!b.dueDate) return 1;
+    return a.dueDate?.getTime() - b.dueDate?.getTime();
+  });
 };
 
 const Section = ({
@@ -56,7 +65,7 @@ const Section = ({
 
   return (
     <div
-      className="mr-4 flex h-[calc(100vh-4rem)] flex-col rounded-lg p-2"
+      className="mr-4 flex h-[calc(100vh-6rem)] snap-center flex-col rounded-lg p-2"
       key={section.id}
     >
       <div className="flex items-center justify-between">
@@ -77,8 +86,8 @@ const Section = ({
         </Menu>
       </div>
       <div className="flex flex-col gap-2">
-        {section.tasks.map((task) => (
-          <TaskCard task={task} key={task.id} projectId={projectId} />
+        {sortByDueDate(section.tasks).map((task) => (
+          <TaskCard task={task} key={task.id} projectId={projectId} details />
         ))}
         <AddSectionTask projectId={projectId} sectionId={section.id} />
       </div>
@@ -109,10 +118,10 @@ const SectionName = ({
           textField.current?.blur();
         }}
       >
-        <input
-          type="text"
+        <TextField
+          flat
           ref={textField}
-          className="h-6 w-60 rounded-md bg-transparent p-1 font-bold"
+          className="px-1 font-bold"
           value={name}
           onChange={(e) => {
             setName(e.target.value);

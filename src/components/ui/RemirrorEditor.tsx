@@ -1,4 +1,4 @@
-import "remirror/styles/all.css";
+import { Remirror, useRemirror } from "@remirror/react";
 import {
   BlockquoteExtension,
   BoldExtension,
@@ -14,7 +14,7 @@ import {
   PlaceholderExtension,
   UnderlineExtension,
 } from "remirror/extensions";
-import { Remirror, useRemirror } from "@remirror/react";
+import "remirror/styles/all.css";
 
 export const RemirrorEditor = ({
   initialContent,
@@ -65,8 +65,7 @@ export const RemirrorEditor = ({
           "border-transparent",
           "focus:border-gray-600",
           "dark:focus:border-gray-400",
-          "px-4",
-          "-py-4",
+          "px-2",
           "rounded-lg",
         ]}
       />

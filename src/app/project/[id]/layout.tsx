@@ -61,7 +61,7 @@ export default async function Layout({
   const project = await getProject(id);
 
   return (
-    <main className="px-6 pt-4">
+    <main className="pt-4 md:px-6">
       <h1 className="mb-2 text-2xl font-bold">{project.name}</h1>
       <ViewSelector id={id} />
       {children}

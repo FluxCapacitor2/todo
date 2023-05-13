@@ -1,8 +1,8 @@
-import { MouseEvent, useState } from "react";
-import { useDatePicker } from "@rehookify/datepicker";
 import { Button } from "@/components/ui/Button";
-import { MdArrowBack, MdArrowForward, MdCancel, MdCheck } from "react-icons/md";
+import { useDatePicker } from "@rehookify/datepicker";
 import clsx from "clsx";
+import { MouseEvent, useState } from "react";
+import { MdArrowBack, MdArrowForward, MdCancel, MdCheck } from "react-icons/md";
 
 const format = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
@@ -12,12 +12,14 @@ export const DatePicker = ({
   date,
   close,
   confirm,
-  allow = () => true,
+  minDate,
+  maxDate,
 }: {
   date?: Date;
   close: () => void;
   confirm: (date: Date) => void;
-  allow?: (date: Date) => boolean;
+  minDate?: Date;
+  maxDate?: Date;
 }) => {
   const [selectedDates, onDatesChange] = useState<Date[]>([date ?? new Date()]);
   const {
@@ -26,6 +28,10 @@ export const DatePicker = ({
   } = useDatePicker({
     selectedDates,
     onDatesChange,
+    dates: {
+      minDate,
+      maxDate,
+    },
   });
 
   // calendars[0] is always present, this is an initial calendar
@@ -73,12 +79,11 @@ export const DatePicker = ({
           <li key={`${year}-${month}-${dpDay.day}-${dpDay.inCurrentMonth}`}>
             <Button
               variant={
-                dpDay.now ? "subtle" : dpDay.selected ? "primary" : "flat"
+                dpDay.selected ? "primary" : dpDay.now ? "subtle" : "flat"
               }
               className={clsx(!dpDay.inCurrentMonth && "text-gray-500")}
               {...dayButton(dpDay, {
                 onClick: onDayClick,
-                disabled: !allow(dpDay.$date),
               })}
             >
               {dpDay.day}
@@ -87,13 +92,22 @@ export const DatePicker = ({
         ))}
       </ul>
       <footer className="flex justify-end gap-2">
-        <Button variant="subtle" onClickCapture={close}>
+        <Button
+          variant="subtle"
+          onClickCapture={(e) => {
+            e.stopPropagation();
+            close();
+          }}
+        >
           <MdCancel />
           Cancel
         </Button>
         <Button
           variant="primary"
-          onClickCapture={() => confirm(selectedDates[0])}
+          onClickCapture={(e) => {
+            e.stopPropagation();
+            confirm(selectedDates[0]);
+          }}
         >
           <MdCheck />
           Confirm

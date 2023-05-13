@@ -1,12 +1,12 @@
-import { Toaster } from "react-hot-toast";
-import "./globals.css";
+import { FetchingIndicators } from "@/components/global/FetchingIndicators";
+import { InnerLayout } from "@/components/global/InnerLayout";
 import { Sidebar } from "@/components/global/Sidebar";
 import { TrpcProvider } from "@/components/global/TrpcProvider";
-import { getServerSession } from "next-auth";
 import { ExtSession, authOptions } from "@/pages/api/auth/[...nextauth]";
-import { InnerLayout } from "@/components/global/InnerLayout";
 import { prisma } from "@/util/prisma";
-import { FetchingIndicators } from "@/components/global/FetchingIndicators";
+import { getServerSession } from "next-auth";
+import { Toaster } from "react-hot-toast";
+import "./globals.css";
 
 export const metadata = {
   title: {
@@ -22,6 +22,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = (await getServerSession(authOptions)) as ExtSession;
+
   return (
     <html lang="en">
       <body className="ui-focus-visible:overflow-hidden">

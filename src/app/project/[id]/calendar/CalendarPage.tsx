@@ -56,7 +56,7 @@ export const CalendarPage = ({
             </Button>
           </div>
         </div>
-        <ul className="grid grid-cols-7">
+        <ul className="grid grid-cols-7 place-items-center">
           {weekDays.map((day) => (
             <li key={`${month}-${day}`}>{day}</li>
           ))}
@@ -85,7 +85,10 @@ const DailyTaskList = ({
 }) => {
   return (
     <div
-      className={clsx("h-28 py-2", day.now && "bg-gray-200 dark:bg-gray-800")}
+      className={clsx(
+        "h-28 rounded-md p-1 text-xs md:text-sm",
+        day.now && "bg-gray-200 dark:bg-gray-800"
+      )}
     >
       <h3
         className={clsx(
@@ -102,13 +105,18 @@ const DailyTaskList = ({
           {section.tasks
             .filter((task) => task.dueDate && sameDay(task.dueDate, day.$date))
             .map((task) => (
-              <TaskCard
-                task={task}
+              <div
                 key={task.id}
-                projectId={project.id}
-                isListItem
-                details={false}
-              />
+                className="mb-1 w-full rounded-md bg-primary-500/10"
+              >
+                <TaskCard
+                  task={task}
+                  projectId={project.id}
+                  isListItem
+                  details={false}
+                  showCheckbox={false}
+                />
+              </div>
             ))}
         </Fragment>
       ))}

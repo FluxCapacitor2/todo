@@ -6,6 +6,11 @@ body {
   @apply dark:bg-black dark:text-white;
 }
 
+body.offline > div:not(:first-child) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

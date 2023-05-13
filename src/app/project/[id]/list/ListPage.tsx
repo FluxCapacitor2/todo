@@ -1,10 +1,11 @@
 "use client";
 
-import { Project, Section, Task } from "@prisma/client";
-import { TaskCard } from "@/components/task/TaskCard";
-import { trpc } from "@/util/trpc/trpc";
-import { Spinner } from "@/components/ui/Spinner";
 import { AddSectionTask } from "@/components/task/AddTask";
+import { TaskCard } from "@/components/task/TaskCard";
+import { Spinner } from "@/components/ui/Spinner";
+import { trpc } from "@/util/trpc/trpc";
+import { Project, Section, Task } from "@prisma/client";
+import { sortByDueDate } from "../ProjectPage";
 
 export const ListPage = ({
   project,
@@ -31,12 +32,13 @@ export const ListPage = ({
   return (
     <section className="m-4 mx-auto max-w-xl">
       <ul className="flex flex-col gap-2">
-        {tasks.map((task) => (
+        {sortByDueDate(tasks).map((task) => (
           <TaskCard
             task={task}
             projectId={project.id}
             key={task.id}
             isListItem
+            details
           />
         ))}
         <AddSectionTask projectId={project.id} />

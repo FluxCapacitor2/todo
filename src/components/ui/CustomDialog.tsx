@@ -1,17 +1,28 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, PropsWithChildren, ReactNode } from "react";
+import {
+  Fragment,
+  MutableRefObject,
+  PropsWithChildren,
+  ReactNode,
+} from "react";
 
 export const CustomDialog = ({
   opened,
   close,
   children,
+  initialFocus,
 }: PropsWithChildren<{
   opened: boolean;
   close: () => void;
+  initialFocus?: MutableRefObject<HTMLElement | null>;
 }>) => {
   return (
     <Transition appear show={opened} as={Fragment}>
-      <Dialog onClose={close} className="relative z-10">
+      <Dialog
+        onClose={close}
+        className="relative z-10"
+        initialFocus={initialFocus}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
