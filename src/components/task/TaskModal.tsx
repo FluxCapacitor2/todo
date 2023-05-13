@@ -126,30 +126,26 @@ export const TaskModal = ({
 
         {task.startDate &&
           task.dueDate &&
-          isBefore(new Date(), task.startDate) && (
+          isBefore(task.startDate, new Date()) &&
+          isBefore(new Date(), task.dueDate) && (
             <>
               <div className="flex items-center justify-between gap-2">
-                {isBefore(task.startDate, new Date()) && (
-                  <>
-                    <span className="flex items-center gap-3">
-                      <MdRunCircle />
-                      Expected Progress:{" "}
-                      {Math.round(
-                        (100 *
-                          differenceInSeconds(new Date(), task.startDate)) /
-                          differenceInSeconds(task.dueDate, task.startDate)
-                      )}
-                      %
-                    </span>
-                    <progress
-                      className="h-2 rounded-full"
-                      value={
-                        (new Date().getTime() - task.startDate.getTime()) /
-                        (task.dueDate.getTime() - task.startDate.getTime())
-                      }
-                    />
-                  </>
-                )}
+                <span className="flex items-center gap-3">
+                  <MdRunCircle />
+                  Expected Progress:{" "}
+                  {Math.round(
+                    (100 * differenceInSeconds(new Date(), task.startDate)) /
+                      differenceInSeconds(task.dueDate, task.startDate)
+                  )}
+                  %
+                </span>
+                <progress
+                  className="h-2 rounded-full"
+                  value={
+                    (new Date().getTime() - task.startDate.getTime()) /
+                    (task.dueDate.getTime() - task.startDate.getTime())
+                  }
+                />
               </div>
             </>
           )}

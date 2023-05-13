@@ -13,7 +13,7 @@ export const MenuItems = (props: PropsWithChildren<{}>) => {
       leaveFrom="transform opacity-100 scale-100"
       leaveTo="transform opacity-0 scale-95"
     >
-      <Menu.Items className="absolute z-10 origin-top-right divide-y divide-gray-100 overflow-hidden rounded-md bg-gray-100 shadow-lg focus:outline-none dark:divide-gray-600 dark:bg-gray-800">
+      <Menu.Items className="absolute right-0 z-10 origin-top-right divide-y divide-gray-100 overflow-hidden rounded-md bg-gray-100 shadow-lg focus:outline-none dark:divide-gray-600 dark:bg-gray-800">
         {props.children}
         <MenuItem>
           <MdClose /> Close

@@ -12,7 +12,7 @@ import {
   MdCalendarToday,
   MdDelete,
   MdMoreHoriz,
-  MdStraighten,
+  MdRemoveCircle,
   MdToday,
 } from "react-icons/md";
 import { useDebounce } from "use-debounce";
@@ -56,7 +56,7 @@ export const TaskWrapper = ({
         initialRender.current = false;
         return;
       } else {
-        updateAsync({
+        await updateAsync({
           ...debouncedTask,
           dueDate: debouncedTask.dueDate ?? undefined,
           startDate: debouncedTask.startDate ?? undefined,
@@ -152,15 +152,13 @@ export const TaskCard = ({
             )}
           </div>
 
-          {details && (
-            <div className="absolute right-1 top-1">
-              <TaskMenuButton
-                task={task}
-                setTask={setTask}
-                projectId={projectId}
-              />
-            </div>
-          )}
+          <div className="absolute right-1 top-1">
+            <TaskMenuButton
+              task={task}
+              setTask={setTask}
+              projectId={projectId}
+            />
+          </div>
           <TaskModal
             {...{
               modalShown,
@@ -207,16 +205,21 @@ export const TaskMenuButton = ({
       >
         <MdMoreHoriz />
       </Menu.Button>
+
       <MenuItems>
         <MenuItem onClick={deleteTask}>
           <MdDelete /> Delete Task
         </MenuItem>
-        <MenuItem onClick={() => setTask({ ...task, dueDate: null })}>
-          <MdToday /> Remove Due Date
-        </MenuItem>
-        <MenuItem onClick={() => setTask({ ...task, startDate: null })}>
-          <MdStraighten /> Remove Start Date
-        </MenuItem>
+        {task.dueDate && (
+          <MenuItem onClick={() => setTask({ ...task, dueDate: null })}>
+            <MdToday /> Remove Due Date
+          </MenuItem>
+        )}
+        {task.startDate && (
+          <MenuItem onClick={() => setTask({ ...task, startDate: null })}>
+            <MdRemoveCircle /> Remove Start Date
+          </MenuItem>
+        )}
       </MenuItems>
     </Menu>
   );

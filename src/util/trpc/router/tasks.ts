@@ -69,7 +69,6 @@ export const tasksRouter = (t: MyTrpc) =>
             // labels: z.array(z.string()),
             priority: z.number(),
             createdAt: z.date(),
-            updatedAt: z.date(),
             completed: z.boolean(),
             startDate: z.date(),
             dueDate: z.date(),
@@ -91,6 +90,7 @@ export const tasksRouter = (t: MyTrpc) =>
           throw new TRPCError({ code: "NOT_FOUND" });
         }
 
+        console.log("Updating task with", input);
         return await prisma.task.update({
           where: {
             id: input.id,
@@ -100,10 +100,10 @@ export const tasksRouter = (t: MyTrpc) =>
             description: input.description,
             priority: input.priority,
             createdAt: input.createdAt,
-            updatedAt: input.updatedAt,
+            updatedAt: new Date(),
             completed: input.completed,
-            startDate: input.startDate,
-            dueDate: input.dueDate,
+            startDate: input.startDate ?? null,
+            dueDate: input.dueDate ?? null,
           },
         });
       }),
