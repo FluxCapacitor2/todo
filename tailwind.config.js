@@ -18,6 +18,7 @@ module.exports = {
   plugins: [
     require("@headlessui/tailwindcss"),
     require("@tailwindcss/typography"),
+    require("@tailwindcss/container-queries"),
   ],
   darkMode: "media",
 };

@@ -1,27 +1,38 @@
 "use client";
 
+import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { ReactNode } from "react";
+import { Spinner } from "../ui/Spinner";
 
 export const ViewSelector = ({ id }: { id: string }) => {
   const pathname = useSelectedLayoutSegment();
+  const { data: project, isLoading, isError } = trpc.projects.get.useQuery(id);
   return (
-    <div className="flex">
-      <PillButton href={`/project/${id}`} active={pathname === null}>
-        Project
-      </PillButton>
-      <PillButton href={`/project/${id}/list`} active={pathname === "list"}>
-        List
-      </PillButton>
-      <PillButton
-        href={`/project/${id}/calendar`}
-        active={pathname === "calendar"}
-      >
-        Calendar
-      </PillButton>
-    </div>
+    <>
+      {isLoading ? (
+        <Spinner />
+      ) : (
+        <h1 className="mb-2 text-2xl font-bold">{project?.name}</h1>
+      )}
+
+      <div className="flex">
+        <PillButton href={`/project/${id}`} active={pathname === null}>
+          Project
+        </PillButton>
+        <PillButton href={`/project/${id}/list`} active={pathname === "list"}>
+          List
+        </PillButton>
+        <PillButton
+          href={`/project/${id}/calendar`}
+          active={pathname === "calendar"}
+        >
+          Calendar
+        </PillButton>
+      </div>
+    </>
   );
 };
 

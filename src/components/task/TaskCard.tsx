@@ -86,7 +86,7 @@ export const TaskCard = ({
       {({ task, setTask, isSaving }) => (
         <div
           className={clsx(
-            "group relative flex cursor-pointer justify-between gap-2 p-2",
+            "group relative flex cursor-pointer justify-between gap-2 p-2 @container/task",
             task.id < 0 && "pointer-events-none opacity-70",
             !isListItem &&
               "max-w-[20rem] rounded-md border border-gray-600 hover:bg-white/30"
@@ -148,7 +148,7 @@ export const TaskCard = ({
             )}
           </div>
 
-          <div className="absolute right-1 top-1">
+          <div className="absolute right-1 top-1 hidden @[10rem]/task:block">
             <TaskMenuButton
               task={task}
               setTask={setTask}

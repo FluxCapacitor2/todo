@@ -18,33 +18,37 @@ export const FetchingIndicators = () => {
   }, [mutating]);
 
   return (
-    <div className="fixed right-0 top-0 z-50 flex justify-end gap-2 p-2">
-      <Transition
-        appear
-        show={mutating > 0}
-        enter="ease-out duration-300"
-        enterFrom="opacity-0"
-        enterTo="opacity-100"
-        leave="ease-in duration-200"
-        leaveFrom="opacity-100"
-        leaveTo="opacity-0"
-        className="animate-bounce"
-      >
-        <MdBrowserUpdated />
-      </Transition>
-      <Transition
-        appear
-        show={fetching > 0}
-        enter="ease-out duration-300"
-        enterFrom="opacity-0"
-        enterTo="opacity-100"
-        leave="ease-in duration-200"
-        leaveFrom="opacity-100"
-        leaveTo="opacity-0"
-        className="animate-spin"
-      >
-        <MdRefresh />
-      </Transition>
-    </div>
+    <>
+      <div className="fixed right-0 top-0 z-50 justify-end gap-2 p-2">
+        <Transition
+          appear
+          show={mutating > 0}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+          className="animate-bounce"
+        >
+          <MdBrowserUpdated />
+        </Transition>
+      </div>
+      <div className="fixed right-4 top-0 z-50 justify-end gap-2 p-2">
+        <Transition
+          appear
+          show={fetching > 0}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+          className="animate-spin"
+        >
+          <MdRefresh />
+        </Transition>
+      </div>
+    </>
   );
 };

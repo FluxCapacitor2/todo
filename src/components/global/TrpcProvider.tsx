@@ -1,11 +1,13 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink, getFetch, loggerLink } from "@trpc/client";
+import { createIDBPersister } from "@/util/idb-persister";
+import { trpc } from "@/util/trpc/trpc";
+import { QueryClient } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { getFetch, httpBatchLink, loggerLink } from "@trpc/client";
 import { useState } from "react";
 import superjson from "superjson";
-import { trpc } from "@/util/trpc/trpc";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -15,13 +17,15 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 5000,
-            refetchInterval:
-              process.env.NODE_ENV === "production" ? 120_000 : 30_000,
+            cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+            staleTime: 10000, // 10 seconds
+            refetchInterval: 1000 * 120, // 2 minutes
           },
         },
       })
   );
+
+  const [persister] = useState(() => createIDBPersister());
 
   const url = process.env.NEXT_PUBLIC_BASE_URL
     ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/trpc/`
@@ -44,12 +48,16 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
       transformer: superjson,
     })
   );
+
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        persistOptions={{ persister }}
+        client={queryClient}
+      >
         {children}
         <ReactQueryDevtools />
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </trpc.Provider>
   );
 };

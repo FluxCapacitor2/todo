@@ -6,7 +6,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { trpc } from "@/util/trpc/trpc";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { MdAdd } from "react-icons/md";
+import { MdAdd, MdError } from "react-icons/md";
 
 export const ProjectCards = () => {
   const { data: projects, isLoading, isError } = trpc.projects.list.useQuery();
@@ -88,11 +88,18 @@ const ProjectCard = ({
             <Spinner />
           </>
         ) : isError ? (
-          <>Error loading project information</>
+          <span className="text-red-500">
+            <MdError className="inline" /> Error loading tasks.
+          </span>
         ) : (
           <>
             <p>
-              {total} task{total === 1 ? "" : "s"}
+              <b>{data?.sections.length}</b> section
+              {data?.sections?.length === 1 ? "" : "s"}
+            </p>
+            <p>
+              <b>{total}</b> task
+              {total === 1 ? "" : "s"}
             </p>
           </>
         )}

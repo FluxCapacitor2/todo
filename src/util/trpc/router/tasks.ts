@@ -90,7 +90,6 @@ export const tasksRouter = (t: MyTrpc) =>
           throw new TRPCError({ code: "NOT_FOUND" });
         }
 
-        console.log("Updating task with", input);
         return await prisma.task.update({
           where: {
             id: input.id,

@@ -1,7 +1,7 @@
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import { ProjectCards } from "./ProjectCards";
+import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { ProjectCards } from "./ProjectCards";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
@@ -11,7 +11,7 @@ export default async function Home() {
   }
 
   return (
-    <main className="mx-auto flex max-w-prose flex-col gap-4 p-6">
+    <main className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
       <ProjectCards />
     </main>
   );

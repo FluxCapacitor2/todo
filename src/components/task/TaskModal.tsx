@@ -20,7 +20,6 @@ import {
   MdRunCircle,
   MdStart,
 } from "react-icons/md";
-import { TextField } from "../ui/TextField";
 import { AddSubtask } from "./AddTask";
 import { TaskCard } from "./TaskCard";
 
@@ -64,19 +63,34 @@ export const TaskModal = ({
         </a>
       )}
       <DialogTitle>
-        <input
-          ref={checkboxRef}
-          type="checkbox"
-          onChange={(e) => setTask({ ...task, completed: e.target.checked })}
-          checked={task.completed}
-          className="h-6 w-6"
-        />
-        <TextField
-          flat
-          value={task.name}
-          onChange={(e) => setTask({ ...task, name: e.target.value })}
-          className={clsx(task.completed && "text-gray-500 line-through")}
-        />
+        <div className="self-start">
+          <input
+            ref={checkboxRef}
+            type="checkbox"
+            onChange={(e) => setTask({ ...task, completed: e.target.checked })}
+            checked={task.completed}
+            className="h-6 w-6"
+          />
+        </div>
+        <h2
+          contentEditable
+          onBlur={(e) =>
+            setTask({ ...task, name: e.currentTarget.textContent ?? "" })
+          }
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.currentTarget.blur();
+            }
+          }}
+          className={clsx(
+            "w-full",
+            task.completed && "text-gray-500 line-through"
+          )}
+          spellCheck={false}
+          suppressContentEditableWarning // The warning does not apply; we expect that this text gets edited
+        >
+          {task.name}
+        </h2>
       </DialogTitle>
 
       <div className="flex flex-col gap-4">
