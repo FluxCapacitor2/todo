@@ -76,7 +76,7 @@ export default function Page({
 
   return (
     <>
-      <div className="flex snap-x overflow-x-scroll">
+      <div className="flex snap-x snap-mandatory overflow-x-scroll lg:snap-none">
         {data.sections.map((section) => (
           <Section key={section.id} section={section} projectId={data.id} />
         ))}
