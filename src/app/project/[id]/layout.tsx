@@ -1,7 +1,7 @@
 import { ViewSelector } from "@/components/project/ViewSelector";
 import { ReactNode } from "react";
 
-export default async function Layout({
+export default function Layout({
   params: { id },
   children,
 }: {

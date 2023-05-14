@@ -72,7 +72,7 @@ export const TaskModal = ({
             className="h-6 w-6"
           />
         </div>
-        <h2
+        <div
           contentEditable
           onBlur={(e) =>
             setTask({ ...task, name: e.currentTarget.textContent ?? "" })
@@ -90,7 +90,7 @@ export const TaskModal = ({
           suppressContentEditableWarning // The warning does not apply; we expect that this text gets edited
         >
           {task.name}
-        </h2>
+        </div>
       </DialogTitle>
 
       <div className="flex flex-col gap-4">

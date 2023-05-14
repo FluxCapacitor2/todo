@@ -13,7 +13,7 @@ import clsx from "clsx";
 import { produce } from "immer";
 import { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
-import { MdDelete, MdEdit, MdMenu } from "react-icons/md";
+import { MdCalendarToday, MdDelete, MdEdit, MdMenu } from "react-icons/md";
 import { AddSectionTask } from "../../../components/task/AddTask";
 
 export default function Page({
@@ -24,7 +24,54 @@ export default function Page({
   const { data } = trpc.projects.get.useQuery(projectId);
 
   if (!data) {
-    return <Spinner />;
+    // Loading UI (skeleton)
+    return (
+      <div className="flex">
+        {new Array(6).fill(null).map((_, i) => (
+          <div
+            className="mr-4 flex h-[calc(100vh-6rem)] w-80 snap-center flex-col rounded-lg p-2"
+            key={i}
+          >
+            <div className="flex items-center justify-between">
+              <div className="h-6 w-52 animate-pulse rounded-md bg-gray-500/50" />
+              <Button variant="flat">
+                <MdMenu />
+              </Button>
+            </div>
+            <div className="flex flex-col gap-2">
+              {new Array(Math.floor(Math.random() * 4 + 2))
+                .fill(null)
+                .map((_, j) => (
+                  <div
+                    className="flex w-80 items-start gap-2 rounded-md border border-gray-500 p-2"
+                    key={j}
+                  >
+                    <input
+                      type="checkbox"
+                      disabled
+                      className="mt-1"
+                      checked={Math.random() < 0.5}
+                    />
+                    <div className="flex flex-col gap-2">
+                      <div
+                        className="my-1 h-4 w-48 animate-pulse rounded-md bg-gray-500/50"
+                        style={{ animationDelay: `${i * 100}ms` }}
+                      />
+                      <div className="flex items-center gap-2">
+                        <MdCalendarToday className="text-sm" />
+                        <div
+                          className="my-1 h-3 w-24 animate-pulse rounded-md bg-gray-500/50"
+                          style={{ animationDelay: `${i * 150}ms` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -87,7 +134,7 @@ const Section = ({
 
   return (
     <div
-      className="mr-4 flex h-[calc(100vh-6rem)] snap-center flex-col rounded-lg p-2"
+      className="mr-4 flex h-[calc(100vh-6rem)] w-80 snap-center flex-col rounded-lg p-2"
       key={section.id}
     >
       <div
@@ -112,7 +159,7 @@ const Section = ({
           </MenuItems>
         </Menu>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex w-80 flex-col gap-2">
         {sortByDueDate(section.tasks).map((task) => (
           <TaskCard task={task} key={task.id} projectId={projectId} details />
         ))}

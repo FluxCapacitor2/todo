@@ -5,7 +5,6 @@ import clsx from "clsx";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { ReactNode } from "react";
-import { Spinner } from "../ui/Spinner";
 
 export const ViewSelector = ({ id }: { id: string }) => {
   const pathname = useSelectedLayoutSegment();
@@ -13,7 +12,7 @@ export const ViewSelector = ({ id }: { id: string }) => {
   return (
     <>
       {isLoading ? (
-        <Spinner />
+        <div className="my-1 h-8 w-48 animate-pulse rounded-md bg-gray-500/50" />
       ) : (
         <h1 className="mb-2 text-2xl font-bold">{project?.name}</h1>
       )}

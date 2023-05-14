@@ -2,7 +2,6 @@
 
 import { TaskCard } from "@/components/task/TaskCard";
 import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/ui/Spinner";
 import { trpc } from "@/util/trpc/trpc";
 import { Project, Section, Task } from "@prisma/client";
 import { CalendarDay, useDatePicker } from "@rehookify/datepicker";
@@ -10,7 +9,7 @@ import clsx from "clsx";
 import { Fragment, useState } from "react";
 import { MdArrowBack, MdArrowForward, MdCalendarToday } from "react-icons/md";
 
-export default async function Page({
+export default function Page({
   params: { id: projectId },
 }: {
   params: { id: string };
@@ -26,10 +25,6 @@ export default async function Page({
   });
 
   const { data } = trpc.projects.get.useQuery(projectId);
-
-  if (!data) {
-    return <Spinner />;
-  }
 
   const { year, month, days } = calendars[0];
 
@@ -78,7 +73,10 @@ const DailyTaskList = ({
   project,
   day,
 }: {
-  project: Project & { sections: (Section & { tasks: Task[] })[] };
+  project:
+    | (Project & { sections: (Section & { tasks: Task[] })[] })
+    | null
+    | undefined;
   day: CalendarDay;
 }) => {
   return (
@@ -98,26 +96,44 @@ const DailyTaskList = ({
       >
         {day.day}
       </h3>
-      {project.sections.map((section) => (
-        <Fragment key={section.id}>
-          {section.tasks
-            .filter((task) => task.dueDate && sameDay(task.dueDate, day.$date))
-            .map((task) => (
-              <div
-                key={task.id}
-                className="mb-1 w-full rounded-md bg-primary-500/10"
-              >
-                <TaskCard
-                  task={task}
-                  projectId={project.id}
-                  isListItem
-                  details={false}
-                  showCheckbox={false}
-                />
-              </div>
-            ))}
-        </Fragment>
-      ))}
+      {project ? (
+        <>
+          {project.sections.map((section) => (
+            <Fragment key={section.id}>
+              {section.tasks
+                .filter(
+                  (task) => task.dueDate && sameDay(task.dueDate, day.$date)
+                )
+                .map((task) => (
+                  <div
+                    key={task.id}
+                    className="mb-1 w-full rounded-md bg-primary-500/10"
+                  >
+                    <TaskCard
+                      task={task}
+                      projectId={project.id}
+                      isListItem
+                      details={false}
+                      showCheckbox={false}
+                    />
+                  </div>
+                ))}
+            </Fragment>
+          ))}
+        </>
+      ) : (
+        // Fallback/skeleton UI for when data is still loading
+        <>
+          <div
+            className="mb-1 h-10 w-full animate-pulse rounded-md bg-gray-500/50"
+            style={{ animationDelay: `${day.day}00ms` }}
+          />
+          <div
+            className="mb-1 h-10 w-full animate-pulse rounded-md bg-gray-500/50"
+            style={{ animationDelay: `${day.day}50ms` }}
+          />
+        </>
+      )}
     </div>
   );
 };
