@@ -1,4 +1,4 @@
-import { DatePickerPopover } from "@/app/project/[id]/DatePickerPopover";
+import { DatePickerPopover } from "@/app/(sidebar)/project/[id]/DatePickerPopover";
 import { Button } from "@/components/ui/Button";
 import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
 import { Spinner } from "@/components/ui/Spinner";

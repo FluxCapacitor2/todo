@@ -1,4 +1,4 @@
-import { DatePickerPopover } from "@/app/project/[id]/DatePickerPopover";
+import { DatePickerPopover } from "@/app/(sidebar)/project/[id]/DatePickerPopover";
 import { Button } from "@/components/ui/Button";
 import { CustomDialog, DialogTitle } from "@/components/ui/CustomDialog";
 import { RemirrorEditor } from "@/components/ui/RemirrorEditor";

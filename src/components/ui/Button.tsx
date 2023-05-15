@@ -3,7 +3,7 @@ import { ButtonHTMLAttributes, forwardRef } from "react";
 
 const styles = {
   primary:
-    "text-white bg-primary-500 dark:bg-primary-700 dark:hover:bg-primary-900",
+    "text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-900",
   subtle:
     "bg-black/[.08] hover:bg-black/[.15] dark:bg-gray-800 dark:hover:bg-gray-700",
   flat: "hover:bg-gray-100 dark:hover:bg-white/10",

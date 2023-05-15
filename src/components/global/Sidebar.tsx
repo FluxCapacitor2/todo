@@ -1,27 +1,26 @@
 "use client";
 
-import Image from "next/image";
-import { useSession } from "next-auth/react";
-import { trpc } from "@/util/trpc/trpc";
-import Link from "next/link";
-import { Spinner } from "@/components/ui/Spinner";
-import { Project } from "@prisma/client";
 import { Button } from "@/components/ui/Button";
+import { Spinner } from "@/components/ui/Spinner";
+import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
-import { MdClose, MdDelete, MdHome, MdMenu } from "react-icons/md";
-import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { BsFillGridFill } from "react-icons/bs";
+import { MdClose, MdDelete, MdMenu } from "react-icons/md";
 
-export const Sidebar = ({
-  initialData,
-}: {
-  initialData: Project[] | undefined;
-}) => {
+const activeClass = "bg-gray-300 dark:bg-gray-600 transition-colors h-16";
+const inactiveClass =
+  "hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors h-16";
+
+export const Sidebar = () => {
   const session = useSession();
 
-  const { data, isLoading, isError } = trpc.projects.list.useQuery(undefined, {
-    initialData,
-  });
+  const { data, isLoading, isError } = trpc.projects.list.useQuery();
 
   const [shown, setShown] = useState(false);
 
@@ -31,38 +30,44 @@ export const Sidebar = ({
   useEffect(() => setShown(false), [pathname, searchParams]);
 
   return (
-    <div>
-      <aside
+    <>
+      <nav
         className={clsx(
           shown ? "absolute inset-0 z-20 flex" : "hidden",
-          "h-screen flex-col gap-8 bg-gray-200 p-6 dark:bg-gray-900 md:flex"
+          "h-full min-h-screen min-w-[16rem] flex-col bg-gray-200 dark:bg-gray-900 md:flex"
         )}
       >
-        <div className="flex w-48 items-center">
-          {session.status === "authenticated" ? (
-            <Link href="/profile">
-              <div className="flex items-center gap-2">
-                {session?.data?.user?.image && (
-                  <Image
-                    src={session.data.user.image}
-                    alt="User profile image"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                    unoptimized
-                  />
-                )}
-                <p className="text-sm font-bold">{session?.data?.user?.name}</p>
-              </div>
-            </Link>
-          ) : (
-            <>
-              <Link className="font-medium underline" href="/signin">
-                Sign In
-              </Link>
-            </>
-          )}
-        </div>
+        <Link href="/profile">
+          <div
+            className={clsx(
+              "flex items-center gap-2 p-4",
+              pathname === "/profile" ? activeClass : inactiveClass
+            )}
+          >
+            {session?.data?.user?.image && (
+              <Image
+                src={session.data.user.image}
+                alt="User profile image"
+                width={32}
+                height={32}
+                className="rounded-full"
+                unoptimized
+              />
+            )}
+            <p className="text-sm font-bold">{session?.data?.user?.name}</p>
+          </div>
+        </Link>
+        <Link href="/projects">
+          <div
+            className={clsx(
+              "flex items-center gap-2 p-4 font-medium",
+              pathname === "/projects" ? activeClass : inactiveClass
+            )}
+          >
+            <BsFillGridFill />
+            <p>Projects</p>
+          </div>
+        </Link>
         {isLoading ? (
           <div className="flex h-24 w-full items-center justify-center">
             <Spinner />
@@ -73,31 +78,28 @@ export const Sidebar = ({
           </>
         ) : (
           <>
-            <Link href="/">
-              <div className="flex items-center gap-2">
-                <MdHome />
-                <p>Home</p>
-              </div>
-            </Link>
             {data?.map((project) => (
               <ProjectItem
                 id={project.id}
-                name={project.name ?? "Untitled Project"}
+                name={project.name || "Untitled Project"}
                 key={project.id}
               />
             ))}
           </>
         )}
         {shown && (
-          <Button
-            variant="flat"
-            className="absolute right-2 top-6"
+          <div
+            className={clsx(
+              inactiveClass,
+              "flex cursor-pointer items-center gap-2 p-4"
+            )}
             onClick={() => setShown(!shown)}
           >
             <MdClose />
-          </Button>
+            Close Menu
+          </div>
         )}
-      </aside>
+      </nav>
       <Button
         variant="flat"
         className="absolute left-3 top-1 block md:hidden"
@@ -105,32 +107,46 @@ export const Sidebar = ({
       >
         <MdMenu />
       </Button>
-    </div>
+    </>
   );
 };
 
 const ProjectItem = ({ name, id }: { name: string; id: string }) => {
   const { mutateAsync, isLoading } = trpc.projects.delete.useMutation();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const active = pathname?.startsWith(`/project/${id}`);
+
   const utils = trpc.useContext();
 
   const deleteProject = async () => {
     await mutateAsync(id);
     utils.projects.list.invalidate();
+    if (active) {
+      router.push("/projects");
+    }
+    toast.success("Project deleted!");
   };
 
   return (
-    <div
-      className={clsx(
-        "flex items-center justify-between",
-        isLoading && "opacity-50"
-      )}
-    >
-      <Link href={`/project/${id}`} className="grow">
-        <p>{name}</p>
-      </Link>
-      <Button variant="subtle" onClick={deleteProject}>
-        <MdDelete />
-      </Button>
-    </div>
+    <Link href={`/project/${id}`}>
+      <div
+        className={clsx(
+          "flex items-center justify-between p-4 font-medium",
+          isLoading && "opacity-50",
+          active ? activeClass : inactiveClass
+        )}
+      >
+        <p className="grow">{name}</p>
+        <Button
+          variant="flat"
+          className="text-gray-600 dark:text-gray-400"
+          onClick={deleteProject}
+        >
+          {isLoading ? <Spinner /> : <MdDelete />}
+        </Button>
+      </div>
+    </Link>
   );
 };
