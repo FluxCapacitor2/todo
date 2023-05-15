@@ -24,8 +24,8 @@ export default async function Home() {
       {/* @ts-expect-error RSC */}
       <CTA />
 
-      <div className="prose grid max-w-full grid-cols-2 justify-items-center gap-6 dark:prose-invert">
-        <div>
+      <div className="prose flex max-w-full flex-col gap-6 dark:prose-invert md:flex-row">
+        <div className="max-w-prose">
           <h2>Projects</h2>
           <p>
             Projects are the way tasks are organized. Each project can have
@@ -36,29 +36,33 @@ export default async function Home() {
           <Image
             src={projectsLight}
             alt="A view divided into three columns: home, work, and school. Each column has tasks related to the category."
-            className="block rounded-md shadow-2xl transition-transform duration-1000 hover:-translate-y-2 hover:scale-125 dark:hidden"
+            className="block rounded-md shadow-2xl transition-transform duration-1000 dark:hidden md:hover:-translate-y-2 motion-safe:md:hover:scale-110 motion-safe:lg:hover:scale-125"
           />
           <Image
             src={projectsDark}
             alt="A view divided into three columns: home, work, and school. Each column has tasks related to the category."
-            className="hidden rounded-md shadow-2xl transition-transform duration-1000 hover:-translate-y-2 hover:scale-125 dark:block"
+            className="hidden rounded-md shadow-2xl transition-transform duration-1000 dark:block md:hover:-translate-y-2 motion-safe:md:hover:scale-110 motion-safe:lg:hover:scale-125"
           />
         </div>
-        <div className="aspect-square max-h-96">
+      </div>
+      <div className="prose flex max-w-full flex-col-reverse gap-6 dark:prose-invert md:flex-row">
+        <div className="aspect-square max-h-96 rounded-md drop-shadow-2xl transition-transform duration-1000 md:hover:-translate-y-2 motion-safe:md:hover:scale-110 motion-safe:lg:hover:scale-125">
           <Image
             src={subTasks}
             alt="A modal showing a task with a due date and five sub-tasks, two of which are completed."
-            className="rounded-md shadow-2xl transition-transform duration-1000 hover:-translate-y-2 hover:scale-125"
+            className="max-h-full max-w-full rounded-md object-scale-down"
           />
         </div>
-        <div>
+        <div className="max-w-prose">
           <h2>Sub-tasks</h2>
           <p>
             Each task can have its own infinitely nested sub-tasks, giving you
             fine-grained control over your organization.
           </p>
         </div>
-        <div>
+      </div>
+      <div className="prose flex max-w-full flex-col gap-6 dark:prose-invert md:flex-row">
+        <div className="max-w-prose">
           <h2>Light and Dark Modes</h2>
           <p>Two themes which automatically adjust based on your system.</p>
         </div>
@@ -66,22 +70,25 @@ export default async function Home() {
           <Image
             src={colorThemes}
             alt="The Project View with an angular split showing both the light and dark themes"
-            className="rounded-md shadow-2xl transition-transform duration-1000 hover:-translate-y-2 hover:scale-125"
+            className="rounded-md shadow-2xl transition-transform duration-1000 md:hover:-translate-y-2 motion-safe:md:hover:scale-110 motion-safe:lg:hover:scale-125"
           />
         </div>
+      </div>
+
+      <div className="prose flex max-w-full flex-col-reverse gap-6 dark:prose-invert md:flex-row">
         <div className="max-w-sm">
           <Image
             src={pwaLight}
             alt="The PWA Logo: a wordmark with the letters 'PWA' emphasizing the 'W' for 'Web'."
-            className="block drop-shadow-2xl transition-transform duration-1000 hover:-translate-y-2 hover:scale-125 dark:hidden"
+            className="block drop-shadow-2xl transition-transform duration-1000 dark:hidden md:hover:-translate-y-2 motion-safe:md:hover:scale-110 motion-safe:lg:hover:scale-125"
           />
           <Image
             src={pwaDark}
             alt="The PWA Logo: a wordmark with the letters 'PWA' emphasizing the 'W' for 'Web'."
-            className="hidden drop-shadow-2xl transition-transform duration-1000 hover:-translate-y-2 hover:scale-125 dark:block"
+            className="hidden drop-shadow-2xl transition-transform duration-1000 dark:block md:hover:-translate-y-2 motion-safe:md:hover:scale-110 motion-safe:lg:hover:scale-125"
           />
         </div>
-        <div>
+        <div className="max-w-prose">
           <h2>⚡ PWA</h2>
           <p>
             This app runs as a{" "}
@@ -94,6 +101,20 @@ export default async function Home() {
           </p>
         </div>
       </div>
+      <div className="prose flex max-w-full flex-col dark:prose-invert md:flex-row">
+        <div className="max-w-prose">
+          <h2>Open-Source</h2>
+          <p>
+            The code for this project is hosted on{" "}
+            <Link href="https://github.com/FluxCapacitor2/todo">GitHub</Link>.
+            Feature requests and contributions are welcome!
+          </p>
+        </div>
+        <Link href="https://github.com/FluxCapacitor2/todo">
+          <FaGithub size={96} className="w-96" />
+        </Link>
+      </div>
+      <hr className="my-6 w-full max-w-prose border-gray-500" />
       {/* @ts-expect-error RSC */}
       <CTA />
     </main>
@@ -113,7 +134,7 @@ const CTA = async () => {
       ) : (
         <>
           <Link href="/signin">
-            <Button variant="primary">Sign In</Button>
+            <Button variant="primary">Sign Up</Button>
           </Link>
         </>
       )}
