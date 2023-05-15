@@ -4,9 +4,11 @@ import clsx from "clsx";
 import { produce } from "immer";
 import { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
-import { MdCancel, MdSend } from "react-icons/md";
+import { MdCalendarToday, MdCancel, MdSend } from "react-icons/md";
 import { SelectField } from "../ui/SelectField";
 import { TextArea, TextField } from "../ui/TextField";
+import { DatePickerPopover } from "@/app/(sidebar)/project/[id]/DatePickerPopover";
+import { format } from "date-fns";
 
 const defaultTask = {
   completed: false,
@@ -28,7 +30,7 @@ export const AddSectionTask = ({
 }) => {
   const utils = trpc.useContext();
   const { mutateAsync } = trpc.tasks.create.useMutation({
-    onMutate: ({ sectionId, name, description }) => {
+    onMutate: ({ sectionId, name, description, dueDate }) => {
       const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
 
       utils.projects.get.cancel(projectId);
@@ -44,6 +46,7 @@ export const AddSectionTask = ({
                 sectionId,
                 name,
                 description: description ?? "",
+                dueDate,
               });
             }
           }
@@ -75,8 +78,8 @@ export const AddSectionTask = ({
     <AddTask
       projectId={projectId}
       section={sectionId}
-      onAdd={({ name, description, sectionId }) =>
-        mutateAsync({ name, description, sectionId: sectionId! })
+      onAdd={({ name, description, sectionId, dueDate }) =>
+        mutateAsync({ name, description, sectionId: sectionId!, dueDate })
       }
     />
   );
@@ -91,7 +94,7 @@ export const AddSubtask = ({
 }) => {
   const utils = trpc.useContext();
   const { mutateAsync } = trpc.tasks.addSubtask.useMutation({
-    onMutate: ({ name, id, description }) => {
+    onMutate: ({ name, id, description, dueDate }) => {
       const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
 
       utils.tasks.get.cancel({ id: parentTaskId });
@@ -108,6 +111,7 @@ export const AddSubtask = ({
               sectionId: null,
               name,
               description: description ?? "",
+              dueDate,
             },
           ],
         };
@@ -134,11 +138,12 @@ export const AddSubtask = ({
     <AddTask
       sectionEditable={false}
       projectId={projectId}
-      onAdd={({ name, description }) =>
+      onAdd={({ name, description, dueDate }) =>
         mutateAsync({
           id: parentTaskId,
           name,
           description,
+          dueDate,
         })
       }
     />
@@ -155,10 +160,12 @@ const AddTask = ({
     name,
     description,
     sectionId,
+    dueDate,
   }: {
     name: string;
     description: string;
     sectionId: number | null;
+    dueDate: Date | null;
   }) => Promise<void>;
   projectId: string;
   section?: number;
@@ -167,6 +174,7 @@ const AddTask = ({
   const { data, isLoading, isError } = trpc.projects.get.useQuery(projectId);
 
   const [focused, setFocused] = useState(false);
+  const [dueDate, setDueDate] = useState<Date | null>(null);
 
   const form = useRef<HTMLFormElement | null>(null);
   const nameField = useRef<HTMLInputElement | null>(null);
@@ -175,6 +183,7 @@ const AddTask = ({
 
   const reset = () => {
     form.current!.reset();
+    setDueDate(null);
   };
 
   const newTask = async () => {
@@ -190,6 +199,7 @@ const AddTask = ({
       name: nameField.current!.value,
       description: descField.current!.value,
       sectionId: sectionEditable ? parseInt(sectionField.current!.value) : null,
+      dueDate,
     });
     reset();
     nameField.current?.focus();
@@ -248,6 +258,12 @@ const AddTask = ({
             }}
           />
           <div className="flex gap-2 self-end">
+            <DatePickerPopover date={dueDate ?? undefined} setDate={setDueDate}>
+              <Button variant="subtle">
+                <MdCalendarToday />
+                {!dueDate ? "Add Due Date" : format(dueDate, "MMM do, hhaaa")}
+              </Button>
+            </DatePickerPopover>
             <Button
               variant="subtle"
               onClick={() => {

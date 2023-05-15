@@ -11,6 +11,7 @@ export const tasksRouter = (t: MyTrpc) =>
           sectionId: z.number(),
           name: z.string(),
           description: z.optional(z.string()),
+          dueDate: z.nullable(z.date()),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -37,6 +38,7 @@ export const tasksRouter = (t: MyTrpc) =>
                 name: input.name,
                 description: input.description ?? "",
                 ownerId: ctx.session.id,
+                dueDate: input.dueDate,
               },
             },
           },
@@ -112,6 +114,7 @@ export const tasksRouter = (t: MyTrpc) =>
           id: z.number(),
           name: z.string(),
           description: z.string(),
+          dueDate: z.nullable(z.date()),
         })
       )
       .mutation(async ({ ctx, input }) => {
@@ -135,6 +138,7 @@ export const tasksRouter = (t: MyTrpc) =>
                   name: input.name,
                   description: input.description,
                   ownerId: ctx.session.id,
+                  dueDate: input.dueDate,
                 },
               ],
             },

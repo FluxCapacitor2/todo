@@ -19,6 +19,7 @@ export const Button = forwardRef<
 >(({ variant, ...props }, ref) => {
   return (
     <button
+      type="button"
       {...props}
       ref={ref}
       className={clsx(
