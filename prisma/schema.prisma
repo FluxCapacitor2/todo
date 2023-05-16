@@ -38,17 +38,16 @@ model Session {
 }
 
 model User {
-  id                   String              @id @default(cuid())
-  name                 String?
-  email                String?             @unique
-  emailVerified        DateTime?
-  image                String?
-  accounts             Account[]
-  projects             Project[]
-  sessions             Session[]
-  tasks                Task[]
-  notificationTokens   NotificationToken[]
-  pendingNotifications NotificationJob[]
+  id                 String              @id @default(cuid())
+  name               String?
+  email              String?             @unique
+  emailVerified      DateTime?
+  image              String?
+  accounts           Account[]
+  projects           Project[]
+  sessions           Session[]
+  tasks              Task[]
+  notificationTokens NotificationToken[]
 }
 
 model NotificationToken {
@@ -57,18 +56,6 @@ model NotificationToken {
   generatedAt DateTime @default(now())
   User        User?    @relation(fields: [userId], references: [id])
   userId      String?
-
-  @@index([userId])
-}
-
-model NotificationJob {
-  id          String   @id @default(cuid())
-  User        User?    @relation(fields: [userId], references: [id])
-  userId      String?
-  time        DateTime
-  title       String
-  description String
-  url         String
 
   @@index([userId])
 }
@@ -102,27 +89,37 @@ model Section {
 }
 
 model Task {
-  id           Int       @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   name         String
   description  String
-  priority     Int       @default(1)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @default(now()) @updatedAt
-  completed    Boolean   @default(false)
+  priority     Int        @default(1)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
+  completed    Boolean    @default(false)
   startDate    DateTime?
   dueDate      DateTime?
   sectionId    Int?
   parentTaskId Int?
   ownerId      String
-  owner        User      @relation(fields: [ownerId], references: [id])
-  parentTask   Task?     @relation("SubTasks", fields: [parentTaskId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  subTasks     Task[]    @relation("SubTasks")
-  section      Section?  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  labels       Label[]   @relation("LabelToTask")
+  owner        User       @relation(fields: [ownerId], references: [id])
+  parentTask   Task?      @relation("SubTasks", fields: [parentTaskId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subTasks     Task[]     @relation("SubTasks")
+  section      Section?   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  labels       Label[]    @relation("LabelToTask")
+  reminders    Reminder[]
 
   @@index([ownerId])
   @@index([sectionId])
   @@index([parentTaskId])
+}
+
+model Reminder {
+  id     Int      @id @default(autoincrement())
+  Task   Task     @relation(fields: [taskId], references: [id])
+  taskId Int
+  time   DateTime
+
+  @@index([taskId])
 }
 
 model Label {

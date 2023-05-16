@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "prisma": "env-cmd -f .env.local npx prisma",
+    "notif": "env-cmd -f .env.local node notification_service.mjs"
   },
   "dependencies": {
     "@floating-ui/react": "^0.24.1",
@@ -58,6 +60,7 @@
     "@tanstack/eslint-plugin-query": "^4.29.4",
     "@types/cron": "^2.0.1",
     "autoprefixer": "^10.4.14",
+    "env-cmd": "^10.1.0",
     "husky": "^8.0.0",
     "postcss": "^8.4.23",
     "prettier": "^2.8.8",

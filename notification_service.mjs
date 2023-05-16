@@ -19,36 +19,48 @@ const prisma = new PrismaClient({
 });
 
 const sendNotifications = async () => {
-  const jobs = await prisma.notificationJob.findMany({
+  const reminders = await prisma.reminder.findMany({
     where: {
       time: {
         lte: new Date(),
       },
     },
     include: {
-      User: {
+      Task: {
         include: {
-          notificationTokens: true,
+          owner: {
+            include: {
+              notificationTokens: true,
+            },
+          },
         },
       },
     },
   });
+  console.log(reminders);
 
-  if (jobs.length > 0) {
-    const messages = jobs.flatMap((notif) => {
-      const tokens = notif.User.notificationTokens.map((it) => it.token);
+  if (reminders.length > 0) {
+    const messages = reminders.flatMap((notif) => {
+      const tokens = notif.Task.owner.notificationTokens.map((it) => it.token);
       return tokens.map((token) => ({
         notification: {
-          title: notif.title,
-          body: notif.description,
-          click_action: notif.url,
+          title: notif.Task.name,
+          body: "🔔 You set a reminder for this task.",
+          // click_action: process.env.NEXT_PUBLIC_BASE_URL + "/projects",
         },
         token,
       }));
     });
-    console.log("Created messages", JSON.stringify(messages));
+    console.log("Created messages", messages);
     await messaging.sendEach(messages);
     console.log("Sent");
+
+    await prisma.reminder.deleteMany({
+      where: {
+        id: reminders.map((r) => r.id),
+      },
+    });
+    console.log("Processing finished");
   }
 };
 

@@ -1,11 +1,12 @@
-import { initTRPC } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
+import { z } from "zod";
+import { prisma } from "../prisma";
 import { Context } from "./context";
 import { projectsRouter } from "./router/project";
 import { sectionsRouter } from "./router/sections";
 import { tasksRouter } from "./router/tasks";
-import { z } from "zod";
-import { prisma } from "../prisma";
+import { userRouter } from "./router/user";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
@@ -17,55 +18,39 @@ export const appRouter = t.router({
   projects: projectsRouter(t),
   sections: sectionsRouter(t),
   tasks: tasksRouter(t),
-  user: t.router({
-    addToken: t.procedure.input(z.string()).mutation(async ({ input, ctx }) => {
-      const res = await prisma.user.update({
-        where: {
-          id: ctx.session.id,
-        },
-        data: {
-          notificationTokens: {
-            upsert: {
-              create: {
-                token: input,
-              },
-              update: {},
-              where: {
-                token: input,
-              },
-            },
-          },
-        },
-      });
-    }),
-    removeToken: t.procedure
-      .input(z.string())
-      .mutation(async ({ input, ctx }) => {
-        const res = await prisma.user.update({
+  user: userRouter(t),
+  notification: t.router({
+    add: t.procedure
+      .input(
+        z.object({
+          taskId: z.number(),
+          time: z.date().min(new Date()),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const task = await prisma.task.findFirst({
           where: {
-            id: ctx.session.id,
+            id: input.taskId,
+          },
+        });
+
+        if (task?.ownerId !== ctx.session.id) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        await prisma.task.update({
+          where: {
+            id: task.id,
           },
           data: {
-            notificationTokens: {
-              delete: {
-                token: input,
+            reminders: {
+              create: {
+                time: input.time,
               },
             },
           },
         });
       }),
-    getTokens: t.procedure.query(async ({ input, ctx }) => {
-      return (
-        await prisma.user.findFirst({
-          where: {
-            id: ctx.session.id,
-          },
-          select: {
-            notificationTokens: true,
-          },
-        })
-      )?.notificationTokens;
-    }),
   }),
 });
 

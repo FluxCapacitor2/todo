@@ -43,12 +43,25 @@ export const TaskModal = ({
 
   const checkboxRef = useRef<HTMLInputElement | null>(null);
 
+  const { mutateAsync: addReminder } = trpc.notification.add.useMutation();
+
   return (
     <CustomDialog
       opened={modalShown}
       close={() => setModalShown(false)}
       initialFocus={checkboxRef}
     >
+      <Button
+        variant="primary"
+        onClick={() =>
+          addReminder({
+            taskId: task.id,
+            time: new Date(new Date().getTime() + 30_000),
+          })
+        }
+      >
+        Remind Me
+      </Button>
       {fullTask?.parentTask?.name && (
         <a
           className="flex items-center gap-2 font-medium"
