@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import { useDatePicker } from "@rehookify/datepicker";
 import clsx from "clsx";
-import { MouseEvent, useState } from "react";
+import { useState } from "react";
 import { MdArrowBack, MdArrowForward, MdCancel, MdCheck } from "react-icons/md";
 
 const format = new Intl.DateTimeFormat("en-US", {
@@ -36,14 +36,6 @@ export const DatePicker = ({
 
   // calendars[0] is always present, this is an initial calendar
   const { year, month, days } = calendars[0];
-
-  const onDayClick = (evt: MouseEvent<HTMLElement>, date: Date) => {
-    // In case you need any action with evt
-    evt.stopPropagation();
-
-    // In case you need any additional action with date
-    console.log(date);
-  };
 
   // selectedDates is an array of dates
   // formatted with date.toLocaleDateString(locale, options)
@@ -83,7 +75,9 @@ export const DatePicker = ({
               }
               className={clsx(!dpDay.inCurrentMonth && "text-gray-500")}
               {...dayButton(dpDay, {
-                onClick: onDayClick,
+                onClick(evt, date) {
+                  evt?.stopPropagation();
+                },
               })}
             >
               {dpDay.day}

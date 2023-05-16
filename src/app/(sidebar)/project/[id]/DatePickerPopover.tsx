@@ -22,7 +22,6 @@ export const DatePickerPopover = ({
   ...rest
 }: DatePickerPopoverProps) => {
   const [open, setOpen] = useState(false);
-  console.log(open);
 
   const { refs, floatingStyles, context } = useFloating({
     placement: "bottom-start",
