@@ -1,5 +1,4 @@
 import { DatePickerPopover } from "@/app/(sidebar)/project/[id]/DatePickerPopover";
-import { Button } from "@/components/ui/Button";
 import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
 import { Spinner } from "@/components/ui/Spinner";
 import { trpc } from "@/util/trpc/trpc";
@@ -18,6 +17,7 @@ import {
   MdToday,
 } from "react-icons/md";
 import { useDebounce } from "use-debounce";
+import { Button } from "../ui/Button";
 import { TaskModal } from "./TaskModal";
 
 export const TaskWrapper = ({
@@ -239,31 +239,39 @@ export const TaskMenuButton = ({
   });
 
   return (
-    <Menu as={"div"}>
-      <Menu.Button
-        as={Button}
-        variant="subtle"
-        onClickCapture={() => {}}
-        className="invisible group-hover:visible"
-      >
-        <MdMoreHoriz />
-      </Menu.Button>
-
-      <MenuItems>
-        <MenuItem onClick={() => deleteAsync(task.id)}>
-          <MdDelete /> Delete Task
-        </MenuItem>
-        {task.dueDate && (
-          <MenuItem onClick={() => setTask({ ...task, dueDate: null })}>
-            <MdToday /> Remove Due Date
+    <Menu
+      as="div"
+      className="absolute right-0.5 top-0.5 hidden @[10rem]/task:block"
+    >
+      {({ open, close }) => (
+        <MenuItems
+          open={open}
+          close={close}
+          button={
+            <Menu.Button
+              as={Button}
+              variant="subtle"
+              className="invisible group-hover:visible"
+            >
+              <MdMoreHoriz />
+            </Menu.Button>
+          }
+        >
+          <MenuItem onClick={() => deleteAsync(task.id)}>
+            <MdDelete /> Delete Task
           </MenuItem>
-        )}
-        {task.startDate && (
-          <MenuItem onClick={() => setTask({ ...task, startDate: null })}>
-            <MdRemoveCircle /> Remove Start Date
-          </MenuItem>
-        )}
-      </MenuItems>
+          {task.dueDate && (
+            <MenuItem onClick={() => setTask({ ...task, dueDate: null })}>
+              <MdToday /> Remove Due Date
+            </MenuItem>
+          )}
+          {task.startDate && (
+            <MenuItem onClick={() => setTask({ ...task, startDate: null })}>
+              <MdRemoveCircle /> Remove Start Date
+            </MenuItem>
+          )}
+        </MenuItems>
+      )}
     </Menu>
   );
 };

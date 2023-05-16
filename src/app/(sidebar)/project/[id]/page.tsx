@@ -147,14 +147,22 @@ const Section = ({
           projectId={projectId}
         />
         <Menu as="div" className="relative">
-          <Menu.Button as={Button} variant="flat">
-            <MdMenu />
-          </Menu.Button>
-          <MenuItems>
-            <MenuItem onClick={() => deleteSection({ id: section.id })}>
-              <MdDelete /> Delete Section
-            </MenuItem>
-          </MenuItems>
+          {({ open, close }) => (
+            <>
+              <MenuItems
+                {...{ open, close }}
+                button={
+                  <Menu.Button as={Button} variant="flat">
+                    <MdMenu />
+                  </Menu.Button>
+                }
+              >
+                <MenuItem onClick={() => deleteSection({ id: section.id })}>
+                  <MdDelete /> Delete Section
+                </MenuItem>
+              </MenuItems>
+            </>
+          )}
         </Menu>
       </div>
       <div className="flex w-80 flex-col gap-2">
