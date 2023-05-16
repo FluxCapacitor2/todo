@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { CronJob } from "cron";
+import admin from "firebase-admin";
 import { initializeApp } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
 
@@ -10,6 +11,11 @@ const app = initializeApp({
   storageBucket: "todoapp-d3b57.appspot.com",
   messagingSenderId: "890377760325",
   appId: "1:890377760325:web:4884f966a03ca3666bfd2c",
+  credential: admin.credential.cert(
+    JSON.parse(
+      Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, "base64").toString()
+    )
+  ),
 });
 
 const messaging = getMessaging(app);
@@ -37,7 +43,6 @@ const sendNotifications = async () => {
       },
     },
   });
-  console.log(reminders);
 
   if (reminders.length > 0) {
     const messages = reminders.flatMap((notif) => {
@@ -51,16 +56,17 @@ const sendNotifications = async () => {
         token,
       }));
     });
-    console.log("Created messages", messages);
-    await messaging.sendEach(messages);
-    console.log("Sent");
+    const result = await messaging.sendEach(messages);
 
     await prisma.reminder.deleteMany({
       where: {
-        id: reminders.map((r) => r.id),
+        id: {
+          in: reminders.map((r) => r.id),
+        },
       },
     });
-    console.log("Processing finished");
+
+    console.log("Sent", JSON.stringify(result));
   }
 };
 
@@ -71,5 +77,5 @@ const job = new CronJob(
   false,
   "America/New_York"
 );
-sendNotifications();
+await sendNotifications();
 job.start();

@@ -5,7 +5,7 @@ import { MyTrpc } from "../trpc-router";
 export const userRouter = (t: MyTrpc) =>
   t.router({
     addToken: t.procedure.input(z.string()).mutation(async ({ input, ctx }) => {
-      const res = await prisma.user.update({
+      await prisma.user.update({
         where: {
           id: ctx.session.id,
         },
@@ -27,7 +27,7 @@ export const userRouter = (t: MyTrpc) =>
     removeToken: t.procedure
       .input(z.string())
       .mutation(async ({ input, ctx }) => {
-        const res = await prisma.user.update({
+        await prisma.user.update({
           where: {
             id: ctx.session.id,
           },
