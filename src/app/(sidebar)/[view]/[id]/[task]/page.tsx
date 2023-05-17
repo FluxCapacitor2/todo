@@ -5,7 +5,7 @@ import { TaskModal } from "@/components/task/TaskModal";
 import { trpc } from "@/util/trpc/trpc";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { getView } from "../page";
+import { getView } from "../_views";
 
 export default function Page({
   params: { view, id, task: taskId },
