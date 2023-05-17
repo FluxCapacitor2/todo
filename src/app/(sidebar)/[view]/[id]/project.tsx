@@ -16,11 +16,7 @@ import { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { MdCalendarToday, MdDelete, MdEdit, MdMenu } from "react-icons/md";
 
-export default function Page({
-  params: { id: projectId },
-}: {
-  params: { id: string };
-}) {
+export const ProjectView = ({ id: projectId }: { id: string }) => {
   const { data } = trpc.projects.get.useQuery(projectId);
 
   if (!data) {
@@ -84,7 +80,7 @@ export default function Page({
       </div>
     </>
   );
-}
+};
 
 const Section = ({
   section,

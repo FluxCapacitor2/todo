@@ -36,6 +36,7 @@ export const appRouter = t.router({
       .input(
         z.object({
           taskId: z.number(),
+          projectId: z.string(),
           time: z.date().min(new Date()),
         })
       )
@@ -72,6 +73,7 @@ export const appRouter = t.router({
             reminders: {
               create: {
                 time: input.time,
+                projectId: input.projectId,
               },
             },
           },

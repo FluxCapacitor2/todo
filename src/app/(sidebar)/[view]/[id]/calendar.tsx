@@ -9,11 +9,7 @@ import clsx from "clsx";
 import { Fragment, useState } from "react";
 import { MdArrowBack, MdArrowForward, MdCalendarToday } from "react-icons/md";
 
-export default function Page({
-  params: { id: projectId },
-}: {
-  params: { id: string };
-}) {
+export const CalendarView = ({ id: projectId }: { id: string }) => {
   const [selectedDates, onDatesChange] = useState<Date[]>([new Date()]);
   const {
     data: { weekDays, calendars },
@@ -67,7 +63,7 @@ export default function Page({
       </ul>
     </section>
   );
-}
+};
 
 const DailyTaskList = ({
   project,

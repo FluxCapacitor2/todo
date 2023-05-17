@@ -1,5 +1,5 @@
-import { DatePickerPopover } from "@/app/(sidebar)/project/[id]/DatePickerPopover";
 import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
+import { DatePickerPopover } from "@/components/ui/DatePickerPopover";
 import { Spinner } from "@/components/ui/Spinner";
 import { trpc } from "@/util/trpc/trpc";
 import { Menu } from "@headlessui/react";
@@ -7,10 +7,12 @@ import { Task } from "@prisma/client";
 import clsx from "clsx";
 import { format } from "date-fns";
 import { produce } from "immer";
+import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import {
   MdCalendarToday,
+  MdContentCopy,
   MdDelete,
   MdMoreHoriz,
   MdRemoveCircle,
@@ -153,6 +155,7 @@ export const TaskCard = ({
               task={task}
               setTask={setTask}
               projectId={projectId}
+              hover={true}
             />
           </div>
           <TaskModal
@@ -175,10 +178,12 @@ export const TaskMenuButton = ({
   task,
   setTask,
   projectId,
+  hover,
 }: {
   task: Task;
   setTask: (task: Task) => void;
   projectId: string;
+  hover: boolean;
 }) => {
   const utils = trpc.useContext();
   const { mutateAsync: deleteAsync } = trpc.tasks.delete.useMutation({
@@ -238,10 +243,19 @@ export const TaskMenuButton = ({
     },
   });
 
+  const pathname = usePathname();
+  const copy = () => {
+    navigator.clipboard.writeText(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/${pathname}/${task.id}`
+    );
+  };
+
   return (
     <Menu
       as="div"
-      className="absolute right-0.5 top-0.5 hidden @[10rem]/task:block"
+      className={
+        hover ? "absolute right-0.5 top-0.5 hidden @[10rem]/task:block" : ""
+      }
     >
       {({ open, close }) => (
         <MenuItems
@@ -251,7 +265,7 @@ export const TaskMenuButton = ({
             <Menu.Button
               as={Button}
               variant="subtle"
-              className="invisible group-hover:visible"
+              className={hover ? "invisible group-hover:visible" : ""}
             >
               <MdMoreHoriz />
             </Menu.Button>
@@ -270,6 +284,9 @@ export const TaskMenuButton = ({
               <MdRemoveCircle /> Remove Start Date
             </MenuItem>
           )}
+          <MenuItem onClick={copy}>
+            <MdContentCopy /> Copy Link
+          </MenuItem>
         </MenuItems>
       )}
     </Menu>

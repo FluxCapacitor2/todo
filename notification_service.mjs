@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { CronJob } from "cron";
+import { formatDistanceToNow } from "date-fns";
 import admin from "firebase-admin";
 import { initializeApp } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
@@ -50,8 +51,13 @@ const sendNotifications = async () => {
       return tokens.map((token) => ({
         notification: {
           title: notif.Task.name,
-          body: "🔔 You set a reminder for this task.",
-          // click_action: process.env.NEXT_PUBLIC_BASE_URL + "/projects",
+          body: notif.Task.dueDate
+            ? `⏰ Due ${formatDistanceToNow(notif.Task.dueDate, {
+                addSuffix: true,
+              })}.`
+            : "🔔 You set a reminder for this task.",
+          icon: "https://todo-app-seven-lime.vercel.app/icon.png",
+          click_action: `https://todo-app-seven-lime.vercel.app/project/${notif.projectId}/${notif.Task.id}`,
         },
         token,
       }));

@@ -2,10 +2,10 @@ import { ViewSelector } from "@/components/project/ViewSelector";
 import { ReactNode } from "react";
 
 export default function Layout({
-  params: { id },
+  params: { view, id },
   children,
 }: {
-  params: { id: string };
+  params: { view: string; id: string };
   children: ReactNode;
 }) {
   return (

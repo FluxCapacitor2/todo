@@ -114,10 +114,11 @@ model Task {
 }
 
 model Reminder {
-  id     Int      @id @default(autoincrement())
-  Task   Task     @relation(fields: [taskId], references: [id])
-  taskId Int
-  time   DateTime
+  id        Int      @id @default(autoincrement())
+  Task      Task     @relation(fields: [taskId], references: [id])
+  taskId    Int
+  projectId String
+  time      DateTime
 
   @@index([taskId])
 }

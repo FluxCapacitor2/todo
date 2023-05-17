@@ -3,11 +3,11 @@
 import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
 import Link from "next/link";
-import { useSelectedLayoutSegment } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 
 export const ViewSelector = ({ id }: { id: string }) => {
-  const pathname = useSelectedLayoutSegment();
+  const pathname = usePathname() ?? "";
   const { data: project, isLoading, isError } = trpc.projects.get.useQuery(id);
   return (
     <>
@@ -18,15 +18,18 @@ export const ViewSelector = ({ id }: { id: string }) => {
       )}
 
       <div className="flex">
-        <PillButton href={`/project/${id}`} active={pathname === null}>
+        <PillButton
+          href={`/project/${id}`}
+          active={pathname.startsWith("/project")}
+        >
           Project
         </PillButton>
-        <PillButton href={`/project/${id}/list`} active={pathname === "list"}>
+        <PillButton href={`/list/${id}`} active={pathname.startsWith("/list")}>
           List
         </PillButton>
         <PillButton
-          href={`/project/${id}/calendar`}
-          active={pathname === "calendar"}
+          href={`/calendar/${id}`}
+          active={pathname.startsWith("/calendar")}
         >
           Calendar
         </PillButton>

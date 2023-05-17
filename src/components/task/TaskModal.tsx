@@ -1,6 +1,6 @@
-import { DatePickerPopover } from "@/app/(sidebar)/project/[id]/DatePickerPopover";
 import { Button } from "@/components/ui/Button";
 import { CustomDialog, DialogTitle } from "@/components/ui/CustomDialog";
+import { DatePickerPopover } from "@/components/ui/DatePickerPopover";
 import { RemirrorEditor } from "@/components/ui/RemirrorEditor";
 import { Spinner } from "@/components/ui/Spinner";
 import { trpc } from "@/util/trpc/trpc";
@@ -25,7 +25,7 @@ import {
   MdStart,
 } from "react-icons/md";
 import { AddSubtask } from "./AddTask";
-import { TaskCard } from "./TaskCard";
+import { TaskCard, TaskMenuButton } from "./TaskCard";
 
 export const TaskModal = ({
   modalShown,
@@ -46,8 +46,6 @@ export const TaskModal = ({
     trpc.tasks.get.useQuery({ id: task.id }, { enabled: modalShown });
 
   const checkboxRef = useRef<HTMLInputElement | null>(null);
-
-  const utils = trpc.useContext();
 
   return (
     <CustomDialog
@@ -213,7 +211,13 @@ export const TaskModal = ({
           </div>
         )}
 
-        <div className="flex justify-end">
+        <div className="flex justify-between">
+          <TaskMenuButton
+            task={task}
+            setTask={setTask}
+            projectId={projectId}
+            hover={false}
+          />
           <Button variant="flat" onClick={() => setModalShown(false)}>
             Close
           </Button>
@@ -264,7 +268,7 @@ const Reminders = ({
       {reminders?.map((reminder) => (
         <div className="flex items-center gap-2" key={reminder.id}>
           <MdNotifications />
-          {format(reminder.time, "MMM do, h:MM aaa")} (
+          {format(reminder.time, "MMM do, h:mm aaa")} (
           {formatDistanceToNow(reminder.time, { addSuffix: true })})
           <button onClick={() => removeReminder(reminder.id)}>
             <MdClose />

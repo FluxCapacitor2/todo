@@ -5,11 +5,7 @@ import { TaskCard } from "@/components/task/TaskCard";
 import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
 
-export default function Page({
-  params: { id: projectId },
-}: {
-  params: { id: string };
-}) {
+export const ListView = ({ id: projectId }: { id: string }) => {
   const { data } = trpc.projects.get.useQuery(projectId);
 
   if (!data) {
@@ -62,4 +58,4 @@ export default function Page({
       </ul>
     </section>
   );
-}
+};
