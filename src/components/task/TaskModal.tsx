@@ -136,7 +136,11 @@ export const TaskModal = ({
             )}
           </DatePickerPopover>
         </div>
-        <Reminders taskId={task.id} dueDate={task.dueDate} />
+        <Reminders
+          taskId={task.id}
+          dueDate={task.dueDate}
+          projectId={projectId}
+        />
 
         {/* <div className="flex items-center gap-2">
           <MdPerson className="h-5 w-5 self-center" />
@@ -235,9 +239,11 @@ export const TaskModal = ({
 
 const Reminders = ({
   taskId,
+  projectId,
   dueDate,
 }: {
   taskId: number;
+  projectId: string;
   dueDate: Date | null;
 }) => {
   const utils = trpc.useContext();
@@ -253,7 +259,7 @@ const Reminders = ({
     if (time.getTime() < new Date().getTime()) {
       toast.error("You must set the reminder for a time in the future!");
     } else {
-      _addReminder({ taskId, time });
+      _addReminder({ taskId, projectId, time });
     }
   };
 
