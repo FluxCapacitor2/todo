@@ -312,19 +312,19 @@ const Reminders = ({
             >
               1 Day Before
             </p>
-            <DatePickerPopover
-              minDate={new Date()}
-              setDate={(date) => {
-                addReminder({
-                  time: date,
-                  taskId,
-                });
-              }}
-            >
-              <span className="font-medium underline">Custom</span>
-            </DatePickerPopover>
           </>
         )}
+        <DatePickerPopover
+          minDate={new Date()}
+          setDate={(date) => {
+            addReminder({
+              time: date,
+              taskId,
+            });
+          }}
+        >
+          <span className="font-medium underline">Custom Time</span>
+        </DatePickerPopover>
       </div>
     </div>
   );
