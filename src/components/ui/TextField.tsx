@@ -19,7 +19,7 @@ export const TextField = forwardRef(
           flat
             ? "bg-transparent"
             : "border border-b-4 border-gray-300 focus:border-primary-500 dark:border-gray-700 dark:bg-gray-900 dark:focus:border-primary-700",
-          "h-10 min-w-[12rem] rounded-md p-3 outline-none"
+          "h-10 rounded-md p-3 outline-none"
         )}
         {...rest}
       />

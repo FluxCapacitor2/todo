@@ -71,7 +71,7 @@ const sendNotifications = async () => {
 };
 
 const job = new CronJob(
-  "* * * * *",
+  "*/5 * * * *",
   sendNotifications,
   null,
   false,

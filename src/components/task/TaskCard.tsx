@@ -128,7 +128,7 @@ export const TaskCard = ({
                   >
                     <p className="flex items-center gap-2 text-sm">
                       <MdCalendarToday />
-                      {format(task.dueDate, "MMM do, hhaaa")}
+                      {format(task.dueDate, "MMM do, h:mm aaa")}
                     </p>
                   </DatePickerPopover>
                 )}

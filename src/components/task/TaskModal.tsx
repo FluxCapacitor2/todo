@@ -13,10 +13,14 @@ import {
   isBefore,
 } from "date-fns";
 import { useRef } from "react";
+import toast from "react-hot-toast";
 import {
   MdArrowBack,
+  MdClose,
   MdDateRange,
   MdError,
+  MdNotificationAdd,
+  MdNotifications,
   MdRunCircle,
   MdStart,
 } from "react-icons/md";
@@ -43,7 +47,7 @@ export const TaskModal = ({
 
   const checkboxRef = useRef<HTMLInputElement | null>(null);
 
-  const { mutateAsync: addReminder } = trpc.notification.add.useMutation();
+  const utils = trpc.useContext();
 
   return (
     <CustomDialog
@@ -51,17 +55,6 @@ export const TaskModal = ({
       close={() => setModalShown(false)}
       initialFocus={checkboxRef}
     >
-      <Button
-        variant="primary"
-        onClick={() =>
-          addReminder({
-            taskId: task.id,
-            time: new Date(new Date().getTime() + 30_000),
-          })
-        }
-      >
-        Remind Me
-      </Button>
       {fullTask?.parentTask?.name && (
         <a
           className="flex items-center gap-2 font-medium"
@@ -145,6 +138,7 @@ export const TaskModal = ({
             )}
           </DatePickerPopover>
         </div>
+        <Reminders taskId={task.id} dueDate={task.dueDate} />
 
         {/* <div className="flex items-center gap-2">
           <MdPerson className="h-5 w-5 self-center" />
@@ -232,5 +226,106 @@ export const TaskModal = ({
         </div>
       )}
     </CustomDialog>
+  );
+};
+
+const Reminders = ({
+  taskId,
+  dueDate,
+}: {
+  taskId: number;
+  dueDate: Date | null;
+}) => {
+  const utils = trpc.useContext();
+  const { data: reminders } = trpc.notification.list.useQuery(taskId);
+
+  const { mutateAsync: _addReminder } = trpc.notification.add.useMutation({
+    onSettled: () => {
+      utils.notification.list.invalidate(taskId);
+    },
+  });
+
+  const addReminder = ({ taskId, time }: { taskId: number; time: Date }) => {
+    if (time.getTime() < new Date().getTime()) {
+      toast.error("You must set the reminder for a time in the future!");
+    } else {
+      _addReminder({ taskId, time });
+    }
+  };
+
+  const { mutateAsync: removeReminder } = trpc.notification.remove.useMutation({
+    onSettled: () => {
+      utils.notification.list.invalidate(taskId);
+    },
+  });
+
+  return (
+    <div>
+      {reminders?.map((reminder) => (
+        <div className="flex items-center gap-2" key={reminder.id}>
+          <MdNotifications />
+          {format(reminder.time, "MMM do, h:MM aaa")} (
+          {formatDistanceToNow(reminder.time, { addSuffix: true })})
+          <button onClick={() => removeReminder(reminder.id)}>
+            <MdClose />
+          </button>
+        </div>
+      ))}
+
+      <div className="flex items-center gap-2">
+        <MdNotificationAdd />
+        Add Reminder:
+      </div>
+      <div className="ml-6 flex flex-wrap gap-4">
+        {dueDate && (
+          <>
+            <p
+              className="cursor-pointer font-medium underline"
+              onClick={() =>
+                addReminder({
+                  taskId,
+                  time: new Date(dueDate.getTime() - 1000 * 60 * 30),
+                })
+              }
+            >
+              30 Minutes Before
+            </p>
+            <p
+              className="cursor-pointer font-medium underline"
+              onClick={() =>
+                addReminder({
+                  taskId,
+                  time: new Date(dueDate.getTime() - 1000 * 60 * 60),
+                })
+              }
+            >
+              1 Hour Before
+            </p>
+            <p
+              className="cursor-pointer font-medium underline"
+              onClick={() =>
+                addReminder({
+                  taskId,
+                  time: new Date(dueDate.getTime() - 1000 * 60 * 60 * 24),
+                })
+              }
+            >
+              1 Day Before
+            </p>
+            <DatePickerPopover
+              minDate={new Date()}
+              setDate={(date) => {
+                addReminder({
+                  time: date,
+                  taskId,
+                });
+              }}
+            >
+              <span className="font-medium underline">Custom</span>
+            </DatePickerPopover>
+          </>
+        )}
+      </div>
+    </div>
   );
 };

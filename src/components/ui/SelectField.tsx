@@ -15,7 +15,7 @@ export const SelectField = forwardRef(
         ref={ref}
         className={clsx(
           className,
-          "h-10 min-w-[12rem] rounded-md border border-b-4 border-gray-300 px-3 outline-none focus:border-primary-500 dark:border-gray-700 dark:bg-gray-900 dark:focus:border-primary-700"
+          "h-10 rounded-md border border-b-4 border-gray-300 px-3 outline-none focus:border-primary-500 dark:border-gray-700 dark:bg-gray-900 dark:focus:border-primary-700"
         )}
         {...rest}
       >

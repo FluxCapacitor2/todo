@@ -2,6 +2,7 @@ import { prisma } from "@/util/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { MyTrpc } from "../trpc-router";
+import { deleteTask } from "./tasks";
 
 export const sectionsRouter = (t: MyTrpc) =>
   t.router({
@@ -35,24 +36,7 @@ export const sectionsRouter = (t: MyTrpc) =>
     delete: t.procedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        const section = await prisma.section.findFirst({
-          where: {
-            id: input.id,
-            project: {
-              ownerId: ctx.session.id,
-            },
-          },
-        });
-
-        if (!section) {
-          throw new TRPCError({ code: "NOT_FOUND" });
-        }
-
-        await prisma.section.delete({
-          where: {
-            id: input.id,
-          },
-        });
+        await deleteSection(input.id, ctx.session.id);
       }),
     update: t.procedure
       .input(z.object({ id: z.number(), name: z.optional(z.string()) }))
@@ -80,3 +64,41 @@ export const sectionsRouter = (t: MyTrpc) =>
         });
       }),
   });
+
+/**
+ * Deletes a section, removing any tasks/sub-tasks in the process.
+ */
+export async function deleteSection(id: number, ownerId: string) {
+  const section = await prisma.section.findFirst({
+    where: {
+      id,
+      project: {
+        ownerId,
+      },
+    },
+    include: {
+      tasks: {
+        include: {
+          reminders: true,
+          subTasks: true,
+        },
+      },
+    },
+  });
+
+  for (const task of section?.tasks ?? []) {
+    if (task.subTasks.length > 0 || task.reminders.length > 0) {
+      await deleteTask(task.id, ownerId);
+    }
+  }
+
+  if (!section) {
+    throw new TRPCError({ code: "NOT_FOUND" });
+  }
+
+  await prisma.section.delete({
+    where: {
+      id,
+    },
+  });
+}

@@ -45,22 +45,7 @@ export const tasksRouter = (t: MyTrpc) =>
         });
       }),
     delete: t.procedure.input(z.number()).mutation(async ({ ctx, input }) => {
-      const task = await prisma.task.findFirst({
-        where: {
-          id: input,
-          ownerId: ctx.session.id,
-        },
-      });
-      if (!task) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
-      return await prisma.task.delete({
-        where: {
-          id: input,
-        },
-      });
+      await deleteTask(input, ctx.session.id);
     }),
     update: t.procedure
       .input(
@@ -165,3 +150,35 @@ export const tasksRouter = (t: MyTrpc) =>
         return task;
       }),
   });
+
+/**
+ * Deletes a task, removing any reminders in the process.
+ */
+export async function deleteTask(id: number, ownerId: string) {
+  await prisma.$transaction(async (tx) => {
+    const task = await tx.task.findFirst({
+      where: {
+        id,
+        ownerId,
+      },
+    });
+
+    if (!task) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+      });
+    }
+
+    await tx.reminder.deleteMany({
+      where: {
+        taskId: id,
+      },
+    });
+
+    return await tx.task.delete({
+      where: {
+        id,
+      },
+    });
+  });
+}
