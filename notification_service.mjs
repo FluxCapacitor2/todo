@@ -56,23 +56,69 @@ const sendNotifications = async () => {
                 addSuffix: true,
               })}.`
             : "🔔 You set a reminder for this task.",
-          icon: "https://todo-app-seven-lime.vercel.app/icon.png",
-          click_action: `https://todo-app-seven-lime.vercel.app/project/${notif.projectId}/${notif.Task.id}`,
+        },
+        webpush: {
+          notification: {
+            icon: "https://todo-app-seven-lime.vercel.app/icon.png",
+            click_action: `https://todo-app-seven-lime.vercel.app/project/${notif.projectId}/${notif.Task.id}`,
+          },
+        },
+        data: {
+          id: notif.id.toString(),
         },
         token,
       }));
     });
-    const result = await messaging.sendEach(messages);
+    const results = await messaging.sendEach(messages);
+
+    let tokensToRemove = [];
+    for (const i in results.responses) {
+      const response = results.responses[i];
+      console.log(i, response);
+      if (response.error) {
+        if (
+          response.error.code === "messaging/registration-token-not-registered"
+        ) {
+          // Remove unregistered notification tokens
+          console.log("Removing unregistered token", messages[i].token);
+          tokensToRemove.push(messages[i].token);
+        } else {
+          console.warn(
+            "Unknown error code: ",
+            response.error,
+            "message ID: ",
+            response.messageId
+          );
+        }
+      }
+    }
+
+    if (tokensToRemove.length > 0) {
+      console.log("Removing inactive notification tokens");
+      await prisma.notificationToken.deleteMany({
+        where: {
+          token: {
+            in: tokensToRemove,
+          },
+        },
+      });
+    }
+
+    const successes = results.responses
+      .map((response, i) => ({
+        response,
+        i,
+      }))
+      .filter(({ response, i }) => response.success)
+      .map(({ response, i }) => parseInt(messages[i].data.id));
 
     await prisma.reminder.deleteMany({
       where: {
         id: {
-          in: reminders.map((r) => r.id),
+          in: successes,
         },
       },
     });
-
-    console.log("Sent", JSON.stringify(result));
   }
 };
 
