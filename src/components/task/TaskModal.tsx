@@ -250,6 +250,23 @@ const Reminders = ({
   const { data: reminders } = trpc.notification.list.useQuery(taskId);
 
   const { mutateAsync: _addReminder } = trpc.notification.add.useMutation({
+    onMutate: ({ projectId, taskId, time }) => {
+      utils.notification.list.cancel(taskId);
+      const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
+      utils.notification.list.setData(taskId, (list) => {
+        if (!list) return undefined;
+        return [...list, { id: newId, projectId, taskId, time }];
+      });
+      return { newId };
+    },
+    onError: (error, { taskId }, context) => {
+      toast.error("There was an error adding a reminder!");
+      if (!context) return;
+      utils.notification.list.setData(taskId, (list) => {
+        if (!list) return undefined;
+        return list.filter((item) => item.id !== context?.newId);
+      });
+    },
     onSettled: () => {
       utils.notification.list.invalidate(taskId);
     },
@@ -264,6 +281,27 @@ const Reminders = ({
   };
 
   const { mutateAsync: removeReminder } = trpc.notification.remove.useMutation({
+    onMutate: (id) => {
+      const reminder = utils.notification.list
+        .getData()
+        ?.find((it) => it.id === id);
+
+      utils.notification.list.cancel(taskId);
+      utils.notification.list.setData(taskId, (list) => {
+        return list?.filter((item) => item.id !== id);
+      });
+
+      return reminder;
+    },
+    onError: (error, id, context) => {
+      toast.error("There was an error removing that reminder!");
+      if (!context) return;
+
+      utils.notification.list.setData(taskId, (list) => {
+        if (!list) return undefined;
+        return [...list, context];
+      });
+    },
     onSettled: () => {
       utils.notification.list.invalidate(taskId);
     },
