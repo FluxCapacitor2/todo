@@ -88,10 +88,10 @@ export const TaskCard = ({
       {({ task, setTask, isSaving }) => (
         <div
           className={clsx(
-            "group relative flex cursor-pointer justify-between gap-2 p-2 @container/task",
+            "group relative flex cursor-pointer justify-between gap-2 @container/task",
             task.id < 0 && "pointer-events-none opacity-70",
             !isListItem &&
-              "max-w-[20rem] rounded-md border border-gray-600 hover:bg-white/30"
+              "max-w-[20rem] rounded-md border border-gray-600 p-2 hover:bg-white/30"
           )}
         >
           {showCheckbox && (
@@ -246,7 +246,9 @@ export const TaskMenuButton = ({
   const pathname = usePathname();
   const copy = () => {
     navigator.clipboard.writeText(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/${pathname}/${task.id}`
+      pathname?.includes(projectId)
+        ? `${process.env.NEXT_PUBLIC_BASE_URL}/${pathname}/${task.id}`
+        : `${process.env.NEXT_PUBLIC_BASE_URL}/project/${projectId}/${task.id}`
     );
   };
 

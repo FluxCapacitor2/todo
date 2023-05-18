@@ -11,7 +11,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { BsFillGridFill } from "react-icons/bs";
-import { MdClose, MdDelete, MdMenu } from "react-icons/md";
+import {
+  MdCalendarMonth,
+  MdChecklist,
+  MdClose,
+  MdDelete,
+  MdMenu,
+} from "react-icons/md";
 
 const activeClass = "bg-gray-300 dark:bg-gray-600 transition-colors h-16";
 const inactiveClass =
@@ -57,6 +63,7 @@ export const Sidebar = () => {
             <p className="text-sm font-bold">{session?.data?.user?.name}</p>
           </div>
         </Link>
+        <Divider />
         <Link href="/projects">
           <div
             className={clsx(
@@ -68,6 +75,29 @@ export const Sidebar = () => {
             <p>Projects</p>
           </div>
         </Link>
+        <Link href="/tasks">
+          <div
+            className={clsx(
+              "flex items-center gap-2 p-4 font-medium",
+              pathname === "/tasks" ? activeClass : inactiveClass
+            )}
+          >
+            <MdChecklist />
+            <p>Tasks</p>
+          </div>
+        </Link>
+        <Link href="/calendar">
+          <div
+            className={clsx(
+              "flex items-center gap-2 p-4 font-medium",
+              pathname === "/calendar" ? activeClass : inactiveClass
+            )}
+          >
+            <MdCalendarMonth />
+            <p>Calendar</p>
+          </div>
+        </Link>
+        <Divider />
         {isLoading ? (
           <div className="flex h-24 w-full items-center justify-center">
             <Spinner />
@@ -110,6 +140,12 @@ export const Sidebar = () => {
     </>
   );
 };
+
+const Divider = () => (
+  <div className="px-2">
+    <hr className="h-1 w-full border-b border-t-0 border-gray-400 dark:border-gray-600" />
+  </div>
+);
 
 const ProjectItem = ({ name, id }: { name: string; id: string }) => {
   const { mutateAsync, isLoading } = trpc.projects.delete.useMutation();

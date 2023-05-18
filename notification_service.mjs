@@ -29,7 +29,7 @@ const sendNotifications = async () => {
   const reminders = await prisma.reminder.findMany({
     where: {
       time: {
-        lte: new Date(),
+        lte: new Date(new Date().getTime() + 60_000),
       },
     },
     include: {
@@ -123,7 +123,7 @@ const sendNotifications = async () => {
 };
 
 const job = new CronJob(
-  "*/5 * * * *",
+  "*/2 * * * *",
   sendNotifications,
   null,
   false,

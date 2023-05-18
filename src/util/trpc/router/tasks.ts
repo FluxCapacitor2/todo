@@ -149,17 +149,54 @@ export const tasksRouter = (t: MyTrpc) =>
         }
         return task;
       }),
+    /**
+     * Get a list of every top-level task that the user currently has. Does not include sub-tasks.
+     */
+    listTopLevel: t.procedure.query(async ({ ctx }) => {
+      return await prisma.task.findMany({
+        where: {
+          AND: {
+            ownerId: ctx.session.id,
+            parentTaskId: null,
+          },
+        },
+        include: {
+          section: {
+            select: {
+              projectId: true,
+            },
+          },
+        },
+      });
+    }),
   });
 
 /**
- * Deletes a task, removing any reminders in the process.
+ * Deletes a task, removing any reminders and sub-tasks in the process.
  */
-export async function deleteTask(id: number, ownerId: string) {
+export async function deleteTask(
+  id: number,
+  ownerId: string,
+  depth: number = 0
+) {
+  if (depth > 8) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Nested tasks are too deep to remove!",
+    });
+  }
   await prisma.$transaction(async (tx) => {
     const task = await tx.task.findFirst({
       where: {
         id,
         ownerId,
+      },
+      include: {
+        subTasks: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
 
@@ -174,6 +211,10 @@ export async function deleteTask(id: number, ownerId: string) {
         taskId: id,
       },
     });
+
+    await Promise.all(
+      task.subTasks.map((subTask) => deleteTask(subTask.id, ownerId, depth + 1))
+    );
 
     return await tx.task.delete({
       where: {

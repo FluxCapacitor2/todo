@@ -10,32 +10,7 @@ export const ListView = ({ id: projectId }: { id: string }) => {
 
   if (!data) {
     // Loading UI (skeleton)
-    return (
-      <section className="m-4 mx-auto max-w-xl">
-        <ul className="flex flex-col gap-2">
-          {new Array(5).fill(null).map((_, i) => (
-            <div key={i} className="flex items-start gap-2">
-              <input
-                type="checkbox"
-                disabled
-                className="mt-1"
-                checked={i < 3}
-              />
-              <div className="flex flex-col gap-2">
-                <div
-                  className="my-1 h-8 w-64 animate-pulse rounded-md bg-gray-500/50"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                />
-                <div
-                  className="my-1 h-4 w-48 animate-pulse rounded-md bg-gray-500/50"
-                  style={{ animationDelay: `${i * 150}ms` }}
-                />
-              </div>
-            </div>
-          ))}
-        </ul>
-      </section>
-    );
+    return <Skeleton />;
   }
 
   const tasks = sortByDueDate(
@@ -44,7 +19,7 @@ export const ListView = ({ id: projectId }: { id: string }) => {
 
   return (
     <section className="m-4 mx-auto max-w-xl">
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-4">
         {tasks.map((task) => (
           <TaskCard
             task={task}
@@ -59,3 +34,25 @@ export const ListView = ({ id: projectId }: { id: string }) => {
     </section>
   );
 };
+
+export const Skeleton = () => (
+  <section className="m-4 mx-auto max-w-xl">
+    <ul className="flex flex-col gap-2">
+      {new Array(5).fill(null).map((_, i) => (
+        <div key={i} className="flex items-start gap-2">
+          <input type="checkbox" disabled className="mt-1" checked={i < 3} />
+          <div className="flex flex-col gap-2">
+            <div
+              className="my-1 h-8 w-64 animate-pulse rounded-md bg-gray-500/50"
+              style={{ animationDelay: `${i * 100}ms` }}
+            />
+            <div
+              className="my-1 h-4 w-48 animate-pulse rounded-md bg-gray-500/50"
+              style={{ animationDelay: `${i * 150}ms` }}
+            />
+          </div>
+        </div>
+      ))}
+    </ul>
+  </section>
+);

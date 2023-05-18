@@ -3,13 +3,29 @@
 import { TaskCard } from "@/components/task/TaskCard";
 import { Button } from "@/components/ui/Button";
 import { trpc } from "@/util/trpc/trpc";
-import { Project, Section, Task } from "@prisma/client";
+import { Task } from "@prisma/client";
 import { CalendarDay, useDatePicker } from "@rehookify/datepicker";
 import clsx from "clsx";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { MdArrowBack, MdArrowForward, MdCalendarToday } from "react-icons/md";
 
 export const CalendarView = ({ id: projectId }: { id: string }) => {
+  const { data } = trpc.projects.get.useQuery(projectId);
+
+  const mapped = data
+    ? data.sections.flatMap((section) =>
+        section.tasks.map((task) => ({ ...task, projectId }))
+      )
+    : null;
+
+  return <Calendar tasks={mapped} />;
+};
+
+export const Calendar = ({
+  tasks,
+}: {
+  tasks: (Task & { projectId: string })[] | null | undefined;
+}) => {
   const [selectedDates, onDatesChange] = useState<Date[]>([new Date()]);
   const {
     data: { weekDays, calendars },
@@ -20,15 +36,12 @@ export const CalendarView = ({ id: projectId }: { id: string }) => {
     onDatesChange,
   });
 
-  const { data } = trpc.projects.get.useQuery(projectId);
-
   const { year, month, days } = calendars[0];
-
   return (
     <section className="mx-auto md:m-4 md:px-4">
       <header>
         <div className="mb-6 flex flex-col items-center gap-4">
-          <p className="text-3xl font-bold lg:-mt-12">
+          <p className="text-3xl font-bold">
             {month} {year}
           </p>
           <div className="flex gap-2">
@@ -57,7 +70,7 @@ export const CalendarView = ({ id: projectId }: { id: string }) => {
             key={`${year}-${month}-${dpDay.day}-${dpDay.inCurrentMonth}`}
             className="overflow-auto"
           >
-            <DailyTaskList day={dpDay} project={data} />
+            <DailyTaskList day={dpDay} tasks={tasks} />
           </li>
         ))}
       </ul>
@@ -66,13 +79,10 @@ export const CalendarView = ({ id: projectId }: { id: string }) => {
 };
 
 const DailyTaskList = ({
-  project,
+  tasks,
   day,
 }: {
-  project:
-    | (Project & { sections: (Section & { tasks: Task[] })[] })
-    | null
-    | undefined;
+  tasks: (Task & { projectId: string })[] | null | undefined;
   day: CalendarDay;
 }) => {
   return (
@@ -92,30 +102,24 @@ const DailyTaskList = ({
       >
         {day.day}
       </h3>
-      {project ? (
+      {tasks ? (
         <>
-          {project.sections.map((section) => (
-            <Fragment key={section.id}>
-              {section.tasks
-                .filter(
-                  (task) => task.dueDate && sameDay(task.dueDate, day.$date)
-                )
-                .map((task) => (
-                  <div
-                    key={task.id}
-                    className="mb-1 w-full rounded-md bg-primary-500/10"
-                  >
-                    <TaskCard
-                      task={task}
-                      projectId={project.id}
-                      isListItem
-                      details={false}
-                      showCheckbox={false}
-                    />
-                  </div>
-                ))}
-            </Fragment>
-          ))}
+          {tasks
+            .filter((task) => task.dueDate && sameDay(task.dueDate, day.$date))
+            .map((task) => (
+              <div
+                key={task.id}
+                className="my-0.5 w-full rounded-md bg-primary-500/10 p-0.5"
+              >
+                <TaskCard
+                  task={task}
+                  projectId={task.projectId}
+                  isListItem
+                  details={false}
+                  showCheckbox={false}
+                />
+              </div>
+            ))}
         </>
       ) : (
         // Fallback/skeleton UI for when data is still loading
