@@ -4,7 +4,7 @@ import { TaskCard } from "@/components/task/TaskCard";
 import { Button } from "@/components/ui/Button";
 import { trpc } from "@/util/trpc/trpc";
 import { Task } from "@prisma/client";
-import { CalendarDay, useDatePicker } from "@rehookify/datepicker";
+import { DPDay, useDatePicker } from "@rehookify/datepicker";
 import clsx from "clsx";
 import { useState } from "react";
 import { MdArrowBack, MdArrowForward, MdCalendarToday } from "react-icons/md";
@@ -83,7 +83,7 @@ const DailyTaskList = ({
   day,
 }: {
   tasks: (Task & { projectId: string })[] | null | undefined;
-  day: CalendarDay;
+  day: DPDay;
 }) => {
   return (
     <div
