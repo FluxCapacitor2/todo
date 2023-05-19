@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply dark:bg-black dark:text-white;
+  @apply accent-primary-500 dark:bg-black dark:text-white;
 }
 
 body.offline > div:not(:first-child) {

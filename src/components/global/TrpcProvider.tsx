@@ -31,7 +31,7 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
               "UNAUTHORIZED"
             ) {
               router.push("/signin");
-              toast.error("You are not signed in!");
+              // toast.error("You are not signed in!");
             } else if (query.state.data !== undefined) {
               toast.error("There was an error updating your tasks.");
             }

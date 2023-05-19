@@ -310,11 +310,22 @@ const Reminders = ({
   return (
     <div>
       {reminders?.map((reminder) => (
-        <div className="flex items-center gap-2" key={reminder.id}>
+        <div
+          className={clsx(
+            "flex items-center gap-2",
+            reminder.id < 0 && "pointer-events-none opacity-70"
+          )}
+          key={reminder.id}
+        >
           <MdNotifications />
-          {format(reminder.time, "MMM do, h:mm aaa")} (
-          {formatDistanceToNow(reminder.time, { addSuffix: true })})
-          <button onClick={() => removeReminder(reminder.id)}>
+          {format(reminder.time, "MMM do, h:mm aaa")}{" "}
+          <span className="text-gray-600 dark:text-gray-400">
+            ({formatDistanceToNow(reminder.time, { addSuffix: true })})
+          </span>
+          <button
+            onClick={() => removeReminder(reminder.id)}
+            disabled={reminder.id < 0}
+          >
             <MdClose />
           </button>
         </div>

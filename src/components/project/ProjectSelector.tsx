@@ -22,7 +22,7 @@ export const ProjectSelector = ({
       {included ? (
         projects?.map((project, i) => (
           <div
-            className="mr-4 inline-flex items-center gap-3 rounded-full bg-gray-100 px-3 py-1"
+            className="mr-4 inline-flex items-center gap-3 rounded-full bg-gray-100 px-3 py-1 font-medium dark:bg-gray-800"
             key={project.id}
           >
             <input
@@ -43,6 +43,7 @@ export const ProjectSelector = ({
       ) : (
         <Spinner />
       )}
+      <hr className="my-4 border-b border-t-0 border-gray-500" />
       {children(included)}
     </div>
   );

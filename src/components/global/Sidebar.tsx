@@ -40,7 +40,7 @@ export const Sidebar = () => {
       <nav
         className={clsx(
           shown ? "absolute inset-0 z-20 flex" : "hidden",
-          "h-full min-h-screen min-w-[16rem] flex-col bg-gray-200 dark:bg-gray-900 md:flex"
+          "sticky top-0 h-full min-h-screen min-w-[16rem] flex-col bg-gray-200 dark:bg-gray-900 md:flex"
         )}
       >
         <Link href="/profile">
