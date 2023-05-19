@@ -57,7 +57,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@tanstack/eslint-plugin-query": "^4.29.4",
+    "@tanstack/eslint-plugin-query": "^4.29.8",
     "@types/cron": "^2.0.1",
     "autoprefixer": "^10.4.14",
     "env-cmd": "^10.1.0",
