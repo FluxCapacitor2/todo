@@ -1,6 +1,7 @@
 "use client";
 
 import { ProjectSelector } from "@/components/project/ProjectSelector";
+import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
 import { Calendar } from "../[view]/[id]/calendar";
 
@@ -8,7 +9,10 @@ export default function Page() {
   const { data, isLoading, isError } = trpc.tasks.listTopLevel.useQuery();
 
   const mapped = data
-    ? data.map((task) => ({ ...task, projectId: task.section!.projectId }))
+    ? sortByDueDate(data).map((task) => ({
+        ...task,
+        projectId: task.section!.projectId,
+      }))
     : null;
 
   return (

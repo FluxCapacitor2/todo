@@ -2,6 +2,7 @@
 
 import { ProjectSelector } from "@/components/project/ProjectSelector";
 import { TaskCard } from "@/components/task/TaskCard";
+import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
 import { Skeleton } from "../[view]/[id]/list";
 
@@ -12,9 +13,11 @@ export default function Page() {
     <main className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
       <ProjectSelector>
         {(included) => {
-          const filtered = data?.filter((task) =>
-            included?.some((it) => it.id === task.section?.projectId)
-          );
+          const filtered = data
+            ? sortByDueDate(data).filter((task) =>
+                included?.some((it) => it.id === task.section?.projectId)
+              )
+            : undefined;
           return (
             <>
               {isLoading || !filtered ? (
