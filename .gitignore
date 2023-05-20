@@ -41,8 +41,8 @@ next-env.d.ts
 # next-pwa generated code
 **/public/workbox-*.js
 **/public/workbox-*.js.map
-**/public/firebase-messaging-sw.js
-**/public/firebase-messaging-sw.js.map
+**/public/sw.js
+**/public/sw.js.map
 **/public/worker-*.js
 **/public/worker-*.js.map
 **/public/worker-**.txt
