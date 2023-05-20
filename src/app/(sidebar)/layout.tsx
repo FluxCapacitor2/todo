@@ -6,14 +6,6 @@ import { ExtSession, authOptions } from "@/pages/api/auth/[...nextauth]";
 import { getServerSession } from "next-auth";
 import { Toaster } from "react-hot-toast";
 
-export const metadata = {
-  title: {
-    template: "%s | Todo App",
-    default: "Todo App",
-  },
-  manifest: "/manifest.webmanifest",
-};
-
 export default async function RootLayout({
   children,
 }: {

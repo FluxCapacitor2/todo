@@ -1,3 +1,8 @@
+const withPWA = require("@imbios/next-pwa")({
+  dest: "public",
+  customWorkerDir: "src/worker",
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -5,4 +10,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig);

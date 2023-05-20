@@ -22,7 +22,9 @@ export default function Page({
 
   const backPath = `/${view}/${id}`;
   const router = useRouter();
-  router.prefetch(backPath);
+  if (typeof window !== "undefined") {
+    router.prefetch(backPath);
+  }
 
   if (isError) {
     router.push(backPath);

@@ -22,15 +22,30 @@ export const ProjectCards = () => {
   return (
     <>
       <NewProjectModal open={modalShown} close={() => setModalShown(false)} />
+      <h2 className="text-2xl font-bold">Projects</h2>
       {isLoading ? (
         <div className="flex justify-center">
-          <Spinner />
+          {/* Fallback/skeleton UI */}
+          <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {new Array(4).fill(undefined).map((_, i) => (
+              <div
+                key={i}
+                className="flex h-28 flex-col gap-2 rounded-md bg-gray-100 p-4 dark:bg-gray-900"
+              >
+                <div className="h-8 w-48 animate-pulse bg-gray-200 delay-100 dark:bg-gray-800" />
+                <div className="h-6 w-32 animate-pulse bg-gray-200 delay-200 dark:bg-gray-800" />
+              </div>
+            ))}
+            <NewProject show={() => setModalShown(true)} />
+          </div>
         </div>
       ) : isError ? (
-        <p>Error loading projects.</p>
+        <p className="flex items-center gap-2 font-bold text-red-500">
+          <MdError />
+          Error loading projects.
+        </p>
       ) : projects.length > 0 ? (
         <>
-          <h2 className="text-2xl font-bold">Projects</h2>
           <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 md:grid-cols-3">
             {projects.map((project) => (
               <ProjectCard
@@ -39,15 +54,7 @@ export const ProjectCards = () => {
                 name={project.name}
               />
             ))}
-            <div
-              className="cursor-pointer rounded-md bg-gray-50 p-4 hover:bg-gray-200 dark:bg-gray-950 dark:hover:bg-gray-800"
-              onClick={() => setModalShown(true)}
-            >
-              <h2 className="text-lg font-bold">New Project</h2>
-              <div className="my-2 flex items-center gap-2">
-                <MdAdd /> Create
-              </div>
-            </div>
+            <NewProject show={() => setModalShown(true)} />
           </div>
         </>
       ) : (
@@ -59,6 +66,20 @@ export const ProjectCards = () => {
         </div>
       )}
     </>
+  );
+};
+
+const NewProject = ({ show }: { show: () => void }) => {
+  return (
+    <div
+      className="cursor-pointer rounded-md bg-gray-50 p-4 hover:bg-gray-200 dark:bg-gray-950 dark:hover:bg-gray-800"
+      onClick={show}
+    >
+      <h2 className="text-lg font-bold">New Project</h2>
+      <div className="my-2 flex items-center gap-2">
+        <MdAdd /> Create
+      </div>
+    </div>
   );
 };
 

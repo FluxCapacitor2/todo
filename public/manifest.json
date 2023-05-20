@@ -1,5 +1,3 @@
-export const GET = () => {
-  return new Response(`
 {
   "name": "Todo App",
   "icons": [
@@ -9,9 +7,10 @@ export const GET = () => {
       "sizes": "512x512"
     }
   ],
-  "start_url": "${process.env.NEXT_PUBLIC_BASE_URL}/projects",
+  "start_url": "https://todo-app-seven-lime.vercel.app/projects",
+  "__start_url": "http://localhost:3000/projects",
+  "id": "/projects",
   "display": "fullscreen",
   "gcm_sender_id": "890377760325",
   "categories": ["productivity"]
-}`);
-};
+}

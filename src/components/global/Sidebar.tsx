@@ -16,6 +16,7 @@ import {
   MdChecklist,
   MdClose,
   MdDelete,
+  MdError,
   MdMenu,
 } from "react-icons/md";
 
@@ -39,8 +40,8 @@ export const Sidebar = () => {
     <>
       <nav
         className={clsx(
-          shown ? "absolute inset-0 z-20 flex" : "hidden",
-          "sticky top-0 h-full min-h-screen min-w-[16rem] flex-col bg-gray-200 dark:bg-gray-900 md:flex"
+          shown ? "absolute inset-0 z-20 flex" : "sticky hidden",
+          "top-0 h-full min-h-screen min-w-[16rem] flex-col bg-gray-200 dark:bg-gray-900 md:flex"
         )}
       >
         <Link href="/profile">
@@ -99,13 +100,21 @@ export const Sidebar = () => {
         </Link>
         <Divider />
         {isLoading ? (
-          <div className="flex h-24 w-full items-center justify-center">
-            <Spinner />
+          <div className="flex w-full flex-col">
+            {new Array(4).fill(undefined).map((_, i) => (
+              <div
+                className="flex h-16 items-center gap-2 p-4 font-medium"
+                key={i}
+              >
+                <div className="h-5 w-32 animate-pulse bg-gray-200 dark:bg-gray-800" />
+              </div>
+            ))}
           </div>
         ) : isError ? (
-          <>
-            <p>Error loading projects.</p>
-          </>
+          <p className="flex items-center gap-2 p-4 font-bold text-red-500">
+            <MdError />
+            Error loading projects.
+          </p>
         ) : (
           <>
             {data?.map((project) => (
@@ -118,16 +127,19 @@ export const Sidebar = () => {
           </>
         )}
         {shown && (
-          <div
-            className={clsx(
-              inactiveClass,
-              "flex cursor-pointer items-center gap-2 p-4"
-            )}
-            onClick={() => setShown(!shown)}
-          >
-            <MdClose />
-            Close Menu
-          </div>
+          <>
+            <Divider />
+            <div
+              className={clsx(
+                inactiveClass,
+                "flex cursor-pointer items-center gap-2 p-4"
+              )}
+              onClick={() => setShown(!shown)}
+            >
+              <MdClose />
+              Close Menu
+            </div>
+          </>
         )}
       </nav>
       <Button
