@@ -1,9 +1,9 @@
-import { getMessaging, onMessage } from "firebase/messaging";
+import { getMessaging, onBackgroundMessage } from "firebase/messaging/sw";
 import { app } from "./../util/firebase";
 
 const messaging = getMessaging(app);
 
-onMessage(messaging, (payload) => {
+onBackgroundMessage(messaging, (payload) => {
   console.log(
     "[firebase-messaging-sw.js] Received background message ",
     payload
