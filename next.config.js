@@ -6,6 +6,7 @@ const withPWAInit = require("@imbios/next-pwa");
 /** @type {import('@imbios/next-pwa').PWAConfig} */
 const withPWA = withPWAInit({
   dest: "public",
+  sw: "firebase-messaging-sw.js",
   // Solution: https://github.com/shadowwalker/next-pwa/issues/424#issuecomment-1399683017
   buildExcludes: ["app-build-manifest.json"],
 });
