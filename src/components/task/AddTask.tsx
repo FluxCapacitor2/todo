@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/Button";
 import { DatePickerPopover } from "@/components/ui/DatePickerPopover";
+import { LONG_DATE_FORMAT } from "@/util/constants";
 import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
 import { format } from "date-fns";
@@ -261,7 +262,7 @@ const AddTask = ({
             <DatePickerPopover date={dueDate ?? undefined} setDate={setDueDate}>
               <Button variant="subtle">
                 <MdCalendarToday />
-                {!dueDate ? "Add Due Date" : format(dueDate, "MMM do, hhaaa")}
+                {!dueDate ? "Add Due Date" : format(dueDate, LONG_DATE_FORMAT)}
               </Button>
             </DatePickerPopover>
             <Button

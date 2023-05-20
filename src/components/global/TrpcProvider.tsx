@@ -12,8 +12,9 @@ import {
   httpBatchLink,
   loggerLink,
 } from "@trpc/client";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import superjson from "superjson";
 
@@ -21,6 +22,14 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const router = useRouter();
+  const session = useSession();
+
+  useEffect(() => {
+    if (session.status === "unauthenticated") {
+      router.push("/signed-out");
+    }
+  }, [router, session.status]);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -30,8 +39,7 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
               (error as TRPCClientError<AppRouter>)?.data?.code ===
               "UNAUTHORIZED"
             ) {
-              router.push("/signin");
-              // toast.error("You are not signed in!");
+              router.push("/signed-out");
             } else if (query.state.data !== undefined) {
               toast.error("There was an error updating your tasks.");
             }
@@ -40,6 +48,9 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
         defaultOptions: {
           queries: {
             retry: (failureCount, error) => {
+              if (session.status === "unauthenticated") {
+                return false;
+              }
               if (
                 (error as TRPCClientError<AppRouter>)?.data?.code ===
                 "UNAUTHORIZED"

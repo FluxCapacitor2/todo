@@ -1,4 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
+import clsx from "clsx";
 import {
   Fragment,
   MutableRefObject,
@@ -11,10 +12,12 @@ export const CustomDialog = ({
   close,
   children,
   initialFocus,
+  sideView = true,
 }: PropsWithChildren<{
   opened: boolean;
   close: () => void;
   initialFocus?: MutableRefObject<HTMLElement | null>;
+  sideView?: boolean;
 }>) => {
   return (
     <Transition appear show={opened} as={Fragment}>
@@ -43,9 +46,21 @@ export const CustomDialog = ({
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 translate-x-4"
         >
-          <div className="fixed inset-y-0 right-0 w-screen overflow-y-auto md:w-1/3 md:min-w-[42rem]">
+          <div
+            className={clsx(
+              sideView
+                ? "inset-y-0 right-0 md:w-1/3 md:min-w-[42rem]"
+                : "inset-0 m-auto h-max w-max rounded-lg",
+              "fixed w-screen overflow-y-auto"
+            )}
+          >
             <div className="flex items-center justify-center">
-              <Dialog.Panel className="min-h-screen w-full overflow-y-scroll bg-white p-8 dark:bg-gray-900">
+              <Dialog.Panel
+                className={clsx(
+                  sideView && "min-h-screen",
+                  "w-full overflow-y-scroll bg-white p-8 dark:bg-gray-900"
+                )}
+              >
                 {children}
               </Dialog.Panel>
             </div>
@@ -56,8 +71,19 @@ export const CustomDialog = ({
   );
 };
 
-export const DialogTitle = ({ children }: { children: ReactNode }) => (
-  <Dialog.Title className="mb-4 flex items-center gap-2 text-3xl font-extrabold">
+export const DialogTitle = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => (
+  <Dialog.Title
+    className={clsx(
+      className,
+      "flex items-center gap-2 text-3xl font-extrabold"
+    )}
+  >
     {children}
   </Dialog.Title>
 );

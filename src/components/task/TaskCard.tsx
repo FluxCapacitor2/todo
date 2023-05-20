@@ -1,6 +1,7 @@
 import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
 import { DatePickerPopover } from "@/components/ui/DatePickerPopover";
 import { Spinner } from "@/components/ui/Spinner";
+import { LONG_DATE_FORMAT } from "@/util/constants";
 import { trpc } from "@/util/trpc/trpc";
 import { Menu } from "@headlessui/react";
 import { Task } from "@prisma/client";
@@ -130,7 +131,7 @@ export const TaskCard = ({
                   >
                     <p className="flex items-center gap-2 text-sm">
                       <MdCalendarToday />
-                      {format(task.dueDate, "MMM do, h:mm aaa")}
+                      {format(task.dueDate, LONG_DATE_FORMAT)}
                     </p>
                   </DatePickerPopover>
                 )}

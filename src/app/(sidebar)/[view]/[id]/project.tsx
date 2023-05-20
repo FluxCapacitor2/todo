@@ -21,51 +21,7 @@ export const ProjectView = ({ id: projectId }: { id: string }) => {
 
   if (!data) {
     // Loading UI (skeleton)
-    return (
-      <div className="flex">
-        {new Array(5).fill(null).map((_, i) => (
-          <div
-            className="mr-4 flex h-[calc(100vh-6rem)] w-80 snap-center flex-col rounded-lg p-2"
-            key={i}
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-6 w-52 animate-pulse rounded-md bg-gray-500/50" />
-              <Button variant="flat">
-                <MdMenu />
-              </Button>
-            </div>
-            <div className="flex flex-col gap-2">
-              {new Array([5, 3, 4, 5, 2][i]).fill(null).map((_, j) => (
-                <div
-                  className="flex w-80 items-start gap-2 rounded-md border border-gray-500 p-2"
-                  key={j}
-                >
-                  <input
-                    type="checkbox"
-                    disabled
-                    className="mt-1"
-                    checked={j < 2}
-                  />
-                  <div className="flex flex-col gap-2">
-                    <div
-                      className="my-1 h-4 w-48 animate-pulse rounded-md bg-gray-500/50"
-                      style={{ animationDelay: `${i * 100}ms` }}
-                    />
-                    <div className="flex items-center gap-2">
-                      <MdCalendarToday className="text-sm" />
-                      <div
-                        className="my-1 h-3 w-24 animate-pulse rounded-md bg-gray-500/50"
-                        style={{ animationDelay: `${i * 150}ms` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return Skeleton;
   }
 
   return (
@@ -81,6 +37,52 @@ export const ProjectView = ({ id: projectId }: { id: string }) => {
     </>
   );
 };
+
+export const Skeleton = (
+  <div className="flex">
+    {new Array(5).fill(null).map((_, i) => (
+      <div
+        className="mr-4 flex h-[calc(100vh-6rem)] w-80 snap-center flex-col rounded-lg p-2"
+        key={i}
+      >
+        <div className="flex items-center justify-between">
+          <div className="h-6 w-52 animate-pulse rounded-md bg-gray-500/50" />
+          <Button variant="flat">
+            <MdMenu />
+          </Button>
+        </div>
+        <div className="flex flex-col gap-2">
+          {new Array([5, 3, 4, 5, 2][i]).fill(null).map((_, j) => (
+            <div
+              className="flex w-80 items-start gap-2 rounded-md border border-gray-500 p-2"
+              key={j}
+            >
+              <input
+                type="checkbox"
+                disabled
+                className="mt-1"
+                checked={j < 2}
+              />
+              <div className="flex flex-col gap-2">
+                <div
+                  className="my-1 h-4 w-48 animate-pulse rounded-md bg-gray-500/50"
+                  style={{ animationDelay: `${i * 100}ms` }}
+                />
+                <div className="flex items-center gap-2">
+                  <MdCalendarToday className="text-sm" />
+                  <div
+                    className="my-1 h-3 w-24 animate-pulse rounded-md bg-gray-500/50"
+                    style={{ animationDelay: `${i * 150}ms` }}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 const Section = ({
   section,
