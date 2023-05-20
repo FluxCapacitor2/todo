@@ -106,7 +106,7 @@ export const Sidebar = () => {
                 className="flex h-16 items-center gap-2 p-4 font-medium"
                 key={i}
               >
-                <div className="h-5 w-32 animate-pulse bg-gray-200 dark:bg-gray-800" />
+                <div className="h-5 w-32 animate-pulse bg-gray-300 dark:bg-gray-800" />
               </div>
             ))}
           </div>
@@ -146,6 +146,7 @@ export const Sidebar = () => {
         variant="flat"
         className="absolute left-3 top-1 block md:hidden"
         onClick={() => setShown(!shown)}
+        aria-label="Toggle navigation"
       >
         <MdMenu />
       </Button>
@@ -191,6 +192,7 @@ const ProjectItem = ({ name, id }: { name: string; id: string }) => {
           variant="flat"
           className="text-gray-600 dark:text-gray-400"
           onClick={deleteProject}
+          aria-label="Delete Project"
         >
           {isLoading ? <Spinner /> : <MdDelete />}
         </Button>

@@ -2,7 +2,6 @@
 
 import { NewProjectModal } from "@/components/global/NewProjectModal";
 import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/ui/Spinner";
 import { trpc } from "@/util/trpc/trpc";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -105,9 +104,10 @@ const ProjectCard = ({
       >
         <h2 className="text-lg font-medium">{data?.name ?? name}</h2>
         {isLoading ? (
-          <>
-            <Spinner />
-          </>
+          <div className="flex flex-col gap-2">
+            <div className="h-8 w-48 animate-pulse bg-gray-200 delay-100 dark:bg-gray-800" />
+            <div className="h-6 w-32 animate-pulse bg-gray-200 delay-200 dark:bg-gray-800" />
+          </div>
         ) : isError ? (
           <span className="text-red-500">
             <MdError className="inline" /> Error loading tasks.

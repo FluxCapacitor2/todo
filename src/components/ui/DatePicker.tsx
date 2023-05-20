@@ -115,7 +115,7 @@ export const DatePicker = ({
       {selectedDates[0] && (
         <div className="mb-6 mt-4 flex justify-between gap-2">
           <TextField
-            className="w-12 [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:[-webkit-appearance:none]"
+            className="w-12 appearance-textfield"
             placeholder="12"
             ref={hourField}
             type="number"
@@ -123,7 +123,7 @@ export const DatePicker = ({
             max={12}
           />
           <TextField
-            className="w-12 [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:[-webkit-appearance:none]"
+            className="w-12 appearance-textfield"
             placeholder="00"
             ref={minuteField}
             type="number"

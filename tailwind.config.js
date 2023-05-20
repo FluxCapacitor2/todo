@@ -19,6 +19,18 @@ module.exports = {
     require("@headlessui/tailwindcss"),
     require("@tailwindcss/typography"),
     require("@tailwindcss/container-queries"),
+    ({ addUtilities }) => {
+      addUtilities({
+        // Makes a number input (<input type="number" />) look like a text input by removing the up/down arrow buttons.
+        ".appearance-textfield": {
+          appearance: "textfield",
+          "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": {
+            "-webkit-appearance": "none",
+            margin: 0,
+          },
+        },
+      });
+    },
   ],
   darkMode: "media",
 };
