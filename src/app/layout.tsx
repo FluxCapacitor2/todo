@@ -1,4 +1,4 @@
-import { Roboto_Slab } from "next/font/google";
+import { Inter } from "next/font/google";
 import { ReactNode } from "react";
 import "./globals.css";
 
@@ -13,7 +13,7 @@ export const metadata = {
   },
 };
 
-const customFont = Roboto_Slab({
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
 });
@@ -21,7 +21,7 @@ const customFont = Roboto_Slab({
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className={customFont.className}>{children}</body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
