@@ -16,3 +16,10 @@ body.offline > div:not(:first-child) {
     color-scheme: dark;
   }
 }
+
+[src$="#gh-dark-mode-only"] {
+  @apply hidden dark:[display:initial];
+}
+[src$="#gh-light-mode-only"] {
+  @apply dark:hidden;
+}

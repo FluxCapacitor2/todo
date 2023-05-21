@@ -11,7 +11,7 @@ export const SignInButton = ({
   return (
     <button
       key={provider.id}
-      className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-black transition-colors hover:bg-gray-200 dark:hover:bg-gray-300"
+      className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-black transition-colors hover:bg-gray-200 dark:hover:bg-gray-300"
       onClick={() => signIn(provider.id)}
     >
       <Image

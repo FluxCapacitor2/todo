@@ -1,3 +1,4 @@
+import { TopNav } from "@/components/global/TopNav";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { getServerSession } from "next-auth";
 import { getProviders } from "next-auth/react";
@@ -16,10 +17,7 @@ export default async function SignIn() {
 
   return (
     <>
-      <Link href="/" className="ml-2 mt-2 flex items-center gap-2">
-        <MdArrowBack />
-        Back Home
-      </Link>
+      <TopNav />
       <main className="mx-auto mt-6 flex max-w-2xl flex-col items-center gap-2">
         <h1 className="mb-4 text-6xl font-black">Sign In</h1>
         <p>
@@ -28,7 +26,9 @@ export default async function SignIn() {
           app and verifying account ownership.
         </p>
         {Object.values(providers!).map((provider) => (
-          <SignInButton provider={provider} key={provider.id} />
+          <div className="w-max" key={provider.id}>
+            <SignInButton provider={provider} />
+          </div>
         ))}
       </main>
     </>
