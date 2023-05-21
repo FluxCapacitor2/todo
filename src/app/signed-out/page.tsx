@@ -1,6 +1,9 @@
 import { getProviders } from "next-auth/react";
 import { SignInButton } from "../signin/SignInButton";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 86400;
+
 export default async function Page() {
   const providers = await getProviders();
 
