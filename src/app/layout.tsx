@@ -11,6 +11,7 @@ export const metadata = {
   appleWebApp: {
     capable: true,
   },
+  themeColor: "#22c55e",
 };
 
 const inter = Inter({

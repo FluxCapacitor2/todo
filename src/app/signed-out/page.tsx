@@ -10,12 +10,12 @@ export default async function Page() {
   return (
     <>
       <div className="mx-auto w-max">
-        <div className="flex w-full flex-col gap-4 overflow-y-scroll rounded-lg bg-white p-12 dark:bg-gray-900">
+        <div className="flex w-full flex-col gap-4 rounded-lg p-12">
           <div className="prose dark:prose-invert">
             <h2>Signed Out</h2>
             <p>You must be signed in to view this project.</p>
           </div>
-          <div className="flex justify-end">
+          <div className="flex flex-col">
             {Object.values(providers!).map((provider) => (
               <SignInButton provider={provider} key={provider.id} />
             ))}

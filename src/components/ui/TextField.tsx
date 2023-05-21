@@ -17,7 +17,7 @@ export const TextField = forwardRef(
         className={clsx(
           className,
           flat
-            ? "bg-transparent"
+            ? "border-none bg-transparent focus:ring-0"
             : "border border-b-4 border-gray-300 focus:border-primary-500 dark:border-gray-700 dark:bg-gray-900 dark:focus:border-primary-700",
           "h-10 rounded-md p-3 outline-none"
         )}

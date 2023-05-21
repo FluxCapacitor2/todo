@@ -2,6 +2,7 @@
 
 import { AddSectionTask } from "@/components/task/AddTask";
 import { TaskCard } from "@/components/task/TaskCard";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
 
@@ -40,7 +41,7 @@ export const Skeleton = () => (
     <ul className="flex flex-col gap-2">
       {new Array(5).fill(null).map((_, i) => (
         <div key={i} className="flex items-start gap-2">
-          <input type="checkbox" disabled className="mt-1" checked={i < 3} />
+          <Checkbox disabled className="mt-1" checked={i < 3} />
           <div className="flex flex-col gap-2">
             <div
               className="my-1 h-8 w-64 animate-pulse rounded-md bg-gray-500/50"

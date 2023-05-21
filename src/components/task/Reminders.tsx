@@ -86,7 +86,7 @@ export const Reminders = ({
           )}
           key={reminder.id}
         >
-          <MdNotifications />
+          <MdNotifications className="h-5 w-5" />
           {format(reminder.time, LONG_DATE_FORMAT)}{" "}
           <span className="text-gray-600 dark:text-gray-400">
             ({formatDistanceToNow(reminder.time, { addSuffix: true })})
@@ -100,11 +100,11 @@ export const Reminders = ({
         </div>
       ))}
 
-      <div className="flex items-center gap-2">
-        <MdNotificationAdd />
+      <div className="flex items-center gap-4">
+        <MdNotificationAdd className="h-5 w-5" />
         Add Reminder:
       </div>
-      <div className="ml-6 flex flex-wrap gap-4">
+      <div className="ml-10 mt-2 flex flex-wrap gap-4 italic">
         {dueDate && (
           <>
             <Reminder
@@ -139,7 +139,9 @@ export const Reminders = ({
             });
           }}
         >
-          <span className="font-medium underline">Custom Time...</span>
+          <span className="text-gray-700 dark:text-gray-300">
+            Custom Time...
+          </span>
         </DatePickerPopover>
       </div>
     </div>
@@ -161,7 +163,7 @@ const Reminder = ({
   if (passed) return null;
   return (
     <p
-      className="cursor-pointer font-medium underline"
+      className="cursor-pointer text-gray-700 hover:underline dark:text-gray-300"
       onClick={() =>
         addReminder({
           taskId,

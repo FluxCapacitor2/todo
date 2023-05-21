@@ -1,10 +1,59 @@
 {
   "name": "Todo App",
+  "theme_color": "#22c55e",
+  "background_color": "#737373",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "icons/icon_x48.png",
+      "type": "image/png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "icons/icon_x72.png",
+      "type": "image/png",
+      "sizes": "72x72"
+    },
+    {
+      "src": "icons/icon_x96.png",
+      "type": "image/png",
+      "sizes": "96x96"
+    },
+    {
+      "src": "icons/icon_x128.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    },
+    {
+      "src": "icons/icon_x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icons/icon_x384.png",
+      "type": "image/png",
+      "sizes": "384x384"
+    },
+    {
+      "src": "icons/icon_x512.png",
       "type": "image/png",
       "sizes": "512x512"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Projects",
+      "url": "/projects",
+      "icons": [{ "src": "/icons/projects.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tasks",
+      "url": "/tasks",
+      "icons": [{ "src": "/icons/tasks.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Calendar",
+      "url": "/calendar",
+      "icons": [{ "src": "/icons/calendar.png", "sizes": "192x192" }]
     }
   ],
   "start_url": "https://todo-app-seven-lime.vercel.app/projects",

@@ -66,6 +66,7 @@ export const RemirrorEditor = ({
           "focus:border-gray-600",
           "dark:focus:border-gray-400",
           "px-2",
+          "py-0",
           "rounded-lg",
         ]}
       />

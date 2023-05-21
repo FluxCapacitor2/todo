@@ -1,10 +1,13 @@
 import Link from "next/link";
 
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import { getServerSession } from "next-auth";
 import Image from "next/image";
 import { MdStarBorder } from "react-icons/md";
 import logo from "../../../public/icon.png";
 
 export const TopNav = async () => {
+  const session = await getServerSession(authOptions);
   const res = await fetch("https://api.github.com/repos/FluxCapacitor2/todo", {
     next: {
       revalidate: 3600,
@@ -22,7 +25,11 @@ export const TopNav = async () => {
       <div className="flex items-center gap-8 font-medium">
         <Link href="/">Home</Link>
         <Link href="/about">About</Link>
-        <Link href="/signin">Sign In</Link>
+        {session?.user ? (
+          <Link href="/projects">Launch</Link>
+        ) : (
+          <Link href="/signin">Sign In</Link>
+        )}
       </div>
       {stars !== undefined && (
         <Link

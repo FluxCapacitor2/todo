@@ -1,6 +1,7 @@
 import { trpc } from "@/util/trpc/trpc";
 import { Project } from "@prisma/client";
 import { ReactNode, useEffect, useState } from "react";
+import { Checkbox } from "../ui/Checkbox";
 import { Spinner } from "../ui/Spinner";
 
 export const ProjectSelector = ({
@@ -26,8 +27,7 @@ export const ProjectSelector = ({
               className="inline-flex items-center gap-3 rounded-full bg-gray-100 px-3 py-1 font-medium dark:bg-gray-800"
               key={project.id}
             >
-              <input
-                type="checkbox"
+              <Checkbox
                 id={`proj-${i}`}
                 checked={included.some((it) => it.id === project.id)}
                 onChange={(e) => {

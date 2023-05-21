@@ -21,6 +21,7 @@ import {
 } from "react-icons/md";
 import { useDebounce } from "use-debounce";
 import { Button } from "../ui/Button";
+import { Checkbox } from "../ui/Checkbox";
 import { TaskModal } from "./TaskModal";
 
 export const TaskWrapper = ({
@@ -97,8 +98,7 @@ export const TaskCard = ({
         >
           {showCheckbox && (
             <div>
-              <input
-                type="checkbox"
+              <Checkbox
                 onChange={(e) => {
                   setTask({ ...task, completed: e.target.checked });
                 }}
@@ -157,6 +157,15 @@ export const TaskCard = ({
               setTask={setTask}
               projectId={projectId}
               hover={true}
+              button={
+                <Menu.Button
+                  as={Button}
+                  variant="subtle"
+                  className={"invisible group-hover:visible"}
+                >
+                  <MdMoreHoriz />
+                </Menu.Button>
+              }
             />
           </div>
           <TaskModal
@@ -180,11 +189,13 @@ export const TaskMenuButton = ({
   setTask,
   projectId,
   hover,
+  button,
 }: {
   task: Task;
   setTask: (task: Task) => void;
   projectId: string;
   hover: boolean;
+  button: ReactNode;
 }) => {
   const utils = trpc.useContext();
   const { mutateAsync: deleteAsync } = trpc.tasks.delete.useMutation({
@@ -199,6 +210,7 @@ export const TaskMenuButton = ({
           });
         });
       } else {
+        utils.tasks.listTopLevel.cancel();
         utils.projects.get.cancel(projectId);
         utils.projects.get.setData(projectId, (project) => {
           if (!project) return undefined;
@@ -239,6 +251,7 @@ export const TaskMenuButton = ({
       if (task.parentTaskId) {
         utils.tasks.get.invalidate({ id: task.parentTaskId });
       } else {
+        utils.tasks.listTopLevel.invalidate();
         utils.projects.get.invalidate(projectId);
       }
     },
@@ -261,19 +274,7 @@ export const TaskMenuButton = ({
       }
     >
       {({ open, close }) => (
-        <MenuItems
-          open={open}
-          close={close}
-          button={
-            <Menu.Button
-              as={Button}
-              variant="subtle"
-              className={hover ? "invisible group-hover:visible" : ""}
-            >
-              <MdMoreHoriz />
-            </Menu.Button>
-          }
-        >
+        <MenuItems open={open} close={close} button={button}>
           <MenuItem onClick={() => deleteAsync(task.id)}>
             <MdDelete /> Delete Task
           </MenuItem>

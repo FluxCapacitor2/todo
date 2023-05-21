@@ -5,6 +5,7 @@ import { RemirrorEditor } from "@/components/ui/RemirrorEditor";
 import { Spinner } from "@/components/ui/Spinner";
 import { LONG_DATE_FORMAT } from "@/util/constants";
 import { trpc } from "@/util/trpc/trpc";
+import { Menu } from "@headlessui/react";
 import { Task } from "@prisma/client";
 import clsx from "clsx";
 import {
@@ -14,13 +15,16 @@ import {
   isBefore,
 } from "date-fns";
 import { useRef } from "react";
+import { GrTextAlignFull } from "react-icons/gr";
 import {
   MdArrowBack,
   MdDateRange,
   MdError,
+  MdMoreHoriz,
   MdRunCircle,
   MdStart,
 } from "react-icons/md";
+import { Checkbox } from "../ui/Checkbox";
 import { AddSubtask } from "./AddTask";
 import { Reminders } from "./Reminders";
 import { TaskCard, TaskMenuButton } from "./TaskCard";
@@ -65,10 +69,9 @@ export const TaskModal = ({
         </a>
       )}
       <DialogTitle>
-        <div className="self-start">
-          <input
+        <div className="mr-2 self-start">
+          <Checkbox
             ref={checkboxRef}
-            type="checkbox"
             onChange={(e) => setTask({ ...task, completed: e.target.checked })}
             checked={task.completed}
             className="h-6 w-6"
@@ -95,8 +98,8 @@ export const TaskModal = ({
         </div>
       </DialogTitle>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2">
+      <div className="mt-8 flex flex-col gap-8">
+        <div className="flex items-center gap-4">
           <MdStart className="h-5 w-5 self-center" />
           <DatePickerPopover
             date={task.startDate ?? undefined}
@@ -115,7 +118,7 @@ export const TaskModal = ({
             )}
           </DatePickerPopover>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <MdDateRange className="h-5 w-5 self-center" />
           <DatePickerPopover
             minDate={task.startDate ?? undefined}
@@ -140,7 +143,7 @@ export const TaskModal = ({
           projectId={projectId}
         />
 
-        {/* <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-4">
           <MdPerson className="h-5 w-5 self-center" />
           You
         </div> */}
@@ -150,8 +153,8 @@ export const TaskModal = ({
           isBefore(task.startDate, new Date()) &&
           isBefore(new Date(), task.dueDate) && (
             <>
-              <div className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-3">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-4">
                   <MdRunCircle />
                   Expected Progress:{" "}
                   {Math.round(
@@ -171,28 +174,51 @@ export const TaskModal = ({
             </>
           )}
 
-        <div className="mb-6 mt-4 max-h-96 overflow-scroll outline-none">
-          <RemirrorEditor
-            editable={!isSaving}
-            initialContent={task.description}
-            setContent={(content) => {
-              if (content !== task.description) {
-                setTask({ ...task, description: content });
-              }
-            }}
-          />
+        <div className="flex flex-col">
+          <p className="flex items-center gap-4">
+            <GrTextAlignFull className="h-5 w-5" /> Description
+          </p>
+          <div className="mb-6 ml-6 mt-4 max-h-96 w-full overflow-scroll outline-none">
+            <RemirrorEditor
+              editable={!isSaving}
+              initialContent={task.description}
+              setContent={(content) => {
+                if (content !== task.description) {
+                  setTask({ ...task, description: content });
+                }
+              }}
+            />
+          </div>
         </div>
+
+        <TaskMenuButton
+          task={task}
+          setTask={setTask}
+          projectId={projectId}
+          hover={false}
+          button={
+            <Menu.Button>
+              <div className="flex items-center gap-4">
+                <MdMoreHoriz />
+                More Options...
+              </div>
+            </Menu.Button>
+          }
+        />
 
         {fullTask?.subTasks ? (
           <>
-            <h2 className="text-xl font-bold">Sub-tasks</h2>
-            {fullTask?.subTasks?.length > 0 && (
-              <p>
-                {fullTask.subTasks.filter((it) => it.completed).length} /{" "}
-                {fullTask.subTasks.length} completed
-              </p>
-            )}
-            <div className="mt-4 flex flex-col gap-4">
+            <h2 className="text-3xl font-bold">
+              Sub-tasks{" "}
+              {fullTask?.subTasks?.length > 0 && (
+                <span className="text-base font-normal">
+                  {fullTask.subTasks.filter((it) => it.completed).length}/
+                  {fullTask.subTasks.length} completed
+                </span>
+              )}
+            </h2>
+
+            <div className="flex flex-col gap-4">
               {fullTask.subTasks.map((task) => (
                 <TaskCard
                   task={task}
@@ -201,8 +227,9 @@ export const TaskModal = ({
                   isListItem
                 />
               ))}
-              <AddSubtask projectId={projectId} parentTaskId={task.id} />
             </div>
+
+            <AddSubtask projectId={projectId} parentTaskId={task.id} />
           </>
         ) : loadingSubTasks ? (
           <Spinner />
@@ -213,13 +240,7 @@ export const TaskModal = ({
           </div>
         )}
 
-        <div className="flex justify-between">
-          <TaskMenuButton
-            task={task}
-            setTask={setTask}
-            projectId={projectId}
-            hover={false}
-          />
+        <div className="flex justify-end">
           <Button variant="flat" onClick={() => setModalShown(false)}>
             Close
           </Button>

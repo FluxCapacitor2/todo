@@ -3,6 +3,7 @@
 import { AddSectionTask } from "@/components/task/AddTask";
 import { TaskCard } from "@/components/task/TaskCard";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
 import { Spinner } from "@/components/ui/Spinner";
 import { TextField } from "@/components/ui/TextField";
@@ -57,12 +58,7 @@ export const Skeleton = (
               className="flex w-80 items-start gap-2 rounded-md border border-gray-500 p-2"
               key={j}
             >
-              <input
-                type="checkbox"
-                disabled
-                className="mt-1"
-                checked={j < 2}
-              />
+              <Checkbox disabled className="mt-1" checked={j < 2} />
               <div className="flex flex-col gap-2">
                 <div
                   className="my-1 h-4 w-48 animate-pulse rounded-md bg-gray-500/50"
@@ -189,12 +185,13 @@ const SectionName = ({
   const [name, setName] = useState(initialName);
 
   return (
-    <div className="relative">
+    <div className="group relative">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           textField.current?.blur();
         }}
+        className="flex items-center gap-1"
       >
         <TextField
           flat
@@ -210,6 +207,10 @@ const SectionName = ({
               utils.projects.get.invalidate(projectId);
             }
           }}
+        />
+        <MdEdit
+          className="cursor-pointer fill-gray-500 opacity-0 transition-opacity group-hover:opacity-100"
+          onClick={() => textField.current?.focus()}
         />
       </form>
       {isLoading && (
