@@ -2,9 +2,7 @@ import { TopNav } from "@/components/global/TopNav";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { getServerSession } from "next-auth";
 import { getProviders } from "next-auth/react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { MdArrowBack } from "react-icons/md";
 import { SignInButton } from "./SignInButton";
 
 export default async function SignIn() {
@@ -17,6 +15,7 @@ export default async function SignIn() {
 
   return (
     <>
+      {/* @ts-expect-error RSC */}
       <TopNav />
       <main className="mx-auto mt-6 flex max-w-2xl flex-col items-center gap-2">
         <h1 className="mb-4 text-6xl font-black">Sign In</h1>
