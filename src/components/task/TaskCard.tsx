@@ -1,6 +1,5 @@
 import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
 import { DatePickerPopover } from "@/components/ui/DatePickerPopover";
-import { Spinner } from "@/components/ui/Spinner";
 import { LONG_DATE_FORMAT } from "@/util/constants";
 import { trpc } from "@/util/trpc/trpc";
 import { Menu } from "@headlessui/react";
@@ -37,14 +36,25 @@ export const TaskWrapper = ({
 }) => {
   const [task, setTask] = useState(inTask);
   const initialRender = useRef(true);
+  const utils = trpc.useContext();
 
   useEffect(() => {
     setTask(inTask); // Force the task to update when new data is received
     initialRender.current = true; // Prevent the update from causing a mutation
   }, [inTask]);
 
+  const [lastRevision, setLastRevision] = useState(inTask);
+
   const { mutateAsync: updateAsync, isLoading: isSaving } =
-    trpc.tasks.update.useMutation();
+    trpc.tasks.update.useMutation({
+      onError: () => {
+        toast.error("There was an error saving that task!");
+        setTask(lastRevision); // Roll back the UI to the last known successful state
+      },
+      onSuccess: (data) => {
+        setLastRevision(data);
+      },
+    });
 
   const [debouncedTask] = useDebounce(task, 500, {
     leading: true,
@@ -53,18 +63,16 @@ export const TaskWrapper = ({
   });
 
   useEffect(() => {
-    (async () => {
-      if (initialRender.current === true) {
-        initialRender.current = false;
-        return;
-      } else {
-        await updateAsync({
-          ...debouncedTask,
-          dueDate: debouncedTask.dueDate ?? undefined,
-          startDate: debouncedTask.startDate ?? undefined,
-        });
-      }
-    })();
+    if (initialRender.current === true) {
+      initialRender.current = false;
+      return;
+    } else {
+      updateAsync({
+        ...debouncedTask,
+        dueDate: debouncedTask.dueDate ?? undefined,
+        startDate: debouncedTask.startDate ?? undefined,
+      });
+    }
   }, [debouncedTask, updateAsync]);
 
   return <>{children({ task, setTask, isSaving })}</>;
@@ -93,7 +101,8 @@ export const TaskCard = ({
             "group relative flex cursor-pointer justify-between gap-2 @container/task",
             task.id < 0 && "pointer-events-none opacity-70",
             !isListItem &&
-              "max-w-[20rem] rounded-md border border-gray-600 p-2 hover:bg-white/30"
+              "max-w-[20rem] rounded-md border border-gray-600 p-2 hover:bg-white/30",
+            isSaving && "animate-pulse"
           )}
         >
           {showCheckbox && (
@@ -114,13 +123,12 @@ export const TaskCard = ({
             <p className="flex w-full items-center justify-between font-bold">
               <span
                 className={clsx(
-                  "line-clamp-1",
+                  "line-clamp-2",
                   task.completed && "text-gray-500 line-through"
                 )}
               >
                 {task.name}
               </span>
-              {isSaving && <Spinner />}
             </p>
             {details && (
               <>

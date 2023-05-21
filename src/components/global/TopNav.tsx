@@ -18,10 +18,10 @@ export const TopNav = async () => {
 
   return (
     <nav className="sticky top-0 z-50 flex w-full justify-around bg-white/50 p-4 shadow-sm backdrop-blur-xl dark:border-b dark:border-b-gray-800 dark:bg-black/50">
-      <div className="flex gap-2">
+      <Link href="/" className="flex gap-2">
         <Image src={logo} alt="App logo" className="h-6 w-6" />
-        <p className="font-bold">Todo App</p>
-      </div>
+        <p className="hidden font-bold sm:inline">Todo App</p>
+      </Link>
       <div className="flex items-center gap-8 font-medium">
         <Link href="/">Home</Link>
         <Link href="/about">About</Link>
@@ -34,7 +34,7 @@ export const TopNav = async () => {
       {stars !== undefined && (
         <Link
           href="https://github.com/FluxCapacitor2/todo"
-          className="flex items-center gap-2"
+          className="hidden items-center gap-2 md:flex"
         >
           Star on GitHub{" "}
           <span className="flex items-center gap-2 text-gray-500">

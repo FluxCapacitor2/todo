@@ -99,6 +99,21 @@ export const TaskModal = ({
       </DialogTitle>
 
       <div className="mt-8 flex flex-col gap-8">
+        <TaskMenuButton
+          task={task}
+          setTask={setTask}
+          projectId={projectId}
+          hover={false}
+          button={
+            <Menu.Button>
+              <div className="flex items-center gap-4">
+                <MdMoreHoriz className="h-5 w-5" />
+                <span className="hover:underline">Options...</span>
+              </div>
+            </Menu.Button>
+          }
+        />
+
         <div className="flex items-center gap-4">
           <MdStart className="h-5 w-5 self-center" />
           <DatePickerPopover
@@ -190,21 +205,6 @@ export const TaskModal = ({
             />
           </div>
         </div>
-
-        <TaskMenuButton
-          task={task}
-          setTask={setTask}
-          projectId={projectId}
-          hover={false}
-          button={
-            <Menu.Button>
-              <div className="flex items-center gap-4">
-                <MdMoreHoriz />
-                More Options...
-              </div>
-            </Menu.Button>
-          }
-        />
 
         {fullTask?.subTasks ? (
           <>
