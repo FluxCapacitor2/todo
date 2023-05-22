@@ -38,16 +38,51 @@ model Session {
 }
 
 model User {
-  id                 String              @id @default(cuid())
-  name               String?
-  email              String?             @unique
-  emailVerified      DateTime?
-  image              String?
-  accounts           Account[]
-  projects           Project[]
-  sessions           Session[]
-  tasks              Task[]
-  notificationTokens NotificationToken[]
+  id                  String              @id @default(cuid())
+  name                String?
+  email               String?             @unique
+  emailVerified       DateTime?
+  image               String?
+  accounts            Account[]
+  projects            Project[]
+  sessions            Session[]
+  tasks               Task[]
+  notificationTokens  NotificationToken[]
+  outgoingInvitations Invitation[]        @relation("from")
+  incomingInvitations Invitation[]        @relation("to")
+  Collaborator        Collaborator[]
+}
+
+model Invitation {
+  id         String   @id @default(cuid())
+  from       User     @relation("from", fields: [senderId], references: [id])
+  to         User     @relation("to", fields: [receiverId], references: [id])
+  senderId   String
+  receiverId String
+  createdAt  DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id])
+  projectId  String
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([projectId])
+}
+
+model Collaborator {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  Project   Project? @relation(fields: [projectId], references: [id])
+  projectId String?
+  role      Role
+
+  @@index([userId])
+  @@index([projectId])
+}
+
+enum Role {
+  EDITOR
+  VIEWER
 }
 
 model NotificationToken {
@@ -69,11 +104,13 @@ model VerificationToken {
 }
 
 model Project {
-  id       String    @id @default(cuid())
-  name     String
-  ownerId  String
-  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  sections Section[]
+  id            String         @id @default(cuid())
+  name          String
+  ownerId       String
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  collaborators Collaborator[]
+  sections      Section[]
+  invitations   Invitation[]
 
   @@index([ownerId])
 }

@@ -1,6 +1,7 @@
 import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { Context } from "./context";
+import { invitationRouter } from "./router/invitation";
 import { notificationRouter } from "./router/notification";
 import { projectsRouter } from "./router/project";
 import { sectionsRouter } from "./router/sections";
@@ -19,6 +20,7 @@ export const appRouter = t.router({
   tasks: tasksRouter(t),
   user: userRouter(t),
   notification: notificationRouter(t),
+  invitation: invitationRouter(t),
 });
 
 export type AppRouter = typeof appRouter;

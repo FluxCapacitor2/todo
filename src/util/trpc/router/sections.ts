@@ -1,4 +1,5 @@
 import { prisma } from "@/util/prisma";
+import { Role } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { MyTrpc } from "../trpc-router";
@@ -11,7 +12,16 @@ export const sectionsRouter = (t: MyTrpc) =>
       .mutation(async ({ ctx, input }) => {
         const project = await prisma.project.findFirst({
           where: {
-            ownerId: ctx.session.id,
+            OR: [
+              {
+                ownerId: ctx.session.id,
+              },
+              {
+                collaborators: {
+                  some: { userId: ctx.session.id, role: Role.EDITOR },
+                },
+              },
+            ],
             id: input.projectId,
           },
         });
@@ -45,7 +55,16 @@ export const sectionsRouter = (t: MyTrpc) =>
           where: {
             id: input.id,
             project: {
-              ownerId: ctx.session.id,
+              OR: [
+                {
+                  ownerId: ctx.session.id,
+                },
+                {
+                  collaborators: {
+                    some: { userId: ctx.session.id, role: Role.EDITOR },
+                  },
+                },
+              ],
             },
           },
         });
@@ -73,7 +92,19 @@ export async function deleteSection(id: number, ownerId: string) {
     where: {
       id,
       project: {
-        ownerId,
+        OR: [
+          {
+            ownerId: ownerId,
+          },
+          {
+            collaborators: {
+              some: {
+                userId: ownerId,
+                role: Role.EDITOR,
+              },
+            },
+          },
+        ],
       },
     },
     include: {

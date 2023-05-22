@@ -15,23 +15,28 @@ export const ViewSelector = ({ id }: { id: string }) => {
         <h1 className="mb-2 text-2xl font-bold">{project?.name}</h1>
       )}
 
-      <div className="flex">
-        <PillButton
-          href={`/project/${id}`}
-          active={pathname.startsWith("/project")}
-        >
-          Project
-        </PillButton>
-        <PillButton href={`/list/${id}`} active={pathname.startsWith("/list")}>
-          List
-        </PillButton>
-        <PillButton
-          href={`/calendar/${id}`}
-          active={pathname.startsWith("/calendar")}
-        >
-          Calendar
-        </PillButton>
-      </div>
+      {!isError && (
+        <div className="flex">
+          <PillButton
+            href={`/project/${id}`}
+            active={pathname.startsWith("/project")}
+          >
+            Project
+          </PillButton>
+          <PillButton
+            href={`/list/${id}`}
+            active={pathname.startsWith("/list")}
+          >
+            List
+          </PillButton>
+          <PillButton
+            href={`/calendar/${id}`}
+            active={pathname.startsWith("/calendar")}
+          >
+            Calendar
+          </PillButton>
+        </div>
+      )}
     </>
   );
 };

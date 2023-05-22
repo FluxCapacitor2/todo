@@ -18,7 +18,9 @@ import { toast } from "react-hot-toast";
 import { MdCalendarToday, MdDelete, MdEdit, MdMenu } from "react-icons/md";
 
 export const ProjectView = ({ id: projectId }: { id: string }) => {
-  const { data } = trpc.projects.get.useQuery(projectId);
+  const { data } = trpc.projects.get.useQuery(projectId, {
+    useErrorBoundary: true,
+  });
 
   if (!data) {
     // Loading UI (skeleton)

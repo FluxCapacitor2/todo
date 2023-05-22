@@ -10,7 +10,9 @@ import { useState } from "react";
 import { MdArrowBack, MdArrowForward, MdCalendarToday } from "react-icons/md";
 
 export const CalendarView = ({ id: projectId }: { id: string }) => {
-  const { data } = trpc.projects.get.useQuery(projectId);
+  const { data } = trpc.projects.get.useQuery(projectId, {
+    useErrorBoundary: true,
+  });
 
   const mapped = data
     ? data.sections.flatMap((section) =>

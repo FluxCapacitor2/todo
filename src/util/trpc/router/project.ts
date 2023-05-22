@@ -2,20 +2,40 @@ import { prisma } from "@/util/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { MyTrpc } from "../trpc-router";
+import { collaboratorsRouter } from "./collaborator";
 
 export const projectsRouter = (t: MyTrpc) =>
   t.router({
+    collaborators: collaboratorsRouter(t),
     list: t.procedure.query(async ({ ctx }) => {
       return await prisma.project.findMany({
         where: {
-          ownerId: ctx.session.id,
+          OR: [
+            { ownerId: ctx.session.id },
+            {
+              collaborators: {
+                some: {
+                  userId: ctx.session.id,
+                },
+              },
+            },
+          ],
         },
       });
     }),
     get: t.procedure.input(z.string()).query(async ({ ctx, input }) => {
-      return await prisma.project.findFirst({
+      const project = await prisma.project.findFirst({
         where: {
-          ownerId: ctx.session.id,
+          OR: [
+            { ownerId: ctx.session.id },
+            {
+              collaborators: {
+                some: {
+                  userId: ctx.session.id,
+                },
+              },
+            },
+          ],
           id: input,
         },
         include: {
@@ -26,6 +46,10 @@ export const projectsRouter = (t: MyTrpc) =>
           },
         },
       });
+      if (!project) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+      return project;
     }),
     create: t.procedure
       .input(z.object({ name: z.string() }))
