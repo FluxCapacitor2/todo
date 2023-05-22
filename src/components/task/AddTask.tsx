@@ -48,6 +48,7 @@ export const AddSectionTask = ({
                 name,
                 description: description ?? "",
                 dueDate,
+                projectId,
               });
             }
           }
@@ -113,6 +114,7 @@ export const AddSubtask = ({
               name,
               description: description ?? "",
               dueDate,
+              projectId,
             },
           ],
         };
