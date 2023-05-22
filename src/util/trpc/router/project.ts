@@ -44,6 +44,7 @@ export const projectsRouter = (t: MyTrpc) =>
               tasks: true,
             },
           },
+          owner: true,
         },
       });
       if (!project) {

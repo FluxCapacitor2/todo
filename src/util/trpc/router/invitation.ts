@@ -22,6 +22,10 @@ export const invitationRouter = (t: MyTrpc) =>
         where: {
           senderId: ctx.session.id,
         },
+        include: {
+          to: true,
+          project: true,
+        },
       });
     }),
     accept: t.procedure.input(z.string()).mutation(async ({ ctx, input }) => {
@@ -45,6 +49,22 @@ export const invitationRouter = (t: MyTrpc) =>
             },
           },
         });
+      });
+    }),
+    rescind: t.procedure.input(z.string()).mutation(async ({ ctx, input }) => {
+      const invitation = await prisma.invitation.findFirst({
+        where: {
+          senderId: ctx.session.id,
+          id: input,
+        },
+      });
+      if (!invitation) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+      await prisma.invitation.delete({
+        where: {
+          id: invitation.id,
+        },
       });
     }),
   });

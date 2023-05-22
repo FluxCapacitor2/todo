@@ -1,7 +1,14 @@
 import { LONG_DATE_FORMAT } from "@/util/constants";
 import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
-import { format, formatDistanceToNow, isAfter } from "date-fns";
+import {
+  format,
+  formatDistanceToNow,
+  isAfter,
+  set,
+  setHours,
+  setMinutes,
+} from "date-fns";
 import toast from "react-hot-toast";
 import { MdClose, MdNotificationAdd, MdNotifications } from "react-icons/md";
 import { DatePickerPopover } from "../ui/DatePickerPopover";
@@ -86,7 +93,7 @@ export const Reminders = ({
           )}
           key={reminder.id}
         >
-          <MdNotifications className="h-5 w-5" />
+          <MdNotifications className="mr-2 h-5 w-5" />
           {format(reminder.time, LONG_DATE_FORMAT)}{" "}
           <span className="text-gray-600 dark:text-gray-400">
             ({formatDistanceToNow(reminder.time, { addSuffix: true })})
@@ -109,6 +116,35 @@ export const Reminders = ({
           <>
             <Reminder
               addReminder={addReminder}
+              date={setHours(setMinutes(new Date(), 0), 12 + 7)}
+              taskId={taskId}
+            >
+              Tonight 7pm
+            </Reminder>
+            <Reminder
+              addReminder={addReminder}
+              date={set(new Date(new Date().getTime() + 86_400_000), {
+                hours: 9,
+                minutes: 0,
+                seconds: 0,
+              })}
+              taskId={taskId}
+            >
+              Tomorrow 9am
+            </Reminder>
+            <Reminder
+              addReminder={addReminder}
+              date={set(new Date(new Date().getTime() + 86_400_000), {
+                hours: 12,
+                minutes: 0,
+                seconds: 0,
+              })}
+              taskId={taskId}
+            >
+              Tomorrow 12pm
+            </Reminder>
+            <Reminder
+              addReminder={addReminder}
               date={new Date(dueDate.getTime() - 1000 * 60 * 30)}
               taskId={taskId}
             >
@@ -123,7 +159,7 @@ export const Reminders = ({
             </Reminder>
             <Reminder
               addReminder={addReminder}
-              date={new Date(dueDate.getTime() - 1000 * 60 * 60)}
+              date={new Date(dueDate.getTime() - 1000 * 60 * 60 * 24)}
               taskId={taskId}
             >
               1 day before

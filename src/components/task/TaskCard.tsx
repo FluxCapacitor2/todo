@@ -7,6 +7,7 @@ import { Task } from "@prisma/client";
 import clsx from "clsx";
 import { format } from "date-fns";
 import { produce } from "immer";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -21,7 +22,10 @@ import {
 import { useDebounce } from "use-debounce";
 import { Button } from "../ui/Button";
 import { Checkbox } from "../ui/Checkbox";
-import { TaskModal } from "./TaskModal";
+
+const TaskModal = dynamic(
+  async () => (await import("@/components/task/TaskModal")).TaskModal
+);
 
 export const TaskWrapper = ({
   task: inTask,
@@ -92,6 +96,11 @@ export const TaskCard = ({
   showCheckbox?: boolean;
 }) => {
   const [modalShown, setModalShown] = useState(false);
+  const [modalLoaded, setModalLoaded] = useState(false);
+
+  useEffect(() => {
+    if (modalShown) setModalLoaded(true);
+  }, [modalShown]);
 
   return (
     <TaskWrapper task={inTask}>
@@ -176,16 +185,18 @@ export const TaskCard = ({
               }
             />
           </div>
-          <TaskModal
-            {...{
-              modalShown,
-              setModalShown,
-              task,
-              projectId,
-              setTask,
-              isSaving,
-            }}
-          />
+          {modalLoaded && (
+            <TaskModal
+              {...{
+                modalShown,
+                setModalShown,
+                task,
+                projectId,
+                setTask,
+                isSaving,
+              }}
+            />
+          )}
         </div>
       )}
     </TaskWrapper>
@@ -269,7 +280,7 @@ export const TaskMenuButton = ({
   const copy = () => {
     navigator.clipboard.writeText(
       pathname?.includes(projectId)
-        ? `${process.env.NEXT_PUBLIC_BASE_URL}/${pathname}/${task.id}`
+        ? `${process.env.NEXT_PUBLIC_BASE_URL}${pathname}/${task.id}`
         : `${process.env.NEXT_PUBLIC_BASE_URL}/project/${projectId}/${task.id}`
     );
   };

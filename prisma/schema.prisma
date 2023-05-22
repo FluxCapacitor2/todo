@@ -111,6 +111,7 @@ model Project {
   collaborators Collaborator[]
   sections      Section[]
   invitations   Invitation[]
+  Task          Task[]
 
   @@index([ownerId])
 }
@@ -144,7 +145,10 @@ model Task {
   section      Section?   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   labels       Label[]    @relation("LabelToTask")
   reminders    Reminder[]
+  project      Project    @relation(fields: [projectId], references: [id])
+  projectId    String
 
+  @@index([projectId])
   @@index([ownerId])
   @@index([sectionId])
   @@index([parentTaskId])
