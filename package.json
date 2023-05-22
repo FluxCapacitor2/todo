@@ -9,6 +9,7 @@
     "lint": "next lint",
     "prepare": "husky install",
     "prisma": "env-cmd -f .env.local npx prisma",
+    "with-env": "env-cmd -f .env.local",
     "notif": "env-cmd -f .env.local node notification_service.mjs"
   },
   "dependencies": {

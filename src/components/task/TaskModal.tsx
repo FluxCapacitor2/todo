@@ -206,40 +206,40 @@ export const TaskModal = ({
           </div>
         </div>
 
-        {fullTask?.subTasks ? (
-          <>
-            <h2 className="text-3xl font-bold">
-              Sub-tasks{" "}
-              {fullTask?.subTasks?.length > 0 && (
-                <span className="text-base font-normal">
-                  {fullTask.subTasks.filter((it) => it.completed).length}/
-                  {fullTask.subTasks.length} completed
-                </span>
-              )}
-            </h2>
+        <section className="flex flex-col gap-2">
+          <h2 className="text-3xl font-bold">
+            Sub-tasks{" "}
+            {fullTask?.subTasks && fullTask.subTasks.length > 0 && (
+              <span className="text-base font-normal">
+                {fullTask.subTasks.filter((it) => it.completed).length}/
+                {fullTask.subTasks.length} completed
+              </span>
+            )}
+          </h2>
+          {fullTask?.subTasks ? (
+            <>
+              <div className="flex flex-col gap-4">
+                {fullTask.subTasks.map((task) => (
+                  <TaskCard
+                    task={task}
+                    key={task.id}
+                    projectId={projectId}
+                    isListItem
+                  />
+                ))}
+              </div>
 
-            <div className="flex flex-col gap-4">
-              {fullTask.subTasks.map((task) => (
-                <TaskCard
-                  task={task}
-                  key={task.id}
-                  projectId={projectId}
-                  isListItem
-                />
-              ))}
+              <AddSubtask projectId={projectId} parentTaskId={task.id} />
+            </>
+          ) : loadingSubTasks ? (
+            <Spinner />
+          ) : (
+            <div className="flex items-center gap-2">
+              <MdError />
+              Failed to load sub-tasks.
             </div>
-
-            <AddSubtask projectId={projectId} parentTaskId={task.id} />
-          </>
-        ) : loadingSubTasks ? (
-          <Spinner />
-        ) : (
-          <div className="flex items-center gap-2">
-            <MdError />
-            Failed to load sub-tasks.
-          </div>
-        )}
-
+          )}
+        </section>
         <div className="flex justify-end">
           <Button variant="flat" onClick={() => setModalShown(false)}>
             Close

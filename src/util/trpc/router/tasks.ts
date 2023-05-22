@@ -49,6 +49,7 @@ export const tasksRouter = (t: MyTrpc) =>
                 description: input.description ?? "",
                 ownerId: ctx.session.id,
                 dueDate: input.dueDate,
+                projectId: section.projectId,
               },
             },
           },
@@ -79,7 +80,18 @@ export const tasksRouter = (t: MyTrpc) =>
         const task = await prisma.task.findFirst({
           where: {
             id: input.id,
-            ownerId: ctx.session.id,
+            OR: [
+              {
+                ownerId: ctx.session.id,
+              },
+              {
+                project: {
+                  collaborators: {
+                    some: { userId: ctx.session.id, role: Role.EDITOR },
+                  },
+                },
+              },
+            ],
           },
         });
 
@@ -116,7 +128,18 @@ export const tasksRouter = (t: MyTrpc) =>
         const task = await prisma.task.findFirst({
           where: {
             id: input.id,
-            ownerId: ctx.session.id,
+            OR: [
+              {
+                ownerId: ctx.session.id,
+              },
+              {
+                project: {
+                  collaborators: {
+                    some: { userId: ctx.session.id, role: Role.EDITOR },
+                  },
+                },
+              },
+            ],
           },
         });
         if (!task) {
@@ -134,6 +157,7 @@ export const tasksRouter = (t: MyTrpc) =>
                   description: input.description,
                   ownerId: ctx.session.id,
                   dueDate: input.dueDate,
+                  projectId: task.projectId,
                 },
               ],
             },
@@ -145,12 +169,20 @@ export const tasksRouter = (t: MyTrpc) =>
       .input(z.object({ id: z.number() }))
       .query(async ({ ctx, input }) => {
         const task = await prisma.task.findFirst({
-          //todo allow collaborators
           where: {
             id: input.id,
             OR: [
               {
                 ownerId: ctx.session.id,
+              },
+              {
+                project: {
+                  collaborators: {
+                    some: {
+                      userId: ctx.session.id,
+                    },
+                  },
+                },
               },
             ],
           },
@@ -168,11 +200,19 @@ export const tasksRouter = (t: MyTrpc) =>
      * Get a list of every top-level task that the user currently has. Does not include sub-tasks.
      */
     listTopLevel: t.procedure.query(async ({ ctx }) => {
-      //todo include projects where the user is a collaborator
       return await prisma.task.findMany({
         where: {
           AND: {
-            ownerId: ctx.session.id,
+            OR: [
+              {
+                ownerId: ctx.session.id,
+              },
+              {
+                project: {
+                  collaborators: { some: { userId: ctx.session.id } },
+                },
+              },
+            ],
             parentTaskId: null,
           },
         },

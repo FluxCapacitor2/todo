@@ -8,29 +8,24 @@ export const collaboratorsRouter = (t: MyTrpc) =>
     list: t.procedure.input(z.string()).query(async ({ ctx, input }) => {
       const list = await prisma.collaborator.findMany({
         where: {
+          projectId: input,
           Project: {
             OR: [
-              { ownerId: ctx.session.id },
+              {
+                ownerId: ctx.session.id,
+              },
               {
                 collaborators: {
                   some: {
-                    id: ctx.session.id,
+                    userId: ctx.session.id,
                   },
                 },
               },
             ],
           },
         },
-        select: {
-          id: true,
-          role: true,
-          user: {
-            select: {
-              email: true,
-              name: true,
-              image: true,
-            },
-          },
+        include: {
+          user: true,
         },
       });
       if (!list) {
@@ -101,4 +96,35 @@ export const collaboratorsRouter = (t: MyTrpc) =>
           },
         });
       }),
+    remove: t.procedure.input(z.string()).mutation(async ({ ctx, input }) => {
+      // Only the owner can remove other collaborators
+      const invitation = await prisma.invitation.findFirst({
+        where: {
+          id: input,
+          project: {
+            OR: [
+              {
+                ownerId: ctx.session.id,
+              },
+              {
+                collaborators: {
+                  some: {
+                    id: input,
+                    userId: ctx.session.id,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      if (!invitation) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+      await prisma.invitation.delete({
+        where: {
+          id: invitation.id,
+        },
+      });
+    }),
   });

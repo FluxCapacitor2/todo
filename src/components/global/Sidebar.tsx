@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
+import { ExtSession } from "@/pages/api/auth/[...nextauth]";
 import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
 import { useSession } from "next-auth/react";
@@ -17,6 +18,7 @@ import {
   MdClose,
   MdDelete,
   MdError,
+  MdGroups,
   MdMenu,
 } from "react-icons/md";
 
@@ -28,6 +30,8 @@ export const Sidebar = () => {
   const session = useSession();
 
   const { data, isLoading, isError } = trpc.projects.list.useQuery();
+
+  const { data: invitations } = trpc.invitation.listIncoming.useQuery();
 
   const [shown, setShown] = useState(false);
 
@@ -47,7 +51,7 @@ export const Sidebar = () => {
         <Link href="/profile">
           <div
             className={clsx(
-              "flex items-center gap-2 p-4",
+              "flex items-center gap-2 p-4 font-medium",
               pathname === "/profile" ? activeClass : inactiveClass
             )}
           >
@@ -61,10 +65,26 @@ export const Sidebar = () => {
                 unoptimized
               />
             )}
-            <p className="text-sm font-bold">{session?.data?.user?.name}</p>
+            <p>{session?.data?.user?.name}</p>
           </div>
         </Link>
         <Divider />
+        <Link href="/invitations">
+          <div
+            className={clsx(
+              "flex items-center gap-2 p-4 font-medium",
+              pathname === "/invitations" ? activeClass : inactiveClass
+            )}
+          >
+            <MdGroups />
+            <p>Invitations</p>
+            {invitations && invitations.length > 0 && (
+              <p className="rounded-md bg-red-500 px-1 text-white">
+                {invitations.length}
+              </p>
+            )}
+          </div>
+        </Link>
         <Link href="/projects">
           <div
             className={clsx(
@@ -120,6 +140,7 @@ export const Sidebar = () => {
             {data?.map((project) => (
               <ProjectItem
                 id={project.id}
+                ownerId={project.ownerId}
                 name={project.name || "Untitled Project"}
                 key={project.id}
               />
@@ -160,10 +181,23 @@ const Divider = () => (
   </div>
 );
 
-const ProjectItem = ({ name, id }: { name: string; id: string }) => {
+const ProjectItem = ({
+  name,
+  ownerId,
+  id,
+}: {
+  name: string;
+  ownerId: string;
+  id: string;
+}) => {
   const { mutateAsync, isLoading } = trpc.projects.delete.useMutation();
   const router = useRouter();
   const pathname = usePathname();
+
+  const session = useSession();
+  const isCollaborator =
+    session.status === "authenticated" &&
+    ownerId !== (session.data as ExtSession).id;
 
   const active = pathname?.startsWith(`/project/${id}`);
 
@@ -187,7 +221,12 @@ const ProjectItem = ({ name, id }: { name: string; id: string }) => {
           active ? activeClass : inactiveClass
         )}
       >
-        <p className="grow">{name}</p>
+        <p className="grow">
+          <span className="mr-2">{name}</span>
+          {isCollaborator && (
+            <MdGroups className="inline fill-gray-700 dark:fill-gray-300" />
+          )}
+        </p>
         <Button
           variant="flat"
           className="text-gray-600 dark:text-gray-400"
