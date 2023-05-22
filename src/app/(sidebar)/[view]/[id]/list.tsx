@@ -7,7 +7,9 @@ import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
 
 export const ListView = ({ id: projectId }: { id: string }) => {
-  const { data } = trpc.projects.get.useQuery(projectId);
+  const { data } = trpc.projects.get.useQuery(projectId, {
+    useErrorBoundary: true,
+  });
 
   if (!data) {
     // Loading UI (skeleton)

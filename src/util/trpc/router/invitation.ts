@@ -1,0 +1,50 @@
+import { prisma } from "@/util/prisma";
+import { Role } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+import { MyTrpc } from "../trpc-router";
+
+export const invitationRouter = (t: MyTrpc) =>
+  t.router({
+    listIncoming: t.procedure.query(async ({ ctx }) => {
+      return await prisma.invitation.findMany({
+        where: {
+          receiverId: ctx.session.id,
+        },
+        include: {
+          from: true,
+          project: true,
+        },
+      });
+    }),
+    listOutgoing: t.procedure.query(async ({ ctx }) => {
+      return await prisma.invitation.findMany({
+        where: {
+          senderId: ctx.session.id,
+        },
+      });
+    }),
+    accept: t.procedure.input(z.string()).mutation(async ({ ctx, input }) => {
+      await prisma.$transaction(async (tx) => {
+        const invitation = await tx.invitation.delete({
+          where: { id: input },
+        });
+        if (invitation.receiverId !== ctx.session.id) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+        await tx.project.update({
+          where: {
+            id: invitation.projectId,
+          },
+          data: {
+            collaborators: {
+              create: {
+                role: Role.EDITOR, //todo roles
+                userId: ctx.session.id,
+              },
+            },
+          },
+        });
+      });
+    }),
+  });

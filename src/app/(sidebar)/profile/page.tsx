@@ -1,10 +1,11 @@
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { getServerSession } from "next-auth";
 import Image from "next/image";
-import { redirect } from "next/navigation";
-import { SignOutButton } from "./SignOutButton";
-import { RequestNotificationPermission } from "./RequestNotificationPermission";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Invitations } from "./Invitations";
+import { RequestNotificationPermission } from "./RequestNotificationPermission";
+import { SignOutButton } from "./SignOutButton";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -33,6 +34,7 @@ export default async function ProfilePage() {
         <RequestNotificationPermission />
         <SignOutButton />
       </div>
+      <Invitations />
       <Link
         href="https://www.flaticon.com/free-icons/foursquare-check-in"
         className="mt-12 text-sm underline"

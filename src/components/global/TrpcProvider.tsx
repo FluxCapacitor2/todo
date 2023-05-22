@@ -51,10 +51,8 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
               if (session.status === "unauthenticated") {
                 return false;
               }
-              if (
-                (error as TRPCClientError<AppRouter>)?.data?.code ===
-                "UNAUTHORIZED"
-              ) {
+              const code = (error as TRPCClientError<AppRouter>)?.data?.code;
+              if (code === "UNAUTHORIZED" || code === "NOT_FOUND") {
                 return false;
               }
               return failureCount < 3;
