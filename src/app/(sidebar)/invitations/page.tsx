@@ -5,13 +5,11 @@ import { Spinner } from "@/components/ui/Spinner";
 import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { MdClose } from "react-icons/md";
 
 export default function Page() {
   const utils = trpc.useContext();
-  const router = useRouter();
 
   const { data: incoming, isLoading: loadingIncoming } =
     trpc.invitation.listIncoming.useQuery();
@@ -22,7 +20,6 @@ export default function Page() {
     onSettled: (data, error, variables) => {
       utils.invitation.listIncoming.invalidate();
       utils.projects.list.invalidate();
-      router.push(`/project/${variables}`);
 
       const name = utils.invitation.listIncoming
         .getData()
