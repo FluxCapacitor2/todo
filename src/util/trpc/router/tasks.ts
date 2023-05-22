@@ -82,7 +82,9 @@ export const tasksRouter = (t: MyTrpc) =>
             id: input.id,
             OR: [
               {
-                ownerId: ctx.session.id,
+                project: {
+                  ownerId: ctx.session.id,
+                },
               },
               {
                 project: {
