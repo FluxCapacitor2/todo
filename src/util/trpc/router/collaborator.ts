@@ -98,10 +98,10 @@ export const collaboratorsRouter = (t: MyTrpc) =>
       }),
     remove: t.procedure.input(z.string()).mutation(async ({ ctx, input }) => {
       // Only the owner can remove other collaborators
-      const invitation = await prisma.invitation.findFirst({
+      const collaborator = await prisma.collaborator.findFirst({
         where: {
           id: input,
-          project: {
+          Project: {
             OR: [
               {
                 ownerId: ctx.session.id,
@@ -118,12 +118,12 @@ export const collaboratorsRouter = (t: MyTrpc) =>
           },
         },
       });
-      if (!invitation) {
+      if (!collaborator) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
-      await prisma.invitation.delete({
+      await prisma.collaborator.delete({
         where: {
-          id: invitation.id,
+          id: collaborator.id,
         },
       });
     }),

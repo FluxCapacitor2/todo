@@ -48,7 +48,7 @@ export default function Page() {
 
       <main
         className={clsx(
-          !empty && "flex-col",
+          !empty ? "flex-col" : "flex-col md:flex-row",
           "mx-auto mt-8 flex max-w-prose justify-center gap-12"
         )}
       >
