@@ -9,7 +9,9 @@ export const ProjectSelector = ({
 }: {
   children: (included: Project[] | undefined) => ReactNode;
 }) => {
-  const { data: projects } = trpc.projects.list.useQuery();
+  const { data: projects } = trpc.projects.list.useQuery(undefined, {
+    refetchInterval: 300_000,
+  });
   const [included, setIncluded] = useState(projects);
 
   useEffect(() => {

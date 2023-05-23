@@ -1,13 +1,15 @@
-import chalk from "chalk";
 import { Prisma, PrismaClient } from "@prisma/client";
+import chalk from "chalk";
 
 export const prisma = new PrismaClient({
-  log: [
-    {
-      emit: "event",
-      level: "query",
-    },
-  ],
+  log: process.env.LOG_QUERIES
+    ? [
+        {
+          emit: "event",
+          level: "query",
+        },
+      ]
+    : ["info"],
 });
 
 prisma.$on("query", (e) => {

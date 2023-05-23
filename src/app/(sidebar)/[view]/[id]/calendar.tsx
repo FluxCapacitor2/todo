@@ -12,6 +12,7 @@ import { MdArrowBack, MdArrowForward, MdCalendarToday } from "react-icons/md";
 export const CalendarView = ({ id: projectId }: { id: string }) => {
   const { data } = trpc.projects.get.useQuery(projectId, {
     useErrorBoundary: true,
+    refetchInterval: 30_000,
   });
 
   const mapped = data

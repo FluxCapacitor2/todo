@@ -174,7 +174,9 @@ const AddTask = ({
   section?: number;
   sectionEditable?: boolean;
 }) => {
-  const { data, isLoading, isError } = trpc.projects.get.useQuery(projectId);
+  const { data, isLoading, isError } = trpc.projects.get.useQuery(projectId, {
+    refetchInterval: 60_000,
+  });
 
   const [focused, setFocused] = useState(false);
   const [dueDate, setDueDate] = useState<Date | null>(null);

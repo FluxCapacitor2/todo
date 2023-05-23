@@ -12,9 +12,13 @@ export default function Page() {
   const utils = trpc.useContext();
 
   const { data: incoming, isLoading: loadingIncoming } =
-    trpc.invitation.listIncoming.useQuery();
+    trpc.invitation.listIncoming.useQuery(undefined, {
+      refetchInterval: 30_000,
+    });
   const { data: outgoing, isLoading: loadingOutgoing } =
-    trpc.invitation.listOutgoing.useQuery();
+    trpc.invitation.listOutgoing.useQuery(undefined, {
+      refetchInterval: 120_000,
+    });
 
   const { mutateAsync: accept } = trpc.invitation.accept.useMutation({
     onSettled: (data, error, variables) => {

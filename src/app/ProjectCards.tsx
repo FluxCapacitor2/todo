@@ -8,7 +8,11 @@ import { useEffect, useMemo, useState } from "react";
 import { MdAdd, MdError } from "react-icons/md";
 
 export const ProjectCards = () => {
-  const { data: projects, isLoading, isError } = trpc.projects.list.useQuery();
+  const {
+    data: projects,
+    isLoading,
+    isError,
+  } = trpc.projects.list.useQuery(undefined, { refetchInterval: 120_000 });
 
   const [modalShown, setModalShown] = useState(false);
 
@@ -89,7 +93,9 @@ const ProjectCard = ({
   projectId: string;
   name: string;
 }) => {
-  const { data, isLoading, isError } = trpc.projects.get.useQuery(projectId);
+  const { data, isLoading, isError } = trpc.projects.get.useQuery(projectId, {
+    refetchInterval: 300_000,
+  });
 
   const total = useMemo(
     () => data?.sections.reduce((acc, s) => acc + s.tasks.length, 0),

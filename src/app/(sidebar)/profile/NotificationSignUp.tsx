@@ -16,7 +16,9 @@ const getNotificationToken = () => {
 };
 
 const component = () => {
-  const { data: tokens, isLoading } = trpc.user.getTokens.useQuery();
+  const { data: tokens, isLoading } = trpc.user.getTokens.useQuery(undefined, {
+    refetchInterval: false,
+  });
   const { mutateAsync: addAsync, isLoading: isAdding } =
     trpc.user.addToken.useMutation();
   const { mutateAsync: removeAsync, isLoading: isRemoving } =

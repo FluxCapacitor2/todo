@@ -57,9 +57,9 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
               }
               return failureCount < 3;
             },
-            cacheTime: 1000 * 60 * 60 * 24, // 24 hours
-            staleTime: 10000, // 10 seconds
-            refetchInterval: 1000 * 120, // 2 minutes
+            cacheTime: 1_000 * 60 * 60 * 24, // 24 hours
+            staleTime: 10_000, // 10 seconds
+            refetchInterval: 30_000, // 30 seconds
           },
         },
       })

@@ -45,7 +45,10 @@ export const TaskModal = ({
   isSaving: boolean;
 }) => {
   const { data: fullTask, isLoading: loadingSubTasks } =
-    trpc.tasks.get.useQuery({ id: task.id }, { enabled: modalShown });
+    trpc.tasks.get.useQuery(
+      { id: task.id },
+      { enabled: modalShown, refetchInterval: 30_000 }
+    );
 
   const checkboxRef = useRef<HTMLInputElement | null>(null);
 

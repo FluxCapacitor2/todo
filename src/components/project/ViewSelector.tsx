@@ -6,7 +6,11 @@ import { PillButton } from "../ui/PillButton";
 
 export const ViewSelector = ({ id }: { id: string }) => {
   const pathname = usePathname() ?? "";
-  const { data: project, isLoading, isError } = trpc.projects.get.useQuery(id);
+  const {
+    data: project,
+    isLoading,
+    isError,
+  } = trpc.projects.get.useQuery(id, { refetchInterval: 600_000 });
   return (
     <>
       {isLoading ? (

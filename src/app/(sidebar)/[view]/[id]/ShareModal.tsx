@@ -42,13 +42,19 @@ export const ShareModal = ({
   const emailField = useRef<HTMLInputElement | null>(null);
   const utils = trpc.useContext();
 
-  const { data: collaborators } =
-    trpc.projects.collaborators.list.useQuery(projectId);
+  const { data: collaborators } = trpc.projects.collaborators.list.useQuery(
+    projectId,
+    { refetchInterval: 120_000 }
+  );
 
   const { data: invitations } =
-    trpc.projects.collaborators.listInvitations.useQuery(projectId);
+    trpc.projects.collaborators.listInvitations.useQuery(projectId, {
+      refetchInterval: 60_000,
+    });
 
-  const { data: project } = trpc.projects.get.useQuery(projectId);
+  const { data: project } = trpc.projects.get.useQuery(projectId, {
+    refetchInterval: false,
+  });
 
   const { mutateAsync: remove } =
     trpc.projects.collaborators.remove.useMutation({

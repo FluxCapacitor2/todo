@@ -20,6 +20,7 @@ import { MdCalendarToday, MdDelete, MdEdit, MdMenu } from "react-icons/md";
 export const ProjectView = ({ id: projectId }: { id: string }) => {
   const { data } = trpc.projects.get.useQuery(projectId, {
     useErrorBoundary: true,
+    refetchInterval: 30_000,
   });
 
   if (!data) {

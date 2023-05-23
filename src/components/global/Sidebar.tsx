@@ -29,9 +29,16 @@ const inactiveClass =
 export const Sidebar = () => {
   const session = useSession();
 
-  const { data, isLoading, isError } = trpc.projects.list.useQuery();
+  const { data, isLoading, isError } = trpc.projects.list.useQuery(undefined, {
+    refetchInterval: 300_000, // 5 minutes
+  });
 
-  const { data: invitations } = trpc.invitation.listIncoming.useQuery();
+  const { data: invitations } = trpc.invitation.listIncoming.useQuery(
+    undefined,
+    {
+      refetchInterval: 300_000, // 5 minutes
+    }
+  );
 
   const [shown, setShown] = useState(false);
 

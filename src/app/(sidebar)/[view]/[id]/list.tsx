@@ -9,6 +9,7 @@ import { trpc } from "@/util/trpc/trpc";
 export const ListView = ({ id: projectId }: { id: string }) => {
   const { data } = trpc.projects.get.useQuery(projectId, {
     useErrorBoundary: true,
+    refetchInterval: 30_000,
   });
 
   if (!data) {

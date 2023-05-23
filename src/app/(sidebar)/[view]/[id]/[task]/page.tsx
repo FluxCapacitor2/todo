@@ -18,7 +18,10 @@ export default function Page({
     data: task,
     isLoading,
     isError,
-  } = trpc.tasks.get.useQuery({ id: parseInt(taskId) });
+  } = trpc.tasks.get.useQuery(
+    { id: parseInt(taskId) },
+    { refetchInterval: 30_000 }
+  );
 
   const backPath = `/${view}/${id}`;
   const router = useRouter();

@@ -23,7 +23,9 @@ export const Reminders = ({
   dueDate: Date | null;
 }) => {
   const utils = trpc.useContext();
-  const { data: reminders } = trpc.notification.list.useQuery(taskId);
+  const { data: reminders } = trpc.notification.list.useQuery(taskId, {
+    refetchInterval: 120_000,
+  });
 
   const { mutateAsync: _addReminder } = trpc.notification.add.useMutation({
     onMutate: ({ projectId, taskId, time }) => {

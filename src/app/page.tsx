@@ -113,7 +113,7 @@ export default async function Home() {
             <h3 className="text-center">
               Sharing
               <span className="ml-2 inline-block w-max self-center rounded-full bg-primary-200 px-2 py-1 text-xs text-primary-950">
-                Coming Soon
+                NEW
               </span>
             </h3>
 
