@@ -1,7 +1,7 @@
 "use client";
 
 import { TaskCard } from "@/components/task/TaskCard";
-import { Button } from "@/components/ui/Button";
+import { PillButton } from "@/components/ui/PillButton";
 import { trpc } from "@/util/trpc/trpc";
 import { Task } from "@prisma/client";
 import { DPDay, useDatePicker } from "@rehookify/datepicker";
@@ -47,18 +47,18 @@ export const Calendar = ({
           <p className="text-3xl font-bold">
             {month} {year}
           </p>
-          <div className="flex gap-2">
-            <Button variant="subtle" {...previousMonthButton()}>
+          <div className="flex">
+            <PillButton {...previousMonthButton()}>
               <MdArrowBack />
-            </Button>
+            </PillButton>
 
-            <Button variant="subtle" onClick={() => setMonth(new Date())}>
+            <PillButton onClick={() => setMonth(new Date())} className="gap-2">
               <MdCalendarToday /> Today
-            </Button>
+            </PillButton>
 
-            <Button variant="subtle" {...nextMonthButton()}>
+            <PillButton {...nextMonthButton()}>
               <MdArrowForward />
-            </Button>
+            </PillButton>
           </div>
         </div>
         <ul className="grid grid-cols-7 place-items-center">

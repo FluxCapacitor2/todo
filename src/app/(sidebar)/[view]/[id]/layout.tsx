@@ -10,7 +10,7 @@ export default function Layout({
   children: ReactNode;
 }) {
   return (
-    <main className="px-2 pt-4 md:px-6">
+    <main className="px-2 md:px-6 md:pt-4">
       <div className="flex justify-between">
         <div>
           <ViewSelector id={id} />

@@ -16,7 +16,7 @@ export default function Page() {
     : null;
 
   return (
-    <main className="px-2 pt-4 md:px-6">
+    <main className="px-2 md:px-6 md:pt-4">
       <ProjectSelector>
         {(included) => {
           const filtered = mapped?.filter((task) =>

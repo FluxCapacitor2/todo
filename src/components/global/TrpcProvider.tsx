@@ -4,7 +4,6 @@ import { createIDBPersister } from "@/util/idb-persister";
 import { trpc } from "@/util/trpc/trpc";
 import { AppRouter } from "@/util/trpc/trpc-router";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import {
   TRPCClientError,
@@ -96,7 +95,7 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
         client={queryClient}
       >
         {children}
-        <ReactQueryDevtools />
+        {/* <ReactQueryDevtools /> */}
       </PersistQueryClientProvider>
     </trpc.Provider>
   );

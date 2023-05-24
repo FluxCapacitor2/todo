@@ -51,7 +51,7 @@ export const Sidebar = () => {
     <>
       <nav
         className={clsx(
-          shown ? "absolute inset-0 z-20 flex" : "sticky hidden",
+          shown ? "fixed inset-0 z-20 flex" : "sticky hidden",
           "top-0 h-full min-h-screen min-w-[16rem] flex-col bg-gray-200 dark:bg-gray-900 md:flex"
         )}
       >
@@ -154,30 +154,23 @@ export const Sidebar = () => {
             ))}
           </>
         )}
-        {shown && (
-          <>
-            <Divider />
-            <div
-              className={clsx(
-                inactiveClass,
-                "flex cursor-pointer items-center gap-2 p-4"
-              )}
-              onClick={() => setShown(!shown)}
-            >
-              <MdClose />
-              Close Menu
-            </div>
-          </>
-        )}
       </nav>
-      <div className="absolute inset-x-0 bottom-0 z-10 block bg-gray-800 md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-center gap-2 bg-gray-800 p-2 md:hidden">
         <Button
           variant="flat"
           onClick={() => setShown(!shown)}
           aria-label="Toggle navigation"
         >
-          <MdMenu />
+          {shown ? (
+            <MdClose className="h-5 w-5" />
+          ) : (
+            <MdMenu className="h-5 w-5" />
+          )}
         </Button>
+        <div
+          id="page-nav"
+          className={clsx(shown ? "hidden" : "flex items-center gap-2")}
+        />
       </div>
     </>
   );

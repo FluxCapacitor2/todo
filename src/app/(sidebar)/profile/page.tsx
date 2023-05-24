@@ -15,7 +15,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <main className="px-6 pt-4">
+    <main className="px-6 md:pt-4">
       <div className="mb-8 flex items-center gap-2">
         <Image
           width={48}

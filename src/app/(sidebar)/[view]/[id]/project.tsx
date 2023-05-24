@@ -46,7 +46,7 @@ export const Skeleton = (
   <div className="flex">
     {new Array(5).fill(null).map((_, i) => (
       <div
-        className="mr-4 flex h-[calc(100vh-6rem)] w-80 snap-center flex-col rounded-lg p-2"
+        className="mr-4 flex w-80 snap-center flex-col rounded-lg p-2"
         key={i}
       >
         <div className="flex items-center justify-between">
@@ -129,7 +129,7 @@ const Section = ({
 
   return (
     <div
-      className="mr-4 flex h-[calc(100vh-6rem)] w-80 snap-center flex-col rounded-lg p-2"
+      className="mr-4 flex w-80 snap-center flex-col rounded-lg p-2"
       key={section.id}
     >
       <div
