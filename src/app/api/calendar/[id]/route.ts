@@ -8,7 +8,20 @@ export const GET = async (
   _req: NextRequest,
   { params: { id } }: { params: { id: string } }
 ) => {
-  // Sorry if you have to debug this
+  const token = await prisma.apiToken.findFirst({
+    where: { id },
+  });
+
+  if (!token) {
+    return new Response(
+      `Error: Invalid link! Please go to ${process.env.NEXT_PUBLIC_BASE_URL}/profile to generate a new iCal subscription link.`,
+      {
+        status: 401,
+        statusText: "Unauthorized",
+      }
+    );
+  }
+
   const tasks = await prisma.task.findMany({
     where: {
       completed: false,
@@ -18,24 +31,12 @@ export const GET = async (
       project: {
         OR: [
           {
-            owner: {
-              apiTokens: {
-                some: {
-                  id,
-                },
-              },
-            },
+            ownerId: token.userId,
           },
           {
             collaborators: {
               some: {
-                user: {
-                  apiTokens: {
-                    some: {
-                      id,
-                    },
-                  },
-                },
+                userId: token.userId,
               },
             },
           },

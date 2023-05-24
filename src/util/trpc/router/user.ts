@@ -1,4 +1,5 @@
 import { prisma } from "@/util/prisma";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { MyTrpc } from "../trpc-router";
 
@@ -69,4 +70,19 @@ export const userRouter = (t: MyTrpc) =>
       }
       return token;
     }),
+    invalidateApiToken: t.procedure
+      .input(z.string())
+      .mutation(async ({ input, ctx }) => {
+        const token = await prisma.apiToken.findFirst({
+          where: {
+            userId: ctx.session.id,
+            id: input,
+          },
+        });
+        if (!token) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        await prisma.apiToken.delete({ where: { id: input } });
+        return token;
+      }),
   });

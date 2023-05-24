@@ -34,6 +34,11 @@ export default async function ProfilePage() {
         <h2 className="text-2xl font-bold">Calendar</h2>
         <p>Subscribe to your tasks as a calendar feed.</p>
         <CalendarFeed />
+        <p className="max-w-sm text-xs">
+          <b>Note</b>: Anyone with the link can view your tasks! If you
+          accidentally share the link, you can reset it by clicking the rotate
+          button above.
+        </p>
       </div>
       <div className="my-8">
         <h2 className="text-2xl font-bold">Notifications</h2>
