@@ -170,14 +170,15 @@ export const Sidebar = () => {
           </>
         )}
       </nav>
-      <Button
-        variant="flat"
-        className="absolute left-3 top-1 block md:hidden"
-        onClick={() => setShown(!shown)}
-        aria-label="Toggle navigation"
-      >
-        <MdMenu />
-      </Button>
+      <div className="absolute inset-x-0 bottom-0 z-10 block bg-gray-800 md:hidden">
+        <Button
+          variant="flat"
+          onClick={() => setShown(!shown)}
+          aria-label="Toggle navigation"
+        >
+          <MdMenu />
+        </Button>
+      </div>
     </>
   );
 };

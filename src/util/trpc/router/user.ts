@@ -4,27 +4,29 @@ import { MyTrpc } from "../trpc-router";
 
 export const userRouter = (t: MyTrpc) =>
   t.router({
-    addToken: t.procedure.input(z.string()).mutation(async ({ input, ctx }) => {
-      await prisma.user.update({
-        where: {
-          id: ctx.session.id,
-        },
-        data: {
-          notificationTokens: {
-            upsert: {
-              create: {
-                token: input,
-              },
-              update: {},
-              where: {
-                token: input,
+    addNotifToken: t.procedure
+      .input(z.string())
+      .mutation(async ({ input, ctx }) => {
+        await prisma.user.update({
+          where: {
+            id: ctx.session.id,
+          },
+          data: {
+            notificationTokens: {
+              upsert: {
+                create: {
+                  token: input,
+                },
+                update: {},
+                where: {
+                  token: input,
+                },
               },
             },
           },
-        },
-      });
-    }),
-    removeToken: t.procedure
+        });
+      }),
+    removeNotifToken: t.procedure
       .input(z.string())
       .mutation(async ({ input, ctx }) => {
         await prisma.user.update({
@@ -40,7 +42,7 @@ export const userRouter = (t: MyTrpc) =>
           },
         });
       }),
-    getTokens: t.procedure.query(async ({ input, ctx }) => {
+    getNotifTokens: t.procedure.query(async ({ input, ctx }) => {
       return (
         await prisma.user.findFirst({
           where: {
@@ -51,5 +53,20 @@ export const userRouter = (t: MyTrpc) =>
           },
         })
       )?.notificationTokens;
+    }),
+    getApiToken: t.procedure.query(async ({ input, ctx }) => {
+      const token = await prisma.apiToken.findFirst({
+        where: {
+          userId: ctx.session.id,
+        },
+      });
+      if (!token) {
+        return await prisma.apiToken.create({
+          data: {
+            userId: ctx.session.id,
+          },
+        });
+      }
+      return token;
     }),
   });

@@ -50,7 +50,17 @@ model User {
   notificationTokens  NotificationToken[]
   outgoingInvitations Invitation[]        @relation("from")
   incomingInvitations Invitation[]        @relation("to")
+  apiTokens           ApiToken[]
   Collaborator        Collaborator[]
+}
+
+model ApiToken {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  generatedAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Invitation {

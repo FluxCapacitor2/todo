@@ -16,13 +16,16 @@ const getNotificationToken = () => {
 };
 
 const component = () => {
-  const { data: tokens, isLoading } = trpc.user.getTokens.useQuery(undefined, {
-    refetchInterval: false,
-  });
+  const { data: tokens, isLoading } = trpc.user.getNotifTokens.useQuery(
+    undefined,
+    {
+      refetchInterval: false,
+    }
+  );
   const { mutateAsync: addAsync, isLoading: isAdding } =
-    trpc.user.addToken.useMutation();
+    trpc.user.addNotifToken.useMutation();
   const { mutateAsync: removeAsync, isLoading: isRemoving } =
-    trpc.user.removeToken.useMutation();
+    trpc.user.removeNotifToken.useMutation();
 
   const utils = trpc.useContext();
 
@@ -33,14 +36,14 @@ const component = () => {
     if (permission == "granted") {
       console.log(token);
       await addAsync(token!);
-      utils.user.getTokens.invalidate();
+      utils.user.getNotifTokens.invalidate();
     }
   };
 
   const revoke = async () => {
     console.log("Removing", token);
     await removeAsync(token!);
-    utils.user.getTokens.invalidate();
+    utils.user.getNotifTokens.invalidate();
   };
 
   const signedUp = tokens?.some((t) => t.token === token);

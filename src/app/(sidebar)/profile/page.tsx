@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { CalendarFeed } from "./CalendarFeed";
 import { RequestNotificationPermission } from "./RequestNotificationPermission";
 import { SignOutButton } from "./SignOutButton";
 
@@ -29,8 +30,19 @@ export default async function ProfilePage() {
           <p>{session.user.email}</p>
         </div>
       </div>
-      <div className="flex w-full flex-col gap-2 sm:max-w-max">
+      <div className="my-8">
+        <h2 className="text-2xl font-bold">Calendar</h2>
+        <p>Subscribe to your tasks as a calendar feed.</p>
+        <CalendarFeed />
+      </div>
+      <div className="my-8">
+        <h2 className="text-2xl font-bold">Notifications</h2>
+        <p>Get notified for important due dates.</p>
         <RequestNotificationPermission />
+      </div>
+      <div className="my-8">
+        <h2 className="text-2xl font-bold">Sign Out</h2>
+        <p>Applies for this device.</p>
         <SignOutButton />
       </div>
       <Link
