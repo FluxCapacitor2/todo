@@ -23,7 +23,6 @@ import Image from "next/image";
 export default async function Home() {
   return (
     <>
-      {/* @ts-expect-error RSC */}
       <TopNav />
       <main className="mx-auto flex max-w-6xl flex-col items-center gap-4 p-6">
         <h1 className={`text-center text-6xl font-black`}>Todo App</h1>
@@ -166,7 +165,6 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* @ts-expect-error RSC */}
         <CTA />
       </main>
     </>

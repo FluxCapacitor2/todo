@@ -25,7 +25,6 @@ export default async function Page() {
 
   return (
     <>
-      {/* @ts-expect-error RSC */}
       <TopNav />
       <main className="prose mx-auto mt-6 flex max-w-full flex-col items-center gap-2 dark:prose-invert">
         <div className="max-w-2xl">

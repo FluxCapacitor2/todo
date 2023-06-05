@@ -18,7 +18,6 @@ export default async function SignIn() {
 
   return (
     <>
-      {/* @ts-expect-error RSC */}
       <TopNav />
       <main className="mx-auto mt-6 flex max-w-2xl flex-col items-center gap-2">
         <h1 className="mb-4 text-6xl font-black">Sign In</h1>
