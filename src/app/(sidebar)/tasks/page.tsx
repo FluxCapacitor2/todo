@@ -26,12 +26,7 @@ export default function Page() {
                 <>
                   {filtered.map((task) => (
                     <div className="p-2" key={task.id}>
-                      <TaskCard
-                        task={task}
-                        projectId={task.section!.projectId}
-                        isListItem
-                        details
-                      />
+                      <TaskCard task={task} isListItem details />
                     </div>
                   ))}
                 </>

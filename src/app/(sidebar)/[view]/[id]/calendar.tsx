@@ -116,7 +116,6 @@ const DailyTaskList = ({
               >
                 <TaskCard
                   task={task}
-                  projectId={task.projectId}
                   isListItem
                   details={false}
                   showCheckbox={false}

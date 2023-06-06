@@ -198,6 +198,32 @@ export const tasksRouter = (t: MyTrpc) =>
         }
         return task;
       }),
+    listCompleted: t.procedure
+      .input(z.object({ page: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return await prisma.task.findMany({
+          where: {
+            AND: {
+              OR: [
+                {
+                  ownerId: ctx.session.id,
+                },
+                {
+                  project: {
+                    collaborators: { some: { userId: ctx.session.id } },
+                  },
+                },
+              ],
+              completed: true,
+            },
+          },
+          take: 20,
+          skip: input.page * 20,
+          orderBy: {
+            updatedAt: "desc",
+          },
+        });
+      }),
     /**
      * Get a list of every top-level task that the user currently has. Does not include sub-tasks.
      */
@@ -216,6 +242,7 @@ export const tasksRouter = (t: MyTrpc) =>
               },
             ],
             parentTaskId: null,
+            completed: false,
           },
         },
         include: {

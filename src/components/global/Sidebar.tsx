@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import { BsFillGridFill } from "react-icons/bs";
 import {
   MdCalendarMonth,
+  MdCheckCircle,
   MdChecklist,
   MdClose,
   MdDelete,
@@ -112,6 +113,17 @@ export const Sidebar = () => {
           >
             <MdChecklist />
             <p>Tasks</p>
+          </div>
+        </Link>
+        <Link href="/completed">
+          <div
+            className={clsx(
+              "flex items-center gap-2 p-4 font-medium",
+              pathname === "/completed" ? activeClass : inactiveClass
+            )}
+          >
+            <MdCheckCircle />
+            <p>Completed</p>
           </div>
         </Link>
         <Link href="/calendar">

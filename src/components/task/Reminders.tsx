@@ -12,18 +12,17 @@ import {
 import toast from "react-hot-toast";
 import { MdClose, MdNotificationAdd, MdNotifications } from "react-icons/md";
 import { DatePickerPopover } from "../ui/DatePickerPopover";
+import { Task } from "@prisma/client";
 
 export const Reminders = ({
-  taskId,
-  projectId,
+  task,
   dueDate,
 }: {
-  taskId: number;
-  projectId: string;
+  task: Task;
   dueDate: Date | null;
 }) => {
   const utils = trpc.useContext();
-  const { data: reminders } = trpc.notification.list.useQuery(taskId, {
+  const { data: reminders } = trpc.notification.list.useQuery(task.id, {
     refetchInterval: 120_000,
   });
 
@@ -46,7 +45,7 @@ export const Reminders = ({
       });
     },
     onSettled: () => {
-      utils.notification.list.invalidate(taskId);
+      utils.notification.list.invalidate(task.id);
     },
   });
 
@@ -54,7 +53,7 @@ export const Reminders = ({
     if (time.getTime() < new Date().getTime()) {
       toast.error("You must set the reminder for a time in the future!");
     } else {
-      _addReminder({ taskId, projectId, time });
+      _addReminder({ taskId, projectId: task.projectId, time });
     }
   };
 
@@ -64,8 +63,8 @@ export const Reminders = ({
         .getData()
         ?.find((it) => it.id === id);
 
-      utils.notification.list.cancel(taskId);
-      utils.notification.list.setData(taskId, (list) => {
+      utils.notification.list.cancel(task.id);
+      utils.notification.list.setData(task.id, (list) => {
         return list?.filter((item) => item.id !== id);
       });
 
@@ -75,13 +74,13 @@ export const Reminders = ({
       toast.error("There was an error removing that reminder!");
       if (!context) return;
 
-      utils.notification.list.setData(taskId, (list) => {
+      utils.notification.list.setData(task.id, (list) => {
         if (!list) return undefined;
         return [...list, context];
       });
     },
     onSettled: () => {
-      utils.notification.list.invalidate(taskId);
+      utils.notification.list.invalidate(task.id);
     },
   });
 
@@ -119,7 +118,7 @@ export const Reminders = ({
             <Reminder
               addReminder={addReminder}
               date={setHours(setMinutes(new Date(), 0), 12 + 7)}
-              taskId={taskId}
+              taskId={task.id}
             >
               Tonight 7pm
             </Reminder>
@@ -130,7 +129,7 @@ export const Reminders = ({
                 minutes: 0,
                 seconds: 0,
               })}
-              taskId={taskId}
+              taskId={task.id}
             >
               Tomorrow 9am
             </Reminder>
@@ -141,28 +140,28 @@ export const Reminders = ({
                 minutes: 0,
                 seconds: 0,
               })}
-              taskId={taskId}
+              taskId={task.id}
             >
               Tomorrow 12pm
             </Reminder>
             <Reminder
               addReminder={addReminder}
               date={new Date(dueDate.getTime() - 1000 * 60 * 30)}
-              taskId={taskId}
+              taskId={task.id}
             >
               30 minutes before
             </Reminder>
             <Reminder
               addReminder={addReminder}
               date={new Date(dueDate.getTime() - 1000 * 60 * 60)}
-              taskId={taskId}
+              taskId={task.id}
             >
               1 hour before
             </Reminder>
             <Reminder
               addReminder={addReminder}
               date={new Date(dueDate.getTime() - 1000 * 60 * 60 * 24)}
-              taskId={taskId}
+              taskId={task.id}
             >
               1 day before
             </Reminder>
@@ -173,7 +172,7 @@ export const Reminders = ({
           setDate={(date) => {
             addReminder({
               time: date,
-              taskId,
+              taskId: task.id,
             });
           }}
         >

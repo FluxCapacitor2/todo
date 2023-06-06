@@ -20,6 +20,7 @@ const defaultTask = {
   priority: 0,
   startDate: null,
   updatedAt: new Date(),
+  subTasks: [],
 };
 
 export const AddSectionTask = ({

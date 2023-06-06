@@ -25,13 +25,7 @@ export const ListView = ({ id: projectId }: { id: string }) => {
     <section className="m-4 mx-auto max-w-xl">
       <ul className="flex flex-col gap-4">
         {tasks.map((task) => (
-          <TaskCard
-            task={task}
-            projectId={projectId}
-            key={task.id}
-            isListItem
-            details
-          />
+          <TaskCard task={task} key={task.id} isListItem details />
         ))}
         <AddSectionTask projectId={projectId} />
       </ul>

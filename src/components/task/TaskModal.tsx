@@ -34,14 +34,12 @@ export const TaskModal = ({
   setModalShown,
   task,
   setTask,
-  projectId,
   isSaving,
 }: {
   modalShown: boolean;
   setModalShown: (shown: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
-  projectId: string;
   isSaving: boolean;
 }) => {
   const { data: fullTask, isLoading: loadingSubTasks } =
@@ -105,7 +103,6 @@ export const TaskModal = ({
         <TaskMenuButton
           task={task}
           setTask={setTask}
-          projectId={projectId}
           hover={false}
           button={
             <Menu.Button>
@@ -155,16 +152,7 @@ export const TaskModal = ({
             )}
           </DatePickerPopover>
         </div>
-        <Reminders
-          taskId={task.id}
-          dueDate={task.dueDate}
-          projectId={projectId}
-        />
-
-        {/* <div className="flex items-center gap-4">
-          <MdPerson className="h-5 w-5 self-center" />
-          You
-        </div> */}
+        <Reminders task={task} dueDate={task.dueDate} />
 
         {task.startDate &&
           task.dueDate &&
@@ -223,16 +211,11 @@ export const TaskModal = ({
             <>
               <div className="flex flex-col gap-4">
                 {fullTask.subTasks.map((task) => (
-                  <TaskCard
-                    task={task}
-                    key={task.id}
-                    projectId={projectId}
-                    isListItem
-                  />
+                  <TaskCard task={task} key={task.id} isListItem />
                 ))}
               </div>
 
-              <AddSubtask projectId={projectId} parentTaskId={task.id} />
+              <AddSubtask projectId={task.projectId} parentTaskId={task.id} />
             </>
           ) : loadingSubTasks ? (
             <Spinner />

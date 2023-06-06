@@ -41,7 +41,18 @@ export const projectsRouter = (t: MyTrpc) =>
         include: {
           sections: {
             include: {
-              tasks: true,
+              tasks: {
+                where: {
+                  completed: false,
+                },
+                include: {
+                  subTasks: {
+                    select: {
+                      completed: true,
+                    },
+                  },
+                },
+              },
             },
           },
           owner: true,

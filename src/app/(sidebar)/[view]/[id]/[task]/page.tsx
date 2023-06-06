@@ -48,7 +48,6 @@ export default function Page({
                     router.push(backPath);
                   }
                 }}
-                projectId={id}
                 task={task}
                 setTask={setTask}
                 isSaving={isSaving}

@@ -162,9 +162,9 @@ const Section = ({
           )}
         </Menu>
       </div>
-      <div className="flex w-80 flex-col gap-2">
+      <div className="flex min-h-screen w-80 flex-col gap-2">
         {sortByDueDate(section.tasks).map((task) => (
-          <TaskCard task={task} key={task.id} projectId={projectId} details />
+          <TaskCard task={task} key={task.id} details />
         ))}
         <AddSectionTask projectId={projectId} sectionId={section.id} />
       </div>

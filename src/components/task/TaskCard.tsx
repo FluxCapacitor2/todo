@@ -13,6 +13,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import {
   MdCalendarToday,
+  MdCheckCircleOutline,
   MdContentCopy,
   MdDelete,
   MdMoreHoriz,
@@ -84,13 +85,11 @@ export const TaskWrapper = ({
 
 export const TaskCard = ({
   task: inTask,
-  projectId,
   isListItem,
   details,
   showCheckbox = true,
 }: {
   task: Task;
-  projectId: string;
   isListItem?: boolean;
   details?: boolean;
   showCheckbox?: boolean;
@@ -101,6 +100,9 @@ export const TaskCard = ({
   useEffect(() => {
     if (modalShown) setModalLoaded(true);
   }, [modalShown]);
+
+  const subTasks =
+    "subTasks" in inTask ? (inTask.subTasks as { completed: boolean }[]) : [];
 
   return (
     <TaskWrapper task={inTask}>
@@ -166,13 +168,25 @@ export const TaskCard = ({
                 )}
               </>
             )}
+
+            {subTasks.length > 0 && (
+              <div className="flex items-center gap-2">
+                <MdCheckCircleOutline />
+                <p className="text-sm">
+                  {subTasks.reduce(
+                    (agg, it) => (it.completed ? agg + 1 : agg),
+                    0
+                  )}
+                  /{subTasks.length}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="absolute right-1 top-1 hidden @[10rem]/task:block">
             <TaskMenuButton
               task={task}
               setTask={setTask}
-              projectId={projectId}
               hover={true}
               button={
                 <Menu.Button
@@ -191,7 +205,6 @@ export const TaskCard = ({
                 modalShown,
                 setModalShown,
                 task,
-                projectId,
                 setTask,
                 isSaving,
               }}
@@ -206,13 +219,11 @@ export const TaskCard = ({
 export const TaskMenuButton = ({
   task,
   setTask,
-  projectId,
   hover,
   button,
 }: {
   task: Task;
   setTask: (task: Task) => void;
-  projectId: string;
   hover: boolean;
   button: ReactNode;
 }) => {
@@ -220,7 +231,9 @@ export const TaskMenuButton = ({
   const { mutateAsync: deleteAsync } = trpc.tasks.delete.useMutation({
     onMutate: async (id) => {
       // Optimistic update
+      let oldTask: Task & { subTasks?: { completed: boolean }[] } = task;
       if (task.parentTaskId) {
+        oldTask = task;
         utils.tasks.get.cancel({ id: task.parentTaskId });
         utils.tasks.get.setData({ id: task.parentTaskId }, (task) => {
           if (!task) return undefined;
@@ -230,19 +243,26 @@ export const TaskMenuButton = ({
         });
       } else {
         utils.tasks.listTopLevel.cancel();
-        utils.projects.get.cancel(projectId);
-        utils.projects.get.setData(projectId, (project) => {
+        utils.projects.get.cancel(task.projectId);
+        utils.projects.get.setData(task.projectId, (project) => {
           if (!project) return undefined;
           const newValue = produce(project, (project) => {
             for (const section of project.sections) {
-              section.tasks = section.tasks.filter((task) => task.id !== id);
+              section.tasks = section.tasks.filter((task) => {
+                if (task.id !== id) {
+                  return true;
+                } else {
+                  oldTask = task;
+                  return false;
+                }
+              });
             }
           });
           return newValue;
         });
       }
 
-      return { task };
+      return { task: oldTask };
     },
     onError: (error, id, context) => {
       toast.error("There was an error deleting that task!");
@@ -253,14 +273,16 @@ export const TaskMenuButton = ({
           return { ...task, subTasks: [...task.subTasks, context.task] };
         });
       } else {
-        utils.projects.get.setData(projectId, (project) => {
+        utils.projects.get.setData(task.projectId, (project) => {
           if (!project) return undefined;
           return produce(project, (project) => {
             const section = project.sections.find(
               (section) => section.id === task.sectionId
             );
             if (context?.task) {
-              section?.tasks?.push?.(context.task);
+              section?.tasks?.push?.(
+                context.task as Task & { subTasks: { completed: boolean }[] }
+              );
             }
           });
         });
@@ -271,7 +293,7 @@ export const TaskMenuButton = ({
         utils.tasks.get.invalidate({ id: task.parentTaskId });
       } else {
         utils.tasks.listTopLevel.invalidate();
-        utils.projects.get.invalidate(projectId);
+        utils.projects.get.invalidate(task.projectId);
       }
     },
   });
@@ -279,9 +301,9 @@ export const TaskMenuButton = ({
   const pathname = usePathname();
   const copy = () => {
     navigator.clipboard.writeText(
-      pathname?.includes(projectId)
+      pathname?.includes(task.projectId)
         ? `${process.env.NEXT_PUBLIC_BASE_URL}${pathname}/${task.id}`
-        : `${process.env.NEXT_PUBLIC_BASE_URL}/project/${projectId}/${task.id}`
+        : `${process.env.NEXT_PUBLIC_BASE_URL}/project/${task.projectId}/${task.id}`
     );
   };
 
