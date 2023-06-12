@@ -30,7 +30,7 @@
     "@tanstack/react-query-devtools": "^4.29.12",
     "@tanstack/react-query-persist-client": "^4.29.12",
     "@trpc/client": "^10.29.1",
-    "@trpc/next": "^10.29.1",
+    "@trpc/next": "^10.30.0",
     "@trpc/react-query": "^10.29.1",
     "@trpc/server": "^10.29.1",
     "@types/node": "20.2.5",
