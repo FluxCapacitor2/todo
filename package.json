@@ -34,7 +34,7 @@
     "@trpc/react-query": "^10.29.1",
     "@trpc/server": "^10.29.1",
     "@types/node": "20.2.5",
-    "@types/react": "18.2.8",
+    "@types/react": "18.2.11",
     "@types/react-dom": "18.2.4",
     "chalk": "^5.2.0",
     "clsx": "^1.2.1",
