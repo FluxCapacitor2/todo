@@ -42,7 +42,7 @@
     "date-fns": "^2.30.0",
     "deep-equal": "^2.2.1",
     "eslint": "8.42.0",
-    "eslint-config-next": "13.4.5",
+    "eslint-config-next": "13.4.6",
     "firebase": "^9.22.2",
     "firebase-admin": "^11.9.0",
     "ics": "^3.1.0",
