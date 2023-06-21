@@ -49,7 +49,13 @@ export const sectionsRouter = (t: MyTrpc) =>
         await deleteSection(input.id, ctx.session.id);
       }),
     update: t.procedure
-      .input(z.object({ id: z.number(), name: z.optional(z.string()) }))
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.optional(z.string()),
+          archived: z.optional(z.boolean()),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         const section = await prisma.section.findFirst({
           where: {
@@ -79,9 +85,37 @@ export const sectionsRouter = (t: MyTrpc) =>
           },
           data: {
             name: input.name,
+            archived: input.archived,
           },
         });
       }),
+    getArchived: t.procedure.input(z.string()).query(async ({ ctx, input }) => {
+      return await prisma.section.findMany({
+        where: {
+          projectId: input,
+          archived: true,
+          project: {
+            OR: [
+              {
+                ownerId: ctx.session.id,
+              },
+              {
+                collaborators: {
+                  some: { userId: ctx.session.id, role: Role.EDITOR },
+                },
+              },
+            ],
+          },
+        },
+        include: {
+          _count: {
+            select: {
+              tasks: true,
+            },
+          },
+        },
+      });
+    }),
   });
 
 /**

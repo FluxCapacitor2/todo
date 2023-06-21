@@ -15,7 +15,13 @@ import clsx from "clsx";
 import { produce } from "immer";
 import { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
-import { MdCalendarToday, MdDelete, MdEdit, MdMenu } from "react-icons/md";
+import {
+  MdArchive,
+  MdCalendarToday,
+  MdDelete,
+  MdEdit,
+  MdMenu,
+} from "react-icons/md";
 
 export const ProjectView = ({ id: projectId }: { id: string }) => {
   const { data } = trpc.projects.get.useQuery(projectId, {
@@ -127,6 +133,49 @@ const Section = ({
     },
   });
 
+  const { mutateAsync: updateSection } = trpc.sections.update.useMutation({
+    onMutate: ({ id, archived }) => {
+      utils.projects.get.cancel(projectId);
+      const originalData = utils.projects.get
+        .getData(projectId)
+        ?.sections?.find((section) => section.id === id)?.archived;
+      utils.projects.get.setData(projectId, (project) => {
+        return produce(project, (project) => {
+          project?.sections.forEach((section) => {
+            if (section.id === id) {
+              section.archived = archived === true;
+            }
+          });
+        });
+      });
+      return { originalData };
+    },
+    onError: (error, { id }, context) => {
+      if (!context) return;
+      utils.projects.get.setData(projectId, (project) => {
+        return produce(project, (project) => {
+          project?.sections.forEach((section) => {
+            if (section.id === id) {
+              section.archived = context.originalData === true;
+            }
+          });
+        });
+      });
+    },
+    onSettled: () => {
+      utils.projects.get.invalidate(projectId);
+    },
+  });
+
+  const archive = () =>
+    updateSection({ id: section.id, archived: true })
+      .catch((err) => {
+        toast.error("There was a problem archiving that section!");
+      })
+      .then(() => {
+        toast.success("Section archived!");
+      });
+
   return (
     <div
       className="mr-4 flex w-80 snap-center flex-col rounded-lg p-2"
@@ -142,6 +191,7 @@ const Section = ({
           id={section.id}
           initialName={section.name}
           projectId={projectId}
+          archived={section.archived}
         />
         <Menu as="div" className="relative">
           {({ open, close }) => (
@@ -154,6 +204,9 @@ const Section = ({
                   </Menu.Button>
                 }
               >
+                <MenuItem onClick={archive}>
+                  <MdArchive /> Archive
+                </MenuItem>
                 <MenuItem onClick={() => deleteSection({ id: section.id })}>
                   <MdDelete /> Delete Section
                 </MenuItem>
@@ -162,7 +215,12 @@ const Section = ({
           )}
         </Menu>
       </div>
-      <div className="flex min-h-screen w-80 flex-col gap-2">
+      <div
+        className={clsx(
+          "flex min-h-screen w-80 flex-col gap-2",
+          section.archived && "opacity-50"
+        )}
+      >
         {sortByDueDate(section.tasks).map((task) => (
           <TaskCard task={task} key={task.id} details />
         ))}
@@ -176,10 +234,12 @@ const SectionName = ({
   id,
   initialName,
   projectId,
+  archived,
 }: {
   id: number;
   initialName: string;
   projectId: string;
+  archived?: boolean;
 }) => {
   const utils = trpc.useContext();
   const textField = useRef<HTMLInputElement | null>(null);
@@ -199,7 +259,10 @@ const SectionName = ({
         <TextField
           flat
           ref={textField}
-          className="px-1 font-bold"
+          className={clsx(
+            "px-1 font-bold",
+            archived && "text-gray-500 line-through"
+          )}
           value={name}
           onChange={(e) => {
             setName(e.target.value);
@@ -238,7 +301,13 @@ const NewSection = ({ projectId }: { projectId: string }) => {
           ...project,
           sections: [
             ...project.sections,
-            { name: "New Section", id: newId, projectId, tasks: [] },
+            {
+              name: "New Section",
+              id: newId,
+              projectId,
+              tasks: [],
+              archived: false,
+            },
           ],
         };
       });

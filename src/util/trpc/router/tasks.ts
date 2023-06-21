@@ -215,6 +215,9 @@ export const tasksRouter = (t: MyTrpc) =>
                 },
               ],
               completed: true,
+              section: {
+                archived: false,
+              },
             },
           },
           take: 20,
@@ -241,6 +244,9 @@ export const tasksRouter = (t: MyTrpc) =>
                 },
               },
             ],
+            section: {
+              archived: false,
+            },
             parentTaskId: null,
             completed: false,
           },

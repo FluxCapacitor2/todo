@@ -40,8 +40,6 @@ export default function Page() {
     },
   });
 
-  if (loadingIncoming || loadingOutgoing) return <Spinner />;
-
   const empty =
     (!incoming || incoming.length === 0) &&
     (!outgoing || outgoing.length === 0);
@@ -80,7 +78,11 @@ export default function Page() {
                 className="mx-auto opacity-30"
               />
               <i className="absolute inset-x-0 top-1/2 text-center font-medium">
-                You have no incoming invitations.
+                {loadingIncoming ? (
+                  <Spinner />
+                ) : (
+                  "You have no incoming invitations."
+                )}
               </i>
             </div>
           )}
@@ -112,7 +114,11 @@ export default function Page() {
                 className="mx-auto opacity-30"
               />
               <i className="absolute inset-x-0 top-1/2 text-center font-medium">
-                You have no outgoing invitations.
+                {loadingOutgoing ? (
+                  <Spinner />
+                ) : (
+                  "You have no outgoing invitations."
+                )}
               </i>
             </div>
           )}

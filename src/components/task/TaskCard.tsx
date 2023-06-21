@@ -7,7 +7,6 @@ import { Task } from "@prisma/client";
 import clsx from "clsx";
 import { format } from "date-fns";
 import { produce } from "immer";
-import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -23,10 +22,7 @@ import {
 import { useDebounce } from "use-debounce";
 import { Button } from "../ui/Button";
 import { Checkbox } from "../ui/Checkbox";
-
-const TaskModal = dynamic(
-  async () => (await import("@/components/task/TaskModal")).TaskModal
-);
+import { TaskModal } from "./TaskModal";
 
 export const TaskWrapper = ({
   task: inTask,

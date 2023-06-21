@@ -14,7 +14,7 @@ Each user can have multiple projects. Each project has multiple sections, and ea
 - Infinitely nested sub-tasks
 - Runs as a Progressive Web App
   - Can be added to a device's home screen
-- Notifications _(soon)_
+- Reminder notifications
 - Frequent polling to keep the UI up-to-date
 
 ## Development
@@ -38,10 +38,16 @@ FIREBASE_PROJECT_ID=
 FIREBASE_STORAGE_BUCKET=
 FIREBASE_MESSAGING_SENDER_ID=
 
+# The service account should be JSON credentials encoded as Base64
+FIREBASE_SERVICE_ACCOUNT=
+
 # MySQL database connection string
 DATABASE_URL=
 
-# The base URL of the app. Must be HTTPS for many PWA features to work.
+# The base URL of the app (must be HTTPS for many PWA features to work)
 NEXT_PUBLIC_BASE_URL=
 NEXTAUTH_URL=
+
+# Whether to log Prisma's SQL queries
+LOG_QUERIES=true
 ```

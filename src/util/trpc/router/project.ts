@@ -40,6 +40,9 @@ export const projectsRouter = (t: MyTrpc) =>
         },
         include: {
           sections: {
+            where: {
+              archived: false,
+            },
             include: {
               tasks: {
                 where: {

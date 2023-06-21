@@ -132,6 +132,7 @@ model Section {
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   tasks     Task[]
+  archived  Boolean @default(false)
 
   @@index([projectId])
 }

@@ -167,7 +167,7 @@ export const Sidebar = () => {
           </>
         )}
       </nav>
-      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-center gap-2 bg-gray-800 p-2 md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-center gap-2 bg-gray-100 p-2 dark:bg-gray-800 md:hidden">
         <Button
           variant="flat"
           onClick={() => setShown(!shown)}
@@ -179,10 +179,7 @@ export const Sidebar = () => {
             <MdMenu className="h-5 w-5" />
           )}
         </Button>
-        <div
-          id="page-nav"
-          className={clsx(shown ? "hidden" : "flex items-center gap-2")}
-        />
+        <div id="page-nav" className={"flex items-center gap-2"} />
       </div>
     </>
   );
