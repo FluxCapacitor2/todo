@@ -30,8 +30,3 @@ updates:
         patterns:
           - "remirror"
           - "@remirror/*"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-patch"]
-      - dependency-name: "*eslint*"
-        update-types: ["version-update:semver-patch", "version-update:semver-minor"]
