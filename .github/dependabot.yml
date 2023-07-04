@@ -9,6 +9,27 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      trpc:
+        patterns:
+          - "@trpc/*"
+          - "@tanstack/query*"
+          - "@tanstack/eslint-plugin-query"
+      next:
+        patterns:
+          - "next"
+          - "eslint-config-next"
+      types:
+        patterns:
+          - "@types/*"
+      prisma:
+        patterns:
+          - "prisma"
+          - "@prisma/*"
+      remirror:
+        patterns:
+          - "remirror"
+          - "@remirror/*"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
