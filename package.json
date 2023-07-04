@@ -41,7 +41,7 @@
     "cron": "^2.3.1",
     "date-fns": "^2.30.0",
     "deep-equal": "^2.2.1",
-    "eslint": "8.42.0",
+    "eslint": "8.44.0",
     "eslint-config-next": "13.4.5",
     "firebase": "^9.23.0",
     "firebase-admin": "^11.9.0",
