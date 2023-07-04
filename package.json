@@ -22,7 +22,7 @@
     "@prisma/client": "^4.16.2",
     "@rehookify/datepicker": "^5.2.2",
     "@remirror/pm": "^2.0.6",
-    "@remirror/react": "^2.0.29",
+    "@remirror/react": "^2.0.30",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/typography": "^0.5.9",
     "@tanstack/query-sync-storage-persister": "^4.29.11",
@@ -55,7 +55,7 @@
     "react-hot-toast": "^2.4.1",
     "react-icons": "^4.10.1",
     "react-markdown": "^8.0.7",
-    "remirror": "^2.0.32",
+    "remirror": "^2.0.33",
     "typescript": "5.1.6",
     "use-debounce": "^9.0.4",
     "zod": "^3.21.4"
