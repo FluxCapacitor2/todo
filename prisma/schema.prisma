@@ -140,7 +140,7 @@ model Section {
 model Task {
   id           Int        @id @default(autoincrement())
   name         String
-  description  String
+  description  String     @db.Text
   priority     Int        @default(1)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now()) @updatedAt
