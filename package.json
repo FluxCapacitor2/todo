@@ -43,7 +43,7 @@
     "deep-equal": "^2.2.1",
     "eslint": "8.44.0",
     "eslint-config-next": "13.4.9",
-    "firebase": "^9.23.0",
+    "firebase": "^10.0.0",
     "firebase-admin": "^11.9.0",
     "ics": "^3.2.0",
     "idb-keyval": "^6.2.1",
