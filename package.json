@@ -22,7 +22,7 @@
     "@prisma/client": "^5.0.0",
     "@rehookify/datepicker": "^5.2.2",
     "@remirror/pm": "^2.0.6",
-    "@remirror/react": "^2.0.32",
+    "@remirror/react": "^2.0.34",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/typography": "^0.5.9",
     "@tanstack/query-sync-storage-persister": "^4.29.25",
