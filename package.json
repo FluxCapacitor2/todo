@@ -40,7 +40,7 @@
     "clsx": "^1.2.1",
     "cron": "^2.3.1",
     "date-fns": "^2.30.0",
-    "deep-equal": "^2.2.1",
+    "deep-equal": "^2.2.2",
     "eslint": "8.44.0",
     "eslint-config-next": "13.4.10",
     "firebase": "^10.0.0",
