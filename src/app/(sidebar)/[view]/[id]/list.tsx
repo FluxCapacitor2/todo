@@ -2,7 +2,7 @@
 
 import { AddSectionTask } from "@/components/task/AddTask";
 import { TaskCard } from "@/components/task/TaskCard";
-import { Checkbox } from "@/components/ui/Checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
 

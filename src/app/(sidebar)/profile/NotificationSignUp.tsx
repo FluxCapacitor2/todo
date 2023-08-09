@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import { app } from "@/util/firebase";
 import { trpc } from "@/util/trpc/trpc";
@@ -52,12 +52,12 @@ const component = () => {
       {isLoading ? (
         <Loading />
       ) : signedUp ? (
-        <Button variant="subtle" onClick={revoke}>
+        <Button variant="secondary" onClick={revoke}>
           Disable Notifications
           {isRemoving && <Spinner />}
         </Button>
       ) : (
-        <Button variant="primary" onClick={request}>
+        <Button onClick={request}>
           Enable Notifications
           {isAdding && <Spinner />}
         </Button>
@@ -67,7 +67,7 @@ const component = () => {
 };
 
 const Loading = () => (
-  <Button variant="subtle" disabled>
+  <Button variant="secondary" disabled>
     <Spinner />
     Loading...
   </Button>

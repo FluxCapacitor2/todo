@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import { TextField } from "@/components/ui/TextField";
 import { trpc } from "@/util/trpc/trpc";
@@ -31,7 +31,7 @@ export const CalendarFeed = () => {
         onClick={(e) => e.currentTarget.select()}
       />
       <Button
-        variant="subtle"
+        variant="secondary"
         title="Get a new link"
         onClick={() => rotate(apiToken!.id)}
         disabled={isLoading || rotating}

@@ -69,7 +69,7 @@ export const projectsRouter = (t: MyTrpc) =>
     create: t.procedure
       .input(z.object({ name: z.string() }))
       .mutation(async ({ ctx, input }) => {
-        await prisma.project.create({
+        const { id } = await prisma.project.create({
           data: {
             name: input.name,
             ownerId: ctx.session.id,
@@ -82,6 +82,7 @@ export const projectsRouter = (t: MyTrpc) =>
             },
           },
         });
+        return id;
       }),
     delete: t.procedure.input(z.string()).mutation(async ({ ctx, input }) => {
       const project = await prisma.project.findFirst({

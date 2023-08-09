@@ -2,7 +2,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { FaGithub } from "react-icons/fa";
-import { Button } from "./ui/Button";
+import { Button } from "./ui/button";
 
 export const CTA = async () => {
   const session = await getServerSession(authOptions);
@@ -11,18 +11,18 @@ export const CTA = async () => {
       {session?.user ? (
         <>
           <Link href="/projects">
-            <Button variant="primary">Launch</Button>
+            <Button>Launch</Button>
           </Link>
         </>
       ) : (
         <>
           <Link href="/signin">
-            <Button variant="primary">Sign Up</Button>
+            <Button>Sign Up</Button>
           </Link>
         </>
       )}
       <Link href="https://github.com/FluxCapacitor2/todo">
-        <Button variant="subtle">
+        <Button variant="secondary" className="gap-2">
           <FaGithub /> View Source on GitHub
         </Button>
       </Link>

@@ -1,7 +1,7 @@
 "use client";
 
-import { TaskWrapper } from "@/components/task/TaskCard";
 import { TaskModal } from "@/components/task/TaskModal";
+import { TaskProvider } from "@/components/task/TaskProvider";
 import { trpc } from "@/util/trpc/trpc";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -39,7 +39,7 @@ export default function Page({
       {component}
       {task && (
         <>
-          <TaskWrapper task={task}>
+          <TaskProvider task={task}>
             {({ task, setTask, isSaving }) => (
               <TaskModal
                 modalShown={true}
@@ -53,7 +53,7 @@ export default function Page({
                 isSaving={isSaving}
               />
             )}
-          </TaskWrapper>
+          </TaskProvider>
         </>
       )}
     </>

@@ -1,8 +1,8 @@
 import { trpc } from "@/util/trpc/trpc";
 import { Project } from "@prisma/client";
 import { ReactNode, useEffect, useState } from "react";
-import { Checkbox } from "../ui/Checkbox";
 import { Spinner } from "../ui/Spinner";
+import { Checkbox } from "../ui/checkbox";
 
 export const ProjectSelector = ({
   children,
@@ -32,8 +32,8 @@ export const ProjectSelector = ({
               <Checkbox
                 id={`proj-${i}`}
                 checked={included.some((it) => it.id === project.id)}
-                onChange={(e) => {
-                  if (e.currentTarget.checked) {
+                onCheckedChange={(checked) => {
+                  if (checked === true) {
                     setIncluded([...included, project]);
                   } else {
                     setIncluded(included.filter((it) => it.id !== project.id));

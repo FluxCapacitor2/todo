@@ -1,11 +1,12 @@
 "use client";
 
-import { NewProjectModal } from "@/components/global/NewProjectModal";
-import { Button } from "@/components/ui/Button";
+import { NewProject } from "@/components/global/NewProjectModal";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/util/trpc/trpc";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { MdAdd, MdError } from "react-icons/md";
+import { useMemo } from "react";
+import { MdError } from "react-icons/md";
 
 export const ProjectCards = () => {
   const {
@@ -14,32 +15,31 @@ export const ProjectCards = () => {
     isError,
   } = trpc.projects.list.useQuery(undefined, { refetchInterval: 120_000 });
 
-  const [modalShown, setModalShown] = useState(false);
-
-  useEffect(() => {
-    if (projects?.length === 0) {
-      setModalShown(true);
-    }
-  }, [projects]);
-
   return (
     <>
-      <NewProjectModal open={modalShown} close={() => setModalShown(false)} />
       <h2 className="text-2xl font-bold">Projects</h2>
+      <div>
+        <NewProject />
+      </div>
       {isLoading ? (
         <div className="flex justify-center">
           {/* Fallback/skeleton UI */}
           <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 md:grid-cols-3">
             {new Array(4).fill(undefined).map((_, i) => (
-              <div
-                key={i}
-                className="flex h-28 flex-col gap-2 rounded-md bg-gray-100 p-4 dark:bg-gray-900"
-              >
-                <div className="h-8 w-48 animate-pulse bg-gray-200 delay-100 dark:bg-gray-800" />
-                <div className="h-6 w-32 animate-pulse bg-gray-200 delay-200 dark:bg-gray-800" />
-              </div>
+              <Card key={i}>
+                <CardHeader>
+                  <CardTitle>
+                    <Skeleton className="h-8 w-40" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </CardContent>
+              </Card>
             ))}
-            <NewProject show={() => setModalShown(true)} />
           </div>
         </div>
       ) : isError ? (
@@ -47,42 +47,22 @@ export const ProjectCards = () => {
           <MdError />
           Error loading projects.
         </p>
-      ) : projects.length > 0 ? (
-        <>
-          <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                projectId={project.id}
-                name={project.name}
-              />
-            ))}
-            <NewProject show={() => setModalShown(true)} />
-          </div>
-        </>
       ) : (
-        <div className="my-12 flex flex-col items-center gap-4">
-          <h2 className="text-2xl font-bold">No Projects</h2>
-          <Button variant="primary" onClick={() => setModalShown(true)}>
-            New Project
-          </Button>
-        </div>
+        projects.length > 0 && (
+          <>
+            <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 md:grid-cols-3">
+              {projects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  projectId={project.id}
+                  name={project.name}
+                />
+              ))}
+            </div>
+          </>
+        )
       )}
     </>
-  );
-};
-
-const NewProject = ({ show }: { show: () => void }) => {
-  return (
-    <div
-      className="cursor-pointer rounded-md bg-gray-50 p-4 hover:bg-gray-200 dark:bg-gray-950 dark:hover:bg-gray-800"
-      onClick={show}
-    >
-      <h2 className="text-lg font-bold">New Project</h2>
-      <div className="my-2 flex items-center gap-2">
-        <MdAdd /> Create
-      </div>
-    </div>
   );
 };
 
@@ -104,33 +84,34 @@ const ProjectCard = ({
 
   return (
     <Link href={`/project/${projectId}`}>
-      <div
-        className="h-full rounded-md bg-gray-100 p-4 dark:bg-gray-900"
-        key={projectId}
-      >
-        <h2 className="text-lg font-medium">{data?.name ?? name}</h2>
-        {isLoading ? (
-          <div className="flex flex-col gap-2">
-            <div className="h-8 w-48 animate-pulse bg-gray-200 delay-100 dark:bg-gray-800" />
-            <div className="h-6 w-32 animate-pulse bg-gray-200 delay-200 dark:bg-gray-800" />
-          </div>
-        ) : isError ? (
-          <span className="text-red-500">
-            <MdError className="inline" /> Error loading tasks.
-          </span>
-        ) : (
-          <>
-            <p>
-              <b>{data?.sections.length}</b> section
-              {data?.sections?.length === 1 ? "" : "s"}
-            </p>
-            <p>
-              <b>{total}</b> task
-              {total === 1 ? "" : "s"}
-            </p>
-          </>
-        )}
-      </div>
+      <Card key={projectId} className="flex h-full flex-col justify-between">
+        <CardHeader>
+          <CardTitle>{data?.name ?? name}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-6 w-32" />
+            </div>
+          ) : isError ? (
+            <span className="text-red-500">
+              <MdError className="inline" /> Error loading tasks.
+            </span>
+          ) : (
+            <>
+              <p>
+                <b>{data?.sections.length}</b> section
+                {data?.sections?.length === 1 ? "" : "s"}
+              </p>
+              <p>
+                <b>{total}</b> task
+                {total === 1 ? "" : "s"}
+              </p>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </Link>
   );
 };

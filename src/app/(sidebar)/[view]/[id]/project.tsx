@@ -2,14 +2,21 @@
 
 import { AddSectionTask } from "@/components/task/AddTask";
 import { TaskCard } from "@/components/task/TaskCard";
-import { Button } from "@/components/ui/Button";
-import { Checkbox } from "@/components/ui/Checkbox";
-import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
 import { Spinner } from "@/components/ui/Spinner";
 import { TextField } from "@/components/ui/TextField";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCreateSection } from "@/hooks/section";
 import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
-import { Menu } from "@headlessui/react";
 import { Section, Task } from "@prisma/client";
 import clsx from "clsx";
 import { produce } from "immer";
@@ -31,7 +38,7 @@ export const ProjectView = ({ id: projectId }: { id: string }) => {
 
   if (!data) {
     // Loading UI (skeleton)
-    return Skeleton;
+    return ProjectSkeleton;
   }
 
   return (
@@ -48,40 +55,47 @@ export const ProjectView = ({ id: projectId }: { id: string }) => {
   );
 };
 
-export const Skeleton = (
+export const ProjectSkeleton = (
   <div className="flex">
-    {new Array(5).fill(null).map((_, i) => (
+    {new Array(3).fill(null).map((_, i) => (
       <div
         className="mr-4 flex w-80 snap-center flex-col rounded-lg p-2"
         key={i}
       >
         <div className="flex items-center justify-between">
           <div className="h-6 w-52 animate-pulse rounded-md bg-gray-500/50" />
-          <Button variant="flat">
+          <Button variant="ghost">
             <MdMenu />
           </Button>
         </div>
         <div className="flex flex-col gap-2">
-          {new Array([5, 3, 4, 5, 2][i]).fill(null).map((_, j) => (
-            <div
-              className="flex w-80 items-start gap-2 rounded-md border border-gray-500 p-2"
-              key={j}
-            >
-              <Checkbox disabled className="mt-1" checked={j < 2} />
-              <div className="flex flex-col gap-2">
-                <div
-                  className="my-1 h-4 w-48 animate-pulse rounded-md bg-gray-500/50"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                />
-                <div className="flex items-center gap-2">
-                  <MdCalendarToday className="text-sm" />
-                  <div
-                    className="my-1 h-3 w-24 animate-pulse rounded-md bg-gray-500/50"
-                    style={{ animationDelay: `${i * 150}ms` }}
-                  />
+          {new Array([5, 3, 4][i]).fill(null).map((_, j) => (
+            <Card key={j}>
+              <CardContent className="p-2">
+                <div className="flex gap-2">
+                  <div className="grid h-8 items-center">
+                    <Checkbox disabled checked={j < 2} />
+                  </div>
+                  <Skeleton className="mt-1 h-6 w-48" />
                 </div>
-              </div>
-            </div>
+                {(i + j + 1) % 3 !== 0 && (
+                  <Card className="mt-2">
+                    <CardContent className="flex flex-col gap-2 p-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                    </CardContent>
+                  </Card>
+                )}
+                {(i + j) % 2 !== 0 && (
+                  <Card className="mt-2">
+                    <CardContent className="flex gap-2 p-2">
+                      <MdCalendarToday className="text-muted-foreground" />
+                      <Skeleton className="h-4 w-16" />
+                    </CardContent>
+                  </Card>
+                )}
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
@@ -184,7 +198,7 @@ const Section = ({
       <div
         className={clsx(
           "flex items-center justify-between",
-          section.id < 0 && "pointer-events-none opacity-70"
+          section.id < 0 && "pointer-events-none"
         )}
       >
         <SectionName
@@ -193,27 +207,25 @@ const Section = ({
           projectId={projectId}
           archived={section.archived}
         />
-        <Menu as="div" className="relative">
-          {({ open, close }) => (
-            <>
-              <MenuItems
-                {...{ open, close }}
-                button={
-                  <Menu.Button as={Button} variant="flat">
-                    <MdMenu />
-                  </Menu.Button>
-                }
-              >
-                <MenuItem onClick={archive}>
-                  <MdArchive /> Archive
-                </MenuItem>
-                <MenuItem onClick={() => deleteSection({ id: section.id })}>
-                  <MdDelete /> Delete Section
-                </MenuItem>
-              </MenuItems>
-            </>
-          )}
-        </Menu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            {section.id < 0 ? (
+              <Spinner />
+            ) : (
+              <Button variant="ghost">
+                <MdMenu />
+              </Button>
+            )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={archive}>
+              <MdArchive /> Archive
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => deleteSection({ id: section.id })}>
+              <MdDelete /> Delete Section
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div
         className={clsx(
@@ -274,10 +286,6 @@ const SectionName = ({
             }
           }}
         />
-        <MdEdit
-          className="cursor-pointer fill-gray-500 opacity-0 transition-opacity group-hover:opacity-100"
-          onClick={() => textField.current?.focus()}
-        />
       </form>
       {isLoading && (
         <div className="absolute inset-y-0 right-0">
@@ -289,60 +297,21 @@ const SectionName = ({
 };
 
 const NewSection = ({ projectId }: { projectId: string }) => {
-  const utils = trpc.useContext();
-  const { mutateAsync } = trpc.sections.create.useMutation({
-    onMutate: ({ name, projectId }) => {
-      const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
-
-      utils.projects.get.cancel(projectId);
-      utils.projects.get.setData(projectId, (project) => {
-        if (!project) return undefined;
-        return {
-          ...project,
-          sections: [
-            ...project.sections,
-            {
-              name: "New Section",
-              id: newId,
-              projectId,
-              tasks: [],
-              archived: false,
-            },
-          ],
-        };
-      });
-      return { newId };
-    },
-    onError: (error, variables, context) => {
-      toast.error("There was an error creating that section!");
-      if (!context) return;
-      utils.projects.get.setData(projectId, (project) => {
-        if (!project) return undefined;
-        return {
-          ...project,
-          sections: {
-            ...project.sections.filter((it) => it.id !== context.newId),
-          },
-        };
-      });
-    },
-    onSettled: () => {
-      utils.projects.get.invalidate(projectId);
-    },
-  });
+  const { createSection } = useCreateSection(projectId);
 
   const newSection = async () => {
-    await mutateAsync({
+    await createSection({
       projectId,
       name: "New Section",
     });
-    utils.projects.get.invalidate(projectId);
   };
 
   return (
-    <Button variant="subtle" onClick={newSection}>
-      <MdEdit />
-      New Section
-    </Button>
+    <div className="mr-4 flex w-80 snap-center flex-col rounded-lg p-2">
+      <Button variant="secondary" onClick={newSection}>
+        <MdEdit />
+        New Section
+      </Button>
+    </div>
   );
 };

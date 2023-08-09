@@ -1,28 +1,21 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/ui/Spinner";
 import { ExtSession } from "@/pages/api/auth/[...nextauth]";
 import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import { BsFillGridFill } from "react-icons/bs";
 import {
   MdCalendarMonth,
   MdCheckCircle,
   MdChecklist,
-  MdClose,
-  MdDelete,
   MdError,
   MdGroups,
-  MdMenu,
 } from "react-icons/md";
-
 const activeClass = "bg-gray-300 dark:bg-gray-600 transition-colors h-16";
 const inactiveClass =
   "hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors h-16";
@@ -167,20 +160,6 @@ export const Sidebar = () => {
           </>
         )}
       </nav>
-      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-center gap-2 bg-gray-100 p-2 dark:bg-gray-800 md:hidden">
-        <Button
-          variant="flat"
-          onClick={() => setShown(!shown)}
-          aria-label="Toggle navigation"
-        >
-          {shown ? (
-            <MdClose className="h-5 w-5" />
-          ) : (
-            <MdMenu className="h-5 w-5" />
-          )}
-        </Button>
-        <div id="page-nav" className={"flex items-center gap-2"} />
-      </div>
     </>
   );
 };
@@ -200,8 +179,6 @@ const ProjectItem = ({
   ownerId: string;
   id: string;
 }) => {
-  const { mutateAsync, isLoading } = trpc.projects.delete.useMutation();
-  const router = useRouter();
   const pathname = usePathname();
 
   const session = useSession();
@@ -211,23 +188,11 @@ const ProjectItem = ({
 
   const active = pathname?.startsWith(`/project/${id}`);
 
-  const utils = trpc.useContext();
-
-  const deleteProject = async () => {
-    await mutateAsync(id);
-    utils.projects.list.invalidate();
-    if (active) {
-      router.push("/projects");
-    }
-    toast.success("Project deleted!");
-  };
-
   return (
     <Link href={`/project/${id}`}>
       <div
         className={clsx(
           "flex items-center justify-between p-4 font-medium",
-          isLoading && "opacity-50",
           active ? activeClass : inactiveClass
         )}
       >
@@ -237,14 +202,6 @@ const ProjectItem = ({
             <MdGroups className="inline fill-gray-700 dark:fill-gray-300" />
           )}
         </p>
-        <Button
-          variant="flat"
-          className="text-gray-600 dark:text-gray-400"
-          onClick={deleteProject}
-          aria-label="Delete Project"
-        >
-          {isLoading ? <Spinner /> : <MdDelete />}
-        </Button>
       </div>
     </Link>
   );
