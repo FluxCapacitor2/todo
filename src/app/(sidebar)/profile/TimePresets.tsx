@@ -44,7 +44,7 @@ export const TimePresets = () => {
       ) : (
         <>
           {presets.map((preset) => (
-            <Card className="mb-2">
+            <Card className="mb-2" key={preset.id}>
               <CardContent className="flex items-center justify-between p-1">
                 <span className="pl-1">{formatTimeInSeconds(preset.time)}</span>
                 <Button
