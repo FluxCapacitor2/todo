@@ -80,7 +80,7 @@ export function shortDateFormat(date: Date) {
     ? "Last " + format(date, "EEE")
     : format(date, isWithinOneWeek ? "EEE" : "MMM d");
 
-  const time = isThisYear && !isMidnight ? format(date, "h:m a ") : "";
+  const time = isThisYear && !isMidnight ? format(date, "h:mm a ") : "";
 
   const year = !isThisYear ? format(date, "yyyy") : "";
 

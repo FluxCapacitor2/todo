@@ -21,8 +21,8 @@ export default async function RootLayout({
   return (
     <InnerLayout session={session}>
       <TrpcProvider>
-        <div className="flex">
-          {session !== null && <Sidebar />}
+        <div className="flex flex-col md:flex-row">
+          <Sidebar />
           <div className="mt-3 w-full">{children}</div>
         </div>
         <Toaster position="top-right" />

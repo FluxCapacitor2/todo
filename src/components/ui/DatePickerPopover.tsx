@@ -68,8 +68,8 @@ export const DatePickerPopover = ({
               </SelectItem>
             )}
             {isLoading && (
-              <SelectItem disabled value="0">
-                <Spinner /> Loading time presets...
+              <SelectItem disabled value={Math.random().toString()}>
+                <Spinner className="inline" /> Loading time presets...
               </SelectItem>
             )}
             {timePresets?.map((preset) => (

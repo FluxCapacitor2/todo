@@ -24,7 +24,7 @@ export const ProjectCards = () => {
       {isLoading ? (
         <div className="flex justify-center">
           {/* Fallback/skeleton UI */}
-          <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {new Array(4).fill(undefined).map((_, i) => (
               <Card key={i}>
                 <CardHeader>
@@ -50,7 +50,7 @@ export const ProjectCards = () => {
       ) : (
         projects.length > 0 && (
           <>
-            <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 md:grid-cols-3">
+            <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {projects.map((project) => (
                 <ProjectCard
                   key={project.id}

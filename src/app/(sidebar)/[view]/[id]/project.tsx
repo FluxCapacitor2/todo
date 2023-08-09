@@ -28,7 +28,7 @@ import {
   MdCalendarToday,
   MdDelete,
   MdEdit,
-  MdMenu,
+  MdMoreHoriz,
 } from "react-icons/md";
 
 export const ProjectView = ({ id: projectId }: { id: string }) => {
@@ -44,7 +44,7 @@ export const ProjectView = ({ id: projectId }: { id: string }) => {
 
   return (
     <>
-      <div className="flex snap-x snap-mandatory overflow-x-scroll lg:snap-none">
+      <div className="ml-2 flex snap-x snap-mandatory overflow-x-scroll lg:snap-none">
         {data.sections.map((section) => (
           <Section key={section.id} section={section} projectId={data.id} />
         ))}
@@ -66,7 +66,7 @@ export const ProjectSkeleton = (
         <div className="flex items-center justify-between">
           <div className="h-6 w-52 animate-pulse rounded-md bg-gray-500/50" />
           <Button variant="ghost">
-            <MdMenu />
+            <MdMoreHoriz />
           </Button>
         </div>
         <div className="flex flex-col gap-2">
@@ -211,7 +211,7 @@ const Section = ({
               <Spinner />
             ) : (
               <Button variant="ghost" size="icon">
-                <MdMenu />
+                <MdMoreHoriz />
               </Button>
             )}
           </DropdownMenuTrigger>

@@ -1,6 +1,7 @@
 "use client";
 
 import { ProjectMenu } from "@/app/(sidebar)/[view]/[id]/ProjectMenu";
+import { cn } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -29,7 +30,7 @@ export const ViewSelector = ({
   const pathname = usePathname();
 
   return (
-    <div className={className}>
+    <div className={cn("px-2", className)}>
       {isLoading ? (
         <Skeleton className="mb-2 h-10 w-64" />
       ) : (

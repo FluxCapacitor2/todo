@@ -45,7 +45,7 @@ export default function Page() {
     (!outgoing || outgoing.length === 0);
 
   return (
-    <>
+    <div className="px-2">
       <h2 className="text-center text-3xl font-bold">Invitations</h2>
 
       <main className="mx-auto mt-8 flex max-w-prose flex-col justify-center gap-12">
@@ -125,6 +125,6 @@ export default function Page() {
           )}
         </section>
       </main>
-    </>
+    </div>
   );
 }
