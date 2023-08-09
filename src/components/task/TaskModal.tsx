@@ -1,16 +1,17 @@
 import { RemirrorEditor } from "@/components/ui/RemirrorEditor";
 import { Spinner } from "@/components/ui/Spinner";
-import { cn, shortDateFormat } from "@/lib/utils";
+import { cn, isBetween, shortDateFormat } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
 import { Task } from "@prisma/client";
-import { differenceInSeconds, isAfter, isBefore } from "date-fns";
+import { differenceInSeconds, isAfter } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { ReactNode } from "react";
-import { MdArrowBack, MdError, MdRunCircle, MdStart } from "react-icons/md";
+import { MdArrowBack, MdError, MdStart } from "react-icons/md";
 import { DatePickerPopover } from "../ui/DatePickerPopover";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
+import { Progress } from "../ui/progress";
 import {
   Sheet,
   SheetContent,
@@ -99,7 +100,7 @@ export const TaskModal = ({
             }}
           />
 
-          <div>
+          <section>
             <h2 className="mb-2 font-bold">Dates</h2>
             <div className="grid w-full grid-cols-1 gap-4 lg:grid-cols-2">
               <DatePickerPopover
@@ -144,40 +145,45 @@ export const TaskModal = ({
                 </Button>
               </DatePickerPopover>
             </div>
-          </div>
+          </section>
 
-          <div>
-            <h2 className="mb-2 font-bold">Reminders</h2>
+          <section>
+            <h2 className="font-bold">Reminders</h2>
+            <p className="mb-2 text-sm text-muted-foreground">
+              Schedule a notification linking to this task.
+            </p>
             <Reminders task={task} dueDate={task.dueDate} />
-          </div>
+          </section>
 
           {task.startDate &&
             task.dueDate &&
-            isBefore(task.startDate, new Date()) &&
-            isBefore(new Date(), task.dueDate) && (
-              <>
-                <div className="flex items-center justify-between">
+            isBetween(new Date(), task.startDate, task.dueDate) && (
+              <section>
+                <h2 className="font-bold">Expected Progress</h2>
+                <p className="mb-2 text-sm text-muted-foreground">
+                  Based on the current date and this task&apos;s start and due
+                  dates.
+                </p>
+                <div className="flex items-center gap-2">
                   <span className="flex items-center gap-4">
-                    <MdRunCircle />
-                    Expected Progress:{" "}
                     {Math.round(
                       (100 * differenceInSeconds(new Date(), task.startDate)) /
                         differenceInSeconds(task.dueDate, task.startDate)
                     )}
                     %
                   </span>
-                  <progress
-                    className="h-2 rounded-full"
+                  <Progress
                     value={
-                      (new Date().getTime() - task.startDate.getTime()) /
-                      (task.dueDate.getTime() - task.startDate.getTime())
+                      ((new Date().getTime() - task.startDate.getTime()) /
+                        (task.dueDate.getTime() - task.startDate.getTime())) *
+                      100
                     }
                   />
                 </div>
-              </>
+              </section>
             )}
 
-          <section className="flex flex-col gap-2">
+          <section>
             <h2 className="mb-2 font-bold">
               Sub-tasks
               {fullTask?.subTasks && fullTask.subTasks.length > 0 && (
@@ -190,7 +196,7 @@ export const TaskModal = ({
             </h2>
             {fullTask?.subTasks ? (
               <>
-                <div className="flex flex-col gap-4">
+                <div className="grid gap-2">
                   {fullTask.subTasks.map((task) => (
                     <TaskCard task={task} key={task.id} isListItem />
                   ))}
