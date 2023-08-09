@@ -84,7 +84,7 @@ export function shortDateFormat(date: Date) {
 
   const year = !isThisYear ? format(date, "yyyy") : "";
 
-  return `${day}${day && time ? ", " : ""}${time}${year}`;
+  return `${day}${day && time ? ", " : ""}${time}${year ? ", " : ""}${year}`;
 }
 
 export function isBetween(dateToCompare: Date, start: Date, end: Date) {
