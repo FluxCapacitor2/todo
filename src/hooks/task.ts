@@ -1,3 +1,4 @@
+import { getBaseURL } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
 import { Task } from "@prisma/client";
 import { produce } from "immer";
@@ -197,8 +198,8 @@ export const useCopyTaskURL = (task: Task) => {
   const copy = () => {
     navigator.clipboard.writeText(
       pathname?.includes(task.projectId)
-        ? `${process.env.NEXT_PUBLIC_BASE_URL}${pathname}/${task.id}`
-        : `${process.env.NEXT_PUBLIC_BASE_URL}/project/${task.projectId}/${task.id}`
+        ? `${getBaseURL()}${pathname}/${task.id}`
+        : `${getBaseURL()}/project/${task.projectId}/${task.id}`
     );
   };
   return { copy };

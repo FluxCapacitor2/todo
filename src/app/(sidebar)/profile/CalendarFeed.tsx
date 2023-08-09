@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import { TextField } from "@/components/ui/TextField";
+import { getBaseURL } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
 import { MdRefresh } from "react-icons/md";
 
@@ -25,7 +26,7 @@ export const CalendarFeed = () => {
         value={
           isLoading
             ? "Loading..."
-            : process.env.NEXT_PUBLIC_BASE_URL + "/api/calendar/" + apiToken?.id
+            : getBaseURL() + "/api/calendar/" + apiToken?.id
         }
         className="w-96"
         onClick={(e) => e.currentTarget.select()}
