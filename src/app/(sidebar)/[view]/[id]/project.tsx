@@ -3,7 +3,6 @@
 import { AddSectionTask } from "@/components/task/AddTask";
 import { TaskCard } from "@/components/task/TaskCard";
 import { Spinner } from "@/components/ui/Spinner";
-import { TextField } from "@/components/ui/TextField";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,8 +12,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCreateSection } from "@/hooks/section";
+import { cn } from "@/lib/utils";
 import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
 import { Section, Task } from "@prisma/client";
@@ -268,11 +269,11 @@ const SectionName = ({
         }}
         className="flex items-center gap-1"
       >
-        <TextField
-          flat
+        <Input
+          type="text"
           ref={textField}
-          className={clsx(
-            "px-1 font-bold",
+          className={cn(
+            "w-full px-1 font-bold",
             archived && "text-gray-500 line-through"
           )}
           value={name}
@@ -287,11 +288,6 @@ const SectionName = ({
           }}
         />
       </form>
-      {isLoading && (
-        <div className="absolute inset-y-0 right-0">
-          <Spinner />
-        </div>
-      )}
     </div>
   );
 };

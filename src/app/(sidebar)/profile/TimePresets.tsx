@@ -43,23 +43,29 @@ export const TimePresets = () => {
         <Spinner />
       ) : (
         <>
-          {presets.map((preset) => (
-            <Card className="mb-2" key={preset.id}>
-              <CardContent className="flex items-center justify-between p-1">
-                <span className="pl-1">{formatTimeInSeconds(preset.time)}</span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={isMutating}
-                  onClick={async () => {
-                    setPresets(await removeTimePreset(preset.id));
-                  }}
-                >
-                  <MdDelete className="h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          <Card className="mb-4">
+            <CardContent className="h-36 overflow-y-auto p-2">
+              {presets.map((preset) => (
+                <Card className="mb-2" key={preset.id}>
+                  <CardContent className="flex items-center justify-between p-1">
+                    <span className="pl-1">
+                      {formatTimeInSeconds(preset.time)}
+                    </span>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={isMutating}
+                      onClick={async () => {
+                        setPresets(await removeTimePreset(preset.id));
+                      }}
+                    >
+                      <MdDelete className="h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </CardContent>
+          </Card>
           <form
             className="flex gap-2"
             onSubmit={async (e) => {

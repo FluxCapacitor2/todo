@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/Spinner";
-import { TextField } from "@/components/ui/TextField";
 import { getBaseURL } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
 import { MdRefresh } from "react-icons/md";
@@ -21,7 +21,8 @@ export const CalendarFeed = () => {
 
   return (
     <div className="flex gap-2">
-      <TextField
+      <Input
+        type="text"
         readOnly
         value={
           isLoading
