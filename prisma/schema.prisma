@@ -52,6 +52,16 @@ model User {
   incomingInvitations Invitation[]        @relation("to")
   apiTokens           ApiToken[]
   Collaborator        Collaborator[]
+  timePresets         TimePreset[]
+}
+
+model TimePreset {
+  id     Int     @id @default(autoincrement())
+  time   Int
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
+
+  @@index([userId])
 }
 
 model ApiToken {

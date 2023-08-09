@@ -62,7 +62,7 @@ export const ArchivedView = ({ id: projectId }: { id: string }) => {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center gap-4">
-          <div className="rounded-full bg-primary-100 p-6">
+          <div className="rounded-full bg-primary-100 p-6 dark:bg-primary-950">
             <MdChecklist size={36} />
           </div>
           <p className="w-96">
@@ -70,9 +70,6 @@ export const ArchivedView = ({ id: projectId }: { id: string }) => {
             the &quot;Archive Section&quot; button in a section&apos;s dropdown
             menu to archive it.
           </p>
-          <Button onClick={() => router.push(`/project/${projectId}`)}>
-            Go Back
-          </Button>
         </div>
       )}
     </>

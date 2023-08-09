@@ -1,16 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { useCreateSubtask, useCreateTask } from "@/hooks/task";
-import { cn } from "@/lib/utils";
+import { cn, shortDateFormat } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PopoverClose } from "@radix-ui/react-popover";
-import { format } from "date-fns";
+import { isAfter } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdAdd, MdCancel, MdSend } from "react-icons/md";
 import { z } from "zod";
-import { Calendar } from "../ui/calendar";
+import { DatePickerPopover } from "../ui/DatePickerPopover";
 import {
   Form,
   FormControl,
@@ -75,17 +75,19 @@ export const AddSubtask = ({
   );
 };
 
-const FormSchema = z.object({
-  name: z
-    .string()
-    .nonempty("You must add a name!")
-    .max(512, "Name is too long!"),
-  description: z.string().max(1024, "Description is too long!"),
-  sectionId: z.coerce
-    .number({ invalid_type_error: "You must select a section!" })
-    .nonnegative(),
-  dueDate: z.nullable(z.date()),
-});
+const FormSchema = (sectionEditable: boolean) =>
+  z.object({
+    name: z
+      .string()
+      .nonempty("You must add a name!")
+      .max(512, "Name is too long!"),
+    description: z.string().max(1024, "Description is too long!"),
+    sectionId: sectionEditable
+      ? z.coerce
+          .number({ invalid_type_error: "You must select a section!" })
+          .nonnegative()
+      : z.optional(z.any()),
+  });
 
 const AddTask = ({
   onAdd,
@@ -119,25 +121,23 @@ const AddTask = ({
     name,
     description,
     sectionId,
-    dueDate,
-  }: z.infer<typeof FormSchema>) => {
+  }: z.infer<ReturnType<typeof FormSchema>>) => {
     onAdd({
       name,
       description,
-      sectionId: sectionEditable ? sectionId : null,
+      sectionId: sectionEditable ? sectionId! : null,
       dueDate,
     });
     reset();
     setPopoverShown(false);
   };
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm<z.infer<ReturnType<typeof FormSchema>>>({
+    resolver: zodResolver(FormSchema(sectionEditable)),
     defaultValues: {
       name: "",
       description: "",
       sectionId: defaultSection,
-      dueDate: null,
     },
   });
 
@@ -225,28 +225,21 @@ const AddTask = ({
               )}
             />
             <div className="flex w-full justify-between gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "justify-start text-left font-normal",
-                      !dueDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, "PPP") : <span>Due date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={dueDate ?? undefined}
-                    onSelect={(date) => setDueDate(date ?? null)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePickerPopover date={dueDate} setDate={setDueDate}>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !dueDate && "text-muted-foreground",
+                    dueDate &&
+                      isAfter(new Date(), dueDate) &&
+                      "text-destructive"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dueDate ? shortDateFormat(dueDate) : <span>Due date</span>}
+                </Button>
+              </DatePickerPopover>
               <div className="flex justify-end gap-2">
                 <PopoverClose asChild>
                   <Button variant="ghost" onClick={reset} type="button">

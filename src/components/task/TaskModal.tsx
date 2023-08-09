@@ -1,26 +1,16 @@
 import { RemirrorEditor } from "@/components/ui/RemirrorEditor";
 import { Spinner } from "@/components/ui/Spinner";
-import { cn } from "@/lib/utils";
+import { cn, shortDateFormat } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
 import { Task } from "@prisma/client";
-import { PopoverClose } from "@radix-ui/react-popover";
-import { addDays, differenceInSeconds, format, isBefore } from "date-fns";
+import { differenceInSeconds, isAfter, isBefore } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { ReactNode } from "react";
-import { GrTextAlignFull } from "react-icons/gr";
 import { MdArrowBack, MdError, MdRunCircle, MdStart } from "react-icons/md";
+import { DatePickerPopover } from "../ui/DatePickerPopover";
 import { Button } from "../ui/button";
-import { Calendar } from "../ui/calendar";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
 import {
   Sheet,
   SheetContent,
@@ -56,8 +46,8 @@ export const TaskModal = ({
   return (
     <Sheet open={modalShown} onOpenChange={setModalShown}>
       {children && <SheetTrigger asChild>{children}</SheetTrigger>}
-      <SheetContent className="max-w-screen overflow-y-auto sm:max-w-2xl">
-        <SheetHeader>
+      <SheetContent className="max-w-screen w-screen overflow-y-auto sm:w-auto sm:max-w-2xl">
+        <SheetHeader className="-mt-2">
           {fullTask?.parentTask?.name && (
             <a
               className="flex items-center gap-2 font-medium"
@@ -77,129 +67,89 @@ export const TaskModal = ({
                 setTask({ ...task, completed: checked === true })
               }
               checked={task.completed}
-              className="inline-block h-5 w-5"
+              className="absolute left-8 inline-block h-5 w-5"
             />
-            <div className="w-full pr-4">
-              <Input
-                type="text"
-                onBlur={(e) => {
-                  setTask({ ...task, name: e.currentTarget.value ?? "" });
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.currentTarget.blur();
-                  }
-                }}
-                className={cn(task.completed && "text-gray-500 line-through")}
-                defaultValue={task.name}
-              />
-            </div>
+            <Input
+              type="text"
+              onBlur={(e) => {
+                setTask({ ...task, name: e.currentTarget.value ?? "" });
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.currentTarget.blur();
+                }
+              }}
+              className={cn(
+                task.completed && "text-gray-500 line-through",
+                "mr-4 pl-8"
+              )}
+              defaultValue={task.name}
+            />
           </SheetTitle>
         </SheetHeader>
-        <div className="mt-8 flex flex-col gap-8">
-          <div className="grid w-full grid-cols-1 lg:grid-cols-2">
-            <Popover>
-              <PopoverTrigger asChild>
+        <div className="flex flex-col gap-6 pr-4">
+          <RemirrorEditor
+            className="mt-2"
+            editable={!isSaving}
+            initialContent={task.description}
+            setContent={(content) => {
+              if (content !== task.description) {
+                setTask({ ...task, description: content });
+              }
+            }}
+          />
+
+          <div>
+            <h2 className="mb-2 font-bold">Dates</h2>
+            <div className="grid w-full grid-cols-1 gap-4 lg:grid-cols-2">
+              <DatePickerPopover
+                date={task.startDate}
+                setDate={(date) => setTask({ ...task, startDate: date })}
+              >
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-[280px] justify-start text-left font-normal",
+                    "w-full justify-start text-left font-normal",
                     !task.startDate && "text-muted-foreground"
                   )}
                 >
                   <MdStart className="mr-2 h-4 w-4" />
                   {task.startDate ? (
-                    <span>Started {format(task.startDate, "PPP")}</span>
+                    <span>Started {shortDateFormat(task.startDate)}</span>
                   ) : (
                     <span>Add start date</span>
                   )}
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
-                <div className="rounded-md border">
-                  <Calendar
-                    mode="single"
-                    selected={task.startDate ?? undefined}
-                    onSelect={(date) =>
-                      setTask({ ...task, startDate: date ?? null })
-                    }
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="destructive"
-                    onClick={() => setTask({ ...task, startDate: null })}
-                  >
-                    Remove Date
-                  </Button>
-                  <PopoverClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </PopoverClose>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Popover>
-              <PopoverTrigger asChild>
+              </DatePickerPopover>
+              <DatePickerPopover
+                date={task.dueDate}
+                setDate={(date) => setTask({ ...task, dueDate: date })}
+              >
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-[280px] justify-start text-left font-normal",
-                    !task.dueDate && "text-muted-foreground"
+                    "w-full justify-start text-left font-normal",
+                    !task.dueDate && "text-muted-foreground",
+                    task.dueDate &&
+                      isAfter(new Date(), task.dueDate) &&
+                      "text-destructive"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {task.dueDate ? (
-                    <span>Due {format(task.dueDate, "PPP")}</span>
+                    <span>Due {shortDateFormat(task.dueDate)}</span>
                   ) : (
                     <span>Add due date</span>
                   )}
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
-                <Select
-                  onValueChange={(value) =>
-                    setTask({
-                      ...task,
-                      dueDate: addDays(new Date(), parseInt(value)),
-                    })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent position="popper">
-                    <SelectItem value="0">Today</SelectItem>
-                    <SelectItem value="1">Tomorrow</SelectItem>
-                    <SelectItem value="3">In 3 days</SelectItem>
-                    <SelectItem value="7">In a week</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="rounded-md border">
-                  <Calendar
-                    mode="single"
-                    selected={task.dueDate ?? undefined}
-                    onSelect={(date) =>
-                      setTask({ ...task, dueDate: date ?? null })
-                    }
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="destructive"
-                    onClick={() => setTask({ ...task, dueDate: null })}
-                  >
-                    Remove Date
-                  </Button>
-                  <PopoverClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </PopoverClose>
-                </div>
-              </PopoverContent>
-            </Popover>
+              </DatePickerPopover>
+            </div>
           </div>
 
-          <Reminders task={task} dueDate={task.dueDate} />
+          <div>
+            <h2 className="mb-2 font-bold">Reminders</h2>
+            <Reminders task={task} dueDate={task.dueDate} />
+          </div>
 
           {task.startDate &&
             task.dueDate &&
@@ -227,28 +177,12 @@ export const TaskModal = ({
               </>
             )}
 
-          <div className="flex flex-col">
-            <p className="flex items-center gap-4">
-              <GrTextAlignFull className="h-5 w-5" /> Description
-            </p>
-            <div className="mb-6 ml-6 mt-4 max-h-96 w-full overflow-scroll outline-none">
-              <RemirrorEditor
-                editable={!isSaving}
-                initialContent={task.description}
-                setContent={(content) => {
-                  if (content !== task.description) {
-                    setTask({ ...task, description: content });
-                  }
-                }}
-              />
-            </div>
-          </div>
-
           <section className="flex flex-col gap-2">
-            <h2 className="text-3xl font-bold">
-              Sub-tasks{" "}
+            <h2 className="mb-2 font-bold">
+              Sub-tasks
               {fullTask?.subTasks && fullTask.subTasks.length > 0 && (
-                <span className="text-base font-normal">
+                <span className="text-base font-normal text-muted-foreground">
+                  {" "}
                   {fullTask.subTasks.filter((it) => it.completed).length}/
                   {fullTask.subTasks.length} completed
                 </span>

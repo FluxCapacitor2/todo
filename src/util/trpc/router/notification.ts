@@ -40,7 +40,7 @@ export const notificationRouter = (t: MyTrpc) =>
         });
 
         if (task?.ownerId !== ctx.session.id) {
-          throw new TRPCError({ code: "NOT_FOUND" });
+          throw new TRPCError({ code: "FORBIDDEN" });
         }
 
         if (task._count.reminders >= 10) {

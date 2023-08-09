@@ -8,6 +8,7 @@ import { CalendarFeed } from "./CalendarFeed";
 import { RequestNotificationPermission } from "./RequestNotificationPermission";
 import { SignOutButton } from "./SignOutButton";
 import { ThemeToggle } from "./ThemeToggle";
+import { TimePresets } from "./TimePresets";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -47,6 +48,18 @@ export default async function ProfilePage() {
               accidentally share the link, you can reset it by clicking the
               rotate button above.
             </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Time Presets</CardTitle>
+            <p className="text-muted-foreground">
+              Change the recommended time presets for start and due dates and
+              reminders.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <TimePresets />
           </CardContent>
         </Card>
         <Card>

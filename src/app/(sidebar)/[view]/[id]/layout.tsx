@@ -11,7 +11,7 @@ export default function Layout({
   children: ReactNode;
 }) {
   return (
-    <main className="px-2 md:px-6 md:pt-4">
+    <main className="md:px-6 md:pt-4">
       <ViewSelector id={id} />
       {children}
     </main>

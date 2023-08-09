@@ -1,7 +1,6 @@
 import { useCopyTaskURL, useDeleteTask } from "@/hooks/task";
-import { cn } from "@/lib/utils";
+import { cn, shortDateFormat } from "@/lib/utils";
 import { Task } from "@prisma/client";
-import { addDays, format } from "date-fns";
 import { useState } from "react";
 import {
   MdCalendarToday,
@@ -11,9 +10,9 @@ import {
   MdRemoveCircle,
   MdToday,
 } from "react-icons/md";
+import { DatePickerPopover } from "../ui/DatePickerPopover";
 import { RemirrorEditor } from "../ui/RemirrorEditor";
 import { Button } from "../ui/button";
-import { Calendar } from "../ui/calendar";
 import { Card, CardContent } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
 import {
@@ -23,13 +22,6 @@ import {
   ContextMenuTrigger,
 } from "../ui/context-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
 import { TaskModal } from "./TaskModal";
 import { TaskProvider } from "./TaskProvider";
 
@@ -121,57 +113,28 @@ export const TaskCard = ({
                           </Popover>
                         )}
                         {task.dueDate && (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                onClick={(e) => e.stopPropagation()}
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full justify-start text-left font-normal",
-                                  !task.dueDate && "text-muted-foreground"
-                                )}
-                              >
-                                <MdCalendarToday className="mr-2 h-4 w-4" />
-                                {task.dueDate ? (
-                                  <>Due {format(task.dueDate, "PPP")}</>
-                                ) : (
-                                  "Add Due Date"
-                                )}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="flex w-auto flex-col space-y-2 p-2">
-                              <Select
-                                onValueChange={(value) =>
-                                  setTask({
-                                    ...task,
-                                    dueDate: addDays(
-                                      new Date(),
-                                      parseInt(value)
-                                    ),
-                                  })
-                                }
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a time..." />
-                                </SelectTrigger>
-                                <SelectContent position="popper">
-                                  <SelectItem value="0">Today</SelectItem>
-                                  <SelectItem value="1">Tomorrow</SelectItem>
-                                  <SelectItem value="3">In 3 days</SelectItem>
-                                  <SelectItem value="7">In a week</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <div className="rounded-md border">
-                                <Calendar
-                                  mode="single"
-                                  selected={task.dueDate}
-                                  onSelect={(date) =>
-                                    date && setTask({ ...task, dueDate: date })
-                                  }
-                                />
-                              </div>
-                            </PopoverContent>
-                          </Popover>
+                          <DatePickerPopover
+                            date={task.dueDate}
+                            setDate={(date) =>
+                              setTask({ ...task, dueDate: date })
+                            }
+                          >
+                            <Button
+                              onClick={(e) => e.stopPropagation()}
+                              variant={"outline"}
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !task.dueDate && "text-muted-foreground"
+                              )}
+                            >
+                              <MdCalendarToday className="mr-2 h-4 w-4" />
+                              {task.dueDate ? (
+                                <>Due {shortDateFormat(task.dueDate)}</>
+                              ) : (
+                                "Add Due Date"
+                              )}
+                            </Button>
+                          </DatePickerPopover>
                         )}
                       </div>
                     )}
@@ -191,7 +154,7 @@ export const TaskCard = ({
                   </CardContent>
                 </Card>
               </ContextMenuTrigger>
-              <ContextMenuContent>
+              <ContextMenuContent onClick={(e) => e.stopPropagation()}>
                 <TaskContextMenuItems task={task} setTask={setTask} />
               </ContextMenuContent>
             </ContextMenu>

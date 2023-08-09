@@ -3,6 +3,7 @@
 import { ProjectMenu } from "@/app/(sidebar)/[view]/[id]/ProjectMenu";
 import { trpc } from "@/util/trpc/trpc";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -19,8 +20,10 @@ export const ViewSelector = ({ id }: { id: string }) => {
     isError,
   } = trpc.projects.get.useQuery(id, { refetchInterval: 600_000 });
 
+  const pathname = usePathname();
+
   return (
-    <div>
+    <>
       {isLoading ? (
         <Skeleton className="mb-2 h-10 w-64" />
       ) : (
@@ -29,32 +32,40 @@ export const ViewSelector = ({ id }: { id: string }) => {
           <ProjectMenu id={id} />
         </h1>
       )}
-
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
             <Link href={`/project/${id}`} legacyBehavior passHref>
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <NavigationMenuLink
+                className={navigationMenuTriggerStyle()}
+                active={pathname?.startsWith("/project/")}
+              >
                 Project
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <Link href={`/list/${id}`} legacyBehavior passHref>
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <NavigationMenuLink
+                className={navigationMenuTriggerStyle()}
+                active={pathname?.startsWith("/list/")}
+              >
                 List
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <Link href={`/archived/${id}`} legacyBehavior passHref>
-              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <NavigationMenuLink
+                className={navigationMenuTriggerStyle()}
+                active={pathname?.startsWith("/archived/")}
+              >
                 Archived
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-    </div>
+    </>
   );
 };
