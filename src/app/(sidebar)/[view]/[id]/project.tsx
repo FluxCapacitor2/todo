@@ -21,7 +21,7 @@ import { trpc } from "@/util/trpc/trpc";
 import { Section, Task } from "@prisma/client";
 import clsx from "clsx";
 import { produce } from "immer";
-import { useRef, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import {
   MdArchive,
@@ -193,27 +193,24 @@ const Section = ({
 
   return (
     <div
-      className="mr-4 flex w-80 snap-center flex-col rounded-lg p-2"
+      className={cn(
+        "mr-4 flex w-80 snap-center flex-col rounded-lg",
+        section.id < 0 && "pointer-events-none"
+      )}
       key={section.id}
     >
-      <div
-        className={clsx(
-          "flex items-center justify-between",
-          section.id < 0 && "pointer-events-none"
-        )}
+      <SectionName
+        id={section.id}
+        initialName={section.name}
+        projectId={projectId}
+        archived={section.archived}
       >
-        <SectionName
-          id={section.id}
-          initialName={section.name}
-          projectId={projectId}
-          archived={section.archived}
-        />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             {section.id < 0 ? (
               <Spinner />
             ) : (
-              <Button variant="ghost">
+              <Button variant="ghost" size="icon">
                 <MdMenu />
               </Button>
             )}
@@ -227,10 +224,10 @@ const Section = ({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+      </SectionName>
       <div
         className={clsx(
-          "flex min-h-screen w-80 flex-col gap-2",
+          "mt-2 flex min-h-screen w-80 flex-col gap-2",
           section.archived && "opacity-50"
         )}
       >
@@ -248,11 +245,13 @@ const SectionName = ({
   initialName,
   projectId,
   archived,
+  children,
 }: {
   id: number;
   initialName: string;
   projectId: string;
   archived?: boolean;
+  children: ReactNode;
 }) => {
   const utils = trpc.useContext();
   const textField = useRef<HTMLInputElement | null>(null);
@@ -261,7 +260,7 @@ const SectionName = ({
   const [name, setName] = useState(initialName);
 
   return (
-    <div className="group relative">
+    <div className="group relative w-full">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -273,8 +272,8 @@ const SectionName = ({
           type="text"
           ref={textField}
           className={cn(
-            "w-full px-1 font-bold",
-            archived && "text-gray-500 line-through"
+            "w-full px-2 font-semibold",
+            archived && "text-muted-foreground line-through"
           )}
           value={name}
           onChange={(e) => {
@@ -287,6 +286,7 @@ const SectionName = ({
             }
           }}
         />
+        <div className="absolute inset-y-0 right-2">{children}</div>
       </form>
     </div>
   );
@@ -303,7 +303,7 @@ const NewSection = ({ projectId }: { projectId: string }) => {
   };
 
   return (
-    <div className="mr-4 flex w-80 snap-center flex-col rounded-lg p-2">
+    <div className="mr-4 flex w-80 snap-center flex-col rounded-lg">
       <Button variant="secondary" onClick={newSection}>
         <MdEdit />
         New Section

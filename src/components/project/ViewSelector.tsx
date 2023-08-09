@@ -13,7 +13,13 @@ import {
 } from "../ui/navigation-menu";
 import { Skeleton } from "../ui/skeleton";
 
-export const ViewSelector = ({ id }: { id: string }) => {
+export const ViewSelector = ({
+  id,
+  className,
+}: {
+  id: string;
+  className: string;
+}) => {
   const {
     data: project,
     isLoading,
@@ -23,7 +29,7 @@ export const ViewSelector = ({ id }: { id: string }) => {
   const pathname = usePathname();
 
   return (
-    <>
+    <div className={className}>
       {isLoading ? (
         <Skeleton className="mb-2 h-10 w-64" />
       ) : (
@@ -66,6 +72,6 @@ export const ViewSelector = ({ id }: { id: string }) => {
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-    </>
+    </div>
   );
 };

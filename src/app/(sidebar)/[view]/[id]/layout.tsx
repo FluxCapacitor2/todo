@@ -12,7 +12,7 @@ export default function Layout({
 }) {
   return (
     <main className="md:px-6 md:pt-4">
-      <ViewSelector id={id} />
+      <ViewSelector id={id} className="mb-2" />
       {children}
     </main>
   );
