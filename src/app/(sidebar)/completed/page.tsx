@@ -7,10 +7,7 @@ import { Skeleton } from "../[view]/[id]/list";
 
 export default function Page() {
   const [page, setPage] = useState(0);
-  const { data, isLoading } = trpc.tasks.listCompleted.useQuery(
-    { page },
-    { useErrorBoundary: true }
-  );
+  const { data, isLoading } = trpc.tasks.listCompleted.useQuery({ page });
 
   return (
     <main className="p-2 pt-1 md:px-6 md:pt-4">

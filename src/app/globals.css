@@ -59,7 +59,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground accent-primary-500 selection:bg-primary-300 dark:selection:bg-primary-600;
+    @apply bg-background text-foreground accent-primary-500 selection:bg-primary-300 dark:selection:bg-primary-700 dark:selection:text-white;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 

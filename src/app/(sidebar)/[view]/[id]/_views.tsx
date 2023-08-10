@@ -4,7 +4,10 @@ import { ArchivedView } from "./archived";
 import { ListView } from "./list";
 import { ProjectView } from "./project";
 
-const components: Record<string, ({ id }: { id: string }) => ReactElement> = {
+export const components: Record<
+  string,
+  ({ id }: { id: string }) => ReactElement
+> = {
   project: ProjectView,
   list: ListView,
   archived: ArchivedView,

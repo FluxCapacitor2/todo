@@ -5,6 +5,7 @@ import { createIDBPersister } from "@/util/idb-persister";
 import { trpc } from "@/util/trpc/trpc";
 import { AppRouter } from "@/util/trpc/trpc-router";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import {
   TRPCClientError,
@@ -13,22 +14,16 @@ import {
   loggerLink,
 } from "@trpc/client";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import superjson from "superjson";
 
 export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const router = useRouter();
   const session = useSession();
 
-  useEffect(() => {
-    if (session.status === "unauthenticated") {
-      router.push("/signed-out");
-    }
-  }, [router, session.status]);
+  console.log(session.status);
 
   const [queryClient] = useState(
     () =>
@@ -36,21 +31,21 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
         queryCache: new QueryCache({
           onError: (error, query) => {
             if (
-              (error as TRPCClientError<AppRouter>)?.data?.code ===
-              "UNAUTHORIZED"
+              (error as TRPCClientError<AppRouter>)?.data?.code !==
+                "UNAUTHORIZED" &&
+              query.state.data !== undefined
             ) {
-              router.push("/signed-out");
-            } else if (query.state.data !== undefined) {
-              toast.error("There was an error updating your tasks.");
+              toast.error("There was an error fetching your tasks.");
             }
           },
         }),
         defaultOptions: {
           queries: {
+            enabled: session.status !== "unauthenticated",
+            retryDelay(failureCount, error) {
+              return failureCount * 1000;
+            },
             retry: (failureCount, error) => {
-              if (session.status === "unauthenticated") {
-                return false;
-              }
               const code = (error as TRPCClientError<AppRouter>)?.data?.code;
               if (code === "UNAUTHORIZED" || code === "NOT_FOUND") {
                 return false;
@@ -89,12 +84,27 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <SigninRedirect />
       <PersistQueryClientProvider
         persistOptions={{ persister }}
         client={queryClient}
       >
         {children}
+        <ReactQueryDevtools />
       </PersistQueryClientProvider>
     </trpc.Provider>
   );
+};
+
+const SigninRedirect = () => {
+  useSession({
+    required: true,
+    onUnauthenticated: () => {
+      window.location.href = `/signin?next=${encodeURIComponent(
+        window.location.pathname
+      )}`;
+    },
+  });
+
+  return null;
 };

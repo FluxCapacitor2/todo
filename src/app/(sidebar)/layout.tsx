@@ -1,25 +1,60 @@
-import { InnerLayout } from "@/components/global/InnerLayout";
+"use client";
+
 import { Sidebar } from "@/components/global/Sidebar";
 import { TrpcProvider } from "@/components/global/TrpcProvider";
-import { ExtSession, authOptions } from "@/pages/api/auth/[...nextauth]";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
+import { MdOfflineBolt } from "react-icons/md";
 import { RouteAttribute } from "./[view]/[id]/RouteAttribute";
 
-export default async function SignedInLayout({
+const useOnline = () => {
+  const [online, setOnline] = useState(
+    typeof window === "undefined" || navigator.onLine
+  );
+
+  useEffect(() => {
+    const onlineHandler = () => setOnline(true);
+    const offlineHandler = () => setOnline(false);
+    window.addEventListener("online", onlineHandler);
+    window.addEventListener("offline", offlineHandler);
+
+    return () => {
+      window.removeEventListener("online", onlineHandler);
+      window.removeEventListener("offline", offlineHandler);
+    };
+  });
+
+  return online;
+};
+
+export default function SignedInLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = (await getServerSession(authOptions)) as ExtSession;
+  const online = useOnline();
 
-  if (!session?.user) {
-    redirect("/signed-out");
-  }
+  useEffect(() => {
+    if (online) {
+      document.body.classList.remove("offline");
+      document.body.classList.add("online");
+    } else {
+      document.body.classList.remove("online");
+      document.body.classList.add("offline");
+    }
+  }, [online]);
 
   return (
-    <InnerLayout session={session}>
+    <>
+      {!online && (
+        <div className="flex h-10 w-full flex-wrap items-center justify-center gap-2 bg-red-500 text-white">
+          <MdOfflineBolt />
+          <span className="font-bold">You are offline!</span>
+          <span className="hidden md:inline">
+            Please reconnect to continue using the app.
+          </span>
+        </div>
+      )}
       <TrpcProvider>
         <div className="conditional-overflow-hidden flex flex-col md:flex-row">
           <Sidebar />
@@ -30,6 +65,6 @@ export default async function SignedInLayout({
         </div>
       </TrpcProvider>
       <RouteAttribute />
-    </InnerLayout>
+    </>
   );
 }

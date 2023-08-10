@@ -1,10 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { NotificationSignUp } from "./NotificationSignUp";
 
-export const RequestNotificationPermission = () => {
+const Component = () => {
   const [status, setStatus] = useState(Notification.permission);
 
   const request = () => {
@@ -28,3 +29,7 @@ export const RequestNotificationPermission = () => {
     </>
   );
 };
+
+export const RequestNotificationPermission = dynamic(async () => Component, {
+  ssr: false,
+});

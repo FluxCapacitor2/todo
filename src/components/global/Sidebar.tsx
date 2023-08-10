@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useState } from "react";
 import { BsFillGridFill } from "react-icons/bs";
 import {
   MdCheckCircle,
@@ -16,19 +16,16 @@ import {
   MdGroups,
   MdMenu,
 } from "react-icons/md";
+import { Divider } from "../ui/Divider";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+import { Skeleton } from "../ui/skeleton";
 
 const activeClass = "transition-colors bg-secondary";
 const inactiveClass = "transition-colors hover:bg-secondary/80";
 
 export const Sidebar = () => {
   const [shown, setShown] = useState(false);
-
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  useEffect(() => setShown(false), [pathname, searchParams]);
 
   useLayoutEffect(() => {
     const handler = () => {
@@ -61,8 +58,20 @@ export const Sidebar = () => {
         </SheetContent>
       </Sheet>
       <SidebarContents isModal={false} />
+      <Suspense>
+        <HideOnRouteChange hide={() => setShown(false)} />
+      </Suspense>
     </>
   );
+};
+
+const HideOnRouteChange = ({ hide }: { hide: () => void }) => {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(hide, [pathname, searchParams]);
+
+  return <></>;
 };
 
 const SidebarContents = ({ isModal }: { isModal: boolean }) => {
@@ -94,17 +103,26 @@ const SidebarContents = ({ isModal }: { isModal: boolean }) => {
             pathname === "/profile" ? activeClass : inactiveClass
           )}
         >
-          {session?.data?.user?.image && (
-            <Image
-              src={session.data.user.image}
-              alt="User profile image"
-              width={32}
-              height={32}
-              className="rounded-full"
-              unoptimized
-            />
+          {session.status === "loading" ? (
+            <>
+              <Skeleton className="h-8 w-8 rounded-full" />
+              <Skeleton className="h-6 w-32" />
+            </>
+          ) : (
+            <>
+              {session.data?.user?.image && (
+                <Image
+                  src={session.data.user.image}
+                  alt="User profile image"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                  unoptimized
+                />
+              )}
+              <p>{session?.data?.user?.name}</p>
+            </>
           )}
-          <p>{session?.data?.user?.name}</p>
         </div>
       </Link>
       <Divider />
@@ -189,12 +207,6 @@ const SidebarContents = ({ isModal }: { isModal: boolean }) => {
     </nav>
   );
 };
-
-const Divider = () => (
-  <div className="px-2">
-    <hr className="h-1 w-full border-b border-t-0 border-gray-400 dark:border-gray-600" />
-  </div>
-);
 
 const ProjectItem = ({
   name,

@@ -1,37 +1,46 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { authOptions } from "@/pages/api/auth/[...nextauth]";
-import { getServerSession } from "next-auth";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { CalendarFeed } from "./CalendarFeed";
 import { RequestNotificationPermission } from "./RequestNotificationPermission";
 import { SignOutButton } from "./SignOutButton";
 import { ThemeToggle } from "./ThemeToggle";
 import { TimePresets } from "./TimePresets";
 
-export default async function ProfilePage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session || !session.user) {
-    redirect("/");
-  }
+export default function ProfilePage() {
+  const session = useSession();
 
   return (
     <main className="px-6 md:pt-4">
       <div className="mb-8 flex items-center gap-2">
-        <Image
-          width={48}
-          height={48}
-          src={session.user.image!}
-          alt="Profile picture"
-          unoptimized
-          className="rounded-full"
-        />
-        <div>
-          <h1 className="text-3xl font-bold">{session.user.name}</h1>
-          <p>{session.user.email}</p>
-        </div>
+        {session.status !== "authenticated" ? (
+          <>
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-5 w-32" />
+            </div>
+          </>
+        ) : (
+          <>
+            <Image
+              width={48}
+              height={48}
+              src={session.data!.user!.image!}
+              alt="Profile picture"
+              unoptimized
+              className="rounded-full"
+            />
+            <div>
+              <h1 className="text-3xl font-bold">{session.data!.user!.name}</h1>
+              <p>{session.data!.user!.email}</p>
+            </div>
+          </>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         <Card>
