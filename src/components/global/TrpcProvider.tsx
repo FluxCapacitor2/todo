@@ -94,7 +94,6 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
         client={queryClient}
       >
         {children}
-        {/* <ReactQueryDevtools /> */}
       </PersistQueryClientProvider>
     </trpc.Provider>
   );

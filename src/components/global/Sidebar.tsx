@@ -68,7 +68,6 @@ export const Sidebar = () => {
 const SidebarContents = ({ isModal }: { isModal: boolean }) => {
   const session = useSession();
   const pathname = usePathname();
-  const shown = isModal;
 
   const { data, isLoading, isError } = trpc.projects.list.useQuery(undefined, {
     refetchInterval: 300_000, // 5 minutes
@@ -80,11 +79,12 @@ const SidebarContents = ({ isModal }: { isModal: boolean }) => {
       refetchInterval: 300_000, // 5 minutes
     }
   );
+
   return (
     <nav
       className={clsx(
-        shown ? "z-20 flex" : "sticky hidden",
-        "top-0 h-full min-h-screen min-w-[16rem] flex-col md:flex"
+        isModal ? "z-20 flex" : "z-20 border-r bg-background",
+        "sticky top-0 flex h-screen min-w-[16rem] flex-col"
       )}
     >
       <Link href="/profile">

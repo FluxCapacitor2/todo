@@ -44,7 +44,7 @@ export const ProjectView = ({ id: projectId }: { id: string }) => {
 
   return (
     <>
-      <div className="ml-2 flex snap-x snap-mandatory overflow-x-scroll lg:snap-none">
+      <div className="-mr-6 ml-2 flex h-full max-h-full snap-x snap-mandatory overflow-scroll lg:snap-none">
         {data.sections.map((section) => (
           <Section key={section.id} section={section} projectId={data.id} />
         ))}
@@ -133,6 +133,7 @@ const Section = ({
       key={section.id}
     >
       <SectionName
+        className="sticky top-0"
         id={section.id}
         initialName={section.name}
         projectId={projectId}
@@ -168,7 +169,7 @@ const Section = ({
       </SectionName>
       <div
         className={clsx(
-          "mt-2 flex min-h-screen w-80 flex-col gap-2",
+          "mt-2 flex w-80 flex-col gap-2",
           section.archived && "opacity-50"
         )}
       >
@@ -182,12 +183,14 @@ const Section = ({
 };
 
 const SectionName = ({
+  className,
   id,
   initialName,
   projectId,
   archived,
   children,
 }: {
+  className?: string;
   id: number;
   initialName: string;
   projectId: string;
@@ -201,7 +204,7 @@ const SectionName = ({
   const [name, setName] = useState(initialName);
 
   return (
-    <div className="group relative w-full">
+    <div className={cn("group relative w-full", className)}>
       <form
         onSubmit={(e) => {
           e.preventDefault();

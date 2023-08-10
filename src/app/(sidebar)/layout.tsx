@@ -2,12 +2,12 @@ import { InnerLayout } from "@/components/global/InnerLayout";
 import { Sidebar } from "@/components/global/Sidebar";
 import { TrpcProvider } from "@/components/global/TrpcProvider";
 import { ExtSession, authOptions } from "@/pages/api/auth/[...nextauth]";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { Toaster } from "react-hot-toast";
+import { RouteAttribute } from "./[view]/[id]/RouteAttribute";
 
-export default async function RootLayout({
+export default async function SignedInLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -21,13 +21,15 @@ export default async function RootLayout({
   return (
     <InnerLayout session={session}>
       <TrpcProvider>
-        <div className="flex flex-col md:flex-row">
+        <div className="conditional-overflow-hidden flex flex-col md:flex-row">
           <Sidebar />
-          <div className="mt-3 w-full">{children}</div>
+          <div className="conditional-overflow-hidden h-screen w-full pt-3">
+            {children}
+          </div>
+          <Toaster position="top-right" />
         </div>
-        <Toaster position="top-right" />
-        <ReactQueryDevtools />
       </TrpcProvider>
+      <RouteAttribute />
     </InnerLayout>
   );
 }
