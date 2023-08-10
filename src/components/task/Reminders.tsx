@@ -2,7 +2,6 @@ import { useAddReminder, useRemoveReminder } from "@/hooks/reminder";
 import { shortDateFormat } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
 import { Task } from "@prisma/client";
-import { useState } from "react";
 import { MdClose, MdNotificationAdd, MdNotifications } from "react-icons/md";
 import { DatePickerPopover } from "../ui/DatePickerPopover";
 import { Button } from "../ui/button";
@@ -47,10 +46,8 @@ export const Reminders = ({
 };
 
 const AddReminder = ({ add }: { add: (date: Date) => void }) => {
-  const [date, setDate] = useState<Date>(new Date(Date.now() + 86_400_000));
-
   return (
-    <DatePickerPopover date={date} setDate={setDate}>
+    <DatePickerPopover date={new Date(Date.now() + 86_400_000)} setDate={add}>
       <Button
         variant={"outline"}
         className="w-full justify-start text-left font-normal text-muted-foreground"

@@ -95,6 +95,17 @@ export const userRouter = (t: MyTrpc) =>
     addTimePreset: t.procedure
       .input(z.number().min(0).max(86400))
       .mutation(async ({ input, ctx }) => {
+        const existingTimePreset = await prisma.timePreset.findFirst({
+          where: {
+            userId: ctx.session.id,
+            time: input,
+          },
+        });
+
+        if (existingTimePreset !== null) {
+          throw new TRPCError({ code: "CONFLICT" });
+        }
+
         return (
           await prisma.user.update({
             where: {

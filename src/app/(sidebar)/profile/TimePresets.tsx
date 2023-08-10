@@ -74,6 +74,18 @@ export const TimePresets = () => {
                 toast.error("Invalid time value!");
                 return;
               }
+              if (
+                presets.some(
+                  (it) => it.time === timeRef.current!.valueAsNumber / 1000
+                )
+              ) {
+                toast.error(
+                  `You already have a time preset for ${
+                    timeRef.current!.value
+                  }!`
+                );
+                return;
+              }
               setPresets(
                 await addTimePreset(
                   Math.floor(timeRef.current!.valueAsNumber / 1000)

@@ -39,7 +39,7 @@ export const ProjectMenu = ({ id }: { id: string }) => {
         opened={shareModalShown}
         close={() => setShareModalShown(false)}
       />
-      {project?.name && (
+      {project?.name !== undefined && (
         <DeleteModal
           projectId={id}
           projectName={project?.name}

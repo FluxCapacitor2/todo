@@ -45,7 +45,13 @@ export const NewProject = () => {
         </p>
         <form className="mt-4 flex flex-col gap-4" onSubmit={submit}>
           <Label htmlFor="newProjectName">Project name</Label>
-          <Input type="text" id="newProjectName" ref={ref} />
+          <Input
+            type="text"
+            id="newProjectName"
+            ref={ref}
+            required
+            maxLength={100}
+          />
           <div className="flex gap-2">
             <Button type="submit" disabled={isLoading}>
               <MdAddBox />

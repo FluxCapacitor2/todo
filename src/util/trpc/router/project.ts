@@ -67,7 +67,7 @@ export const projectsRouter = (t: MyTrpc) =>
       return project;
     }),
     create: t.procedure
-      .input(z.object({ name: z.string() }))
+      .input(z.object({ name: z.string().nonempty().max(100) }))
       .mutation(async ({ ctx, input }) => {
         const { id } = await prisma.project.create({
           data: {

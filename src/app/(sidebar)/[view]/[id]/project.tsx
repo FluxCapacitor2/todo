@@ -281,6 +281,10 @@ const SectionName = ({
           }}
           onBlur={async (e) => {
             if (name !== initialName) {
+              if (name.trim().length === 0) {
+                toast.error("The section name must not be empty!");
+                return;
+              }
               await mutateAsync({ id, name });
               utils.projects.get.invalidate(projectId);
             }
