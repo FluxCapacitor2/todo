@@ -1,27 +1,34 @@
-import { Button } from "@/components/ui/Button";
-import { DatePickerPopover } from "@/components/ui/DatePickerPopover";
-import { LONG_DATE_FORMAT } from "@/util/constants";
+import { Button } from "@/components/ui/button";
+import { useCreateSubtask, useCreateTask } from "@/hooks/task";
+import { cn, shortDateFormat } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
-import clsx from "clsx";
-import { format } from "date-fns";
-import { produce } from "immer";
-import { useRef, useState } from "react";
-import { toast } from "react-hot-toast";
-import { MdCalendarToday, MdCancel, MdSend } from "react-icons/md";
-import { SelectField } from "../ui/SelectField";
-import { TextArea, TextField } from "../ui/TextField";
-
-const defaultTask = {
-  completed: false,
-  createdAt: new Date(),
-  dueDate: null,
-  ownerId: "",
-  parentTaskId: null,
-  priority: 0,
-  startDate: null,
-  updatedAt: new Date(),
-  subTasks: [],
-};
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PopoverClose } from "@radix-ui/react-popover";
+import { isAfter } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { MdAdd, MdCancel, MdSend } from "react-icons/md";
+import { z } from "zod";
+import { DatePickerPopover } from "../ui/DatePickerPopover";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Textarea } from "../ui/textarea";
 
 export const AddSectionTask = ({
   sectionId,
@@ -30,59 +37,14 @@ export const AddSectionTask = ({
   sectionId?: number;
   projectId: string;
 }) => {
-  const utils = trpc.useContext();
-  const { mutateAsync } = trpc.tasks.create.useMutation({
-    onMutate: ({ sectionId, name, description, dueDate }) => {
-      const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
+  const { createTask } = useCreateTask(projectId);
 
-      utils.projects.get.cancel(projectId);
-
-      utils.projects.get.setData(projectId, (project) => {
-        if (!project) return undefined;
-        return produce(project, (project) => {
-          for (const section of project.sections) {
-            if (section.id === sectionId) {
-              section.tasks.push({
-                ...defaultTask,
-                id: newId,
-                sectionId,
-                name,
-                description: description ?? "",
-                dueDate,
-                projectId,
-              });
-            }
-          }
-        });
-      });
-
-      return { newId };
-    },
-    onError: (error, { sectionId, name, description }, context) => {
-      toast.error("There was an error adding a new task!");
-      if (!context) return;
-
-      utils.projects.get.setData(projectId, (project) => {
-        if (!project) return undefined;
-        return produce(project, (project) => {
-          for (const section of project.sections) {
-            section.tasks = section.tasks.filter(
-              (it) => it.id !== context.newId
-            );
-          }
-        });
-      });
-    },
-    onSettled: () => {
-      utils.projects.get.invalidate(projectId);
-    },
-  });
   return (
     <AddTask
       projectId={projectId}
       section={sectionId}
       onAdd={({ name, description, sectionId, dueDate }) =>
-        mutateAsync({ name, description, sectionId: sectionId!, dueDate })
+        createTask({ name, description, sectionId: sectionId!, dueDate })
       }
     />
   );
@@ -95,55 +57,14 @@ export const AddSubtask = ({
   projectId: string;
   parentTaskId: number;
 }) => {
-  const utils = trpc.useContext();
-  const { mutateAsync } = trpc.tasks.addSubtask.useMutation({
-    onMutate: ({ name, id, description, dueDate }) => {
-      const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
+  const { createSubtask } = useCreateSubtask(projectId, parentTaskId);
 
-      utils.tasks.get.cancel({ id: parentTaskId });
-      utils.tasks.get.setData({ id: parentTaskId }, (task) => {
-        if (!task) return undefined;
-        return {
-          ...task,
-          subTasks: [
-            ...task.subTasks,
-            {
-              ...defaultTask,
-              id: newId,
-              parentTaskId: id,
-              sectionId: null,
-              name,
-              description: description ?? "",
-              dueDate,
-              projectId,
-            },
-          ],
-        };
-      });
-
-      return { newId };
-    },
-    onError: (error, { name, id, description }, context) => {
-      toast.error("There was an error adding that sub-task!");
-      if (!context) return;
-      utils.tasks.get.setData({ id }, (task) => {
-        if (!task) return undefined;
-        return {
-          ...task,
-          subTasks: task.subTasks.filter((it) => it.id !== context.newId),
-        };
-      });
-    },
-    onSettled: () => {
-      utils.tasks.get.invalidate({ id: parentTaskId });
-    },
-  });
   return (
     <AddTask
       sectionEditable={false}
       projectId={projectId}
       onAdd={({ name, description, dueDate }) =>
-        mutateAsync({
+        createSubtask({
           id: parentTaskId,
           name,
           description,
@@ -153,6 +74,20 @@ export const AddSubtask = ({
     />
   );
 };
+
+const FormSchema = (sectionEditable: boolean) =>
+  z.object({
+    name: z
+      .string()
+      .nonempty("You must add a name!")
+      .max(512, "Name is too long!"),
+    description: z.string().max(1024, "Description is too long!"),
+    sectionId: sectionEditable
+      ? z.coerce
+          .number({ invalid_type_error: "You must select a section!" })
+          .nonnegative()
+      : z.optional(z.any()),
+  });
 
 const AddTask = ({
   onAdd,
@@ -179,113 +114,146 @@ const AddTask = ({
     refetchInterval: 60_000,
   });
 
-  const [focused, setFocused] = useState(false);
+  const [popoverShown, setPopoverShown] = useState(false);
   const [dueDate, setDueDate] = useState<Date | null>(null);
 
-  const form = useRef<HTMLFormElement | null>(null);
-  const nameField = useRef<HTMLInputElement | null>(null);
-  const descField = useRef<HTMLTextAreaElement | null>(null);
-  const sectionField = useRef<HTMLSelectElement | null>(null);
-
-  const reset = () => {
-    form.current!.reset();
-    setDueDate(null);
-  };
-
-  const newTask = async () => {
-    if (sectionEditable && !sectionField.current?.value) {
-      toast.error("Please select a section to add the task to!");
-      return;
-    }
-    if (!nameField.current?.value) {
-      toast.error("Title must not be empty!");
-      return;
-    }
+  const newTask = async ({
+    name,
+    description,
+    sectionId,
+  }: z.infer<ReturnType<typeof FormSchema>>) => {
     onAdd({
-      name: nameField.current!.value,
-      description: descField.current!.value,
-      sectionId: sectionEditable ? parseInt(sectionField.current!.value) : null,
+      name,
+      description,
+      sectionId: sectionEditable ? sectionId! : null,
       dueDate,
     });
     reset();
-    nameField.current?.focus();
+    setPopoverShown(false);
+  };
+
+  const form = useForm<z.infer<ReturnType<typeof FormSchema>>>({
+    resolver: zodResolver(FormSchema(sectionEditable)),
+    defaultValues: {
+      name: "",
+      description: "",
+      sectionId: defaultSection,
+    },
+  });
+
+  const reset = () => {
+    form.reset();
+    setDueDate(null);
   };
 
   return (
-    <form
-      ref={form}
-      className={clsx(
-        "flex min-w-min flex-col gap-2",
-        focused &&
-          "min-w-full rounded-lg border border-gray-600 bg-white p-2 dark:bg-black"
-      )}
-      onSubmit={async (e) => {
-        e.preventDefault();
-        await newTask();
-      }}
-      onMouseDown={() => setFocused(true)}
-      onKeyDown={() => setFocused(true)}
-      onBlur={(e) => {
-        if (form.current?.contains(e.relatedTarget)) {
-          return;
-        }
-        if (
-          !nameField.current?.value.trim() &&
-          !descField.current?.value.trim()
-        ) {
-          setFocused(false);
-        }
+    <Popover
+      open={popoverShown}
+      onOpenChange={(open) => {
+        if (!open) reset();
+        setPopoverShown(open);
       }}
     >
-      <TextField
-        placeholder={focused ? "Name" : "Add a new task..."}
-        className="rounded-md bg-transparent p-1"
-        ref={nameField}
-      />
-      {focused && (
-        <>
-          {sectionEditable && (
-            <SelectField ref={sectionField} defaultValue={defaultSection}>
-              {data?.sections.map((section) => (
-                <option key={section.id} value={section.id}>
-                  {section.name}
-                </option>
-              ))}
-            </SelectField>
-          )}
-          <TextArea
-            ref={descField}
-            placeholder="Description"
-            className="h-16 rounded-md bg-transparent p-1"
-            onKeyDown={async (e) => {
-              if (e.ctrlKey && e.key == "Enter") {
-                await newTask();
-              }
-            }}
-          />
-          <div className="flex gap-2 self-end">
-            <DatePickerPopover date={dueDate ?? undefined} setDate={setDueDate}>
-              <Button variant="subtle">
-                <MdCalendarToday />
-                {!dueDate ? "Add Due Date" : format(dueDate, LONG_DATE_FORMAT)}
-              </Button>
-            </DatePickerPopover>
-            <Button
-              variant="subtle"
-              onClick={() => {
-                setFocused(false);
-                reset();
-              }}
-              type="button"
-            >
-              <MdCancel />
-            </Button>
-            <Button variant="primary" type="submit">
-              <MdSend />
-            </Button>
-          </div>
-        </>
-      )}
-    </form>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className="gap-2">
+          <MdAdd />
+          Add Task
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="center" className="w-80">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(newTask)}
+            className="flex flex-col gap-2"
+          >
+            <FormField
+              name="name"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input type="text" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {sectionEditable && (
+              <FormField
+                name="sectionId"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Section</FormLabel>
+                    <FormControl>
+                      <Select
+                        defaultValue={field.value?.toString()}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger id="addTaskSection">
+                          <SelectValue placeholder="Choose a section..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {data?.sections.map((section) => (
+                            <SelectItem
+                              key={section.id}
+                              value={section.id.toString()}
+                            >
+                              {section.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            <FormField
+              name="description"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea id="addTaskDescription" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex w-full justify-between gap-2">
+              <DatePickerPopover date={dueDate} setDate={setDueDate}>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !dueDate && "text-muted-foreground",
+                    dueDate &&
+                      isAfter(new Date(), dueDate) &&
+                      "text-destructive"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dueDate ? shortDateFormat(dueDate) : <span>Due date</span>}
+                </Button>
+              </DatePickerPopover>
+              <div className="flex justify-end gap-2">
+                <PopoverClose asChild>
+                  <Button variant="ghost" onClick={reset} type="button">
+                    <MdCancel />
+                  </Button>
+                </PopoverClose>
+                <Button type="submit">
+                  <MdSend />
+                </Button>
+              </div>
+            </div>
+          </form>
+        </Form>
+      </PopoverContent>
+    </Popover>
   );
 };

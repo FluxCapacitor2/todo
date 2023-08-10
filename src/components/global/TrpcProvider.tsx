@@ -1,5 +1,6 @@
 "use client";
 
+import { getBaseURL } from "@/lib/utils";
 import { createIDBPersister } from "@/util/idb-persister";
 import { trpc } from "@/util/trpc/trpc";
 import { AppRouter } from "@/util/trpc/trpc-router";
@@ -66,9 +67,7 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [persister] = useState(() => createIDBPersister());
 
-  const url = process.env.NEXT_PUBLIC_BASE_URL
-    ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/trpc/`
-    : "http://localhost:3000/api/trpc/";
+  const url = getBaseURL() + "/api/trpc";
 
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -95,7 +94,6 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
         client={queryClient}
       >
         {children}
-        {/* <ReactQueryDevtools /> */}
       </PersistQueryClientProvider>
     </trpc.Provider>
   );

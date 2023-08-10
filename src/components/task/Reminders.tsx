@@ -1,18 +1,11 @@
-import { LONG_DATE_FORMAT } from "@/util/constants";
+import { useAddReminder, useRemoveReminder } from "@/hooks/reminder";
+import { shortDateFormat } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
-import clsx from "clsx";
-import {
-  format,
-  formatDistanceToNow,
-  isAfter,
-  set,
-  setHours,
-  setMinutes,
-} from "date-fns";
-import toast from "react-hot-toast";
+import { Task } from "@prisma/client";
 import { MdClose, MdNotificationAdd, MdNotifications } from "react-icons/md";
 import { DatePickerPopover } from "../ui/DatePickerPopover";
-import { Task } from "@prisma/client";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
 
 export const Reminders = ({
   task,
@@ -21,194 +14,47 @@ export const Reminders = ({
   task: Task;
   dueDate: Date | null;
 }) => {
-  const utils = trpc.useContext();
   const { data: reminders } = trpc.notification.list.useQuery(task.id, {
+    enabled: task.id > 0,
     refetchInterval: 120_000,
   });
 
-  const { mutateAsync: _addReminder } = trpc.notification.add.useMutation({
-    onMutate: ({ projectId, taskId, time }) => {
-      utils.notification.list.cancel(taskId);
-      const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
-      utils.notification.list.setData(taskId, (list) => {
-        if (!list) return undefined;
-        return [...list, { id: newId, projectId, taskId, time }];
-      });
-      return { newId };
-    },
-    onError: (error, { taskId }, context) => {
-      toast.error("There was an error adding a reminder!");
-      if (!context) return;
-      utils.notification.list.setData(taskId, (list) => {
-        if (!list) return undefined;
-        return list.filter((item) => item.id !== context?.newId);
-      });
-    },
-    onSettled: () => {
-      utils.notification.list.invalidate(task.id);
-    },
-  });
-
-  const addReminder = ({ taskId, time }: { taskId: number; time: Date }) => {
-    if (time.getTime() < new Date().getTime()) {
-      toast.error("You must set the reminder for a time in the future!");
-    } else {
-      _addReminder({ taskId, projectId: task.projectId, time });
-    }
-  };
-
-  const { mutateAsync: removeReminder } = trpc.notification.remove.useMutation({
-    onMutate: (id) => {
-      const reminder = utils.notification.list
-        .getData()
-        ?.find((it) => it.id === id);
-
-      utils.notification.list.cancel(task.id);
-      utils.notification.list.setData(task.id, (list) => {
-        return list?.filter((item) => item.id !== id);
-      });
-
-      return reminder;
-    },
-    onError: (error, id, context) => {
-      toast.error("There was an error removing that reminder!");
-      if (!context) return;
-
-      utils.notification.list.setData(task.id, (list) => {
-        if (!list) return undefined;
-        return [...list, context];
-      });
-    },
-    onSettled: () => {
-      utils.notification.list.invalidate(task.id);
-    },
-  });
+  const { addReminder } = useAddReminder(task);
+  const { removeReminder } = useRemoveReminder(task);
 
   return (
-    <div>
+    <div className="flex flex-col gap-2">
+      <AddReminder add={(time) => addReminder({ taskId: task.id, time })} />
       {reminders?.map((reminder) => (
-        <div
-          className={clsx(
-            "flex items-center gap-2",
-            reminder.id < 0 && "pointer-events-none opacity-70"
-          )}
-          key={reminder.id}
-        >
-          <MdNotifications className="mr-2 h-5 w-5" />
-          {format(reminder.time, LONG_DATE_FORMAT)}{" "}
-          <span className="text-gray-600 dark:text-gray-400">
-            ({formatDistanceToNow(reminder.time, { addSuffix: true })})
-          </span>
-          <button
-            onClick={() => removeReminder(reminder.id)}
-            disabled={reminder.id < 0}
-          >
-            <MdClose />
-          </button>
-        </div>
+        <Card key={reminder.id}>
+          <CardContent className="flex items-center px-4 py-2">
+            <MdNotifications className="mr-2 inline h-4 w-4" />
+            <p>{shortDateFormat(reminder.time)}</p>
+            <div className="grow" />
+            <button
+              onClick={() => removeReminder(reminder.id)}
+              disabled={reminder.id < 0}
+            >
+              <span className="sr-only">Remove reminder</span>
+              <MdClose />
+            </button>
+          </CardContent>
+        </Card>
       ))}
-
-      <div className="flex items-center gap-4">
-        <MdNotificationAdd className="h-5 w-5" />
-        Add Reminder:
-      </div>
-      <div className="ml-10 mt-2 flex flex-wrap gap-4 italic">
-        {dueDate && (
-          <>
-            <Reminder
-              addReminder={addReminder}
-              date={setHours(setMinutes(new Date(), 0), 12 + 7)}
-              taskId={task.id}
-            >
-              Tonight 7pm
-            </Reminder>
-            <Reminder
-              addReminder={addReminder}
-              date={set(new Date(new Date().getTime() + 86_400_000), {
-                hours: 9,
-                minutes: 0,
-                seconds: 0,
-              })}
-              taskId={task.id}
-            >
-              Tomorrow 9am
-            </Reminder>
-            <Reminder
-              addReminder={addReminder}
-              date={set(new Date(new Date().getTime() + 86_400_000), {
-                hours: 12,
-                minutes: 0,
-                seconds: 0,
-              })}
-              taskId={task.id}
-            >
-              Tomorrow 12pm
-            </Reminder>
-            <Reminder
-              addReminder={addReminder}
-              date={new Date(dueDate.getTime() - 1000 * 60 * 30)}
-              taskId={task.id}
-            >
-              30 minutes before
-            </Reminder>
-            <Reminder
-              addReminder={addReminder}
-              date={new Date(dueDate.getTime() - 1000 * 60 * 60)}
-              taskId={task.id}
-            >
-              1 hour before
-            </Reminder>
-            <Reminder
-              addReminder={addReminder}
-              date={new Date(dueDate.getTime() - 1000 * 60 * 60 * 24)}
-              taskId={task.id}
-            >
-              1 day before
-            </Reminder>
-          </>
-        )}
-        <DatePickerPopover
-          minDate={new Date()}
-          setDate={(date) => {
-            addReminder({
-              time: date,
-              taskId: task.id,
-            });
-          }}
-        >
-          <span className="text-gray-700 dark:text-gray-300">
-            Custom Time...
-          </span>
-        </DatePickerPopover>
-      </div>
     </div>
   );
 };
 
-const Reminder = ({
-  addReminder,
-  taskId,
-  date,
-  children,
-}: {
-  addReminder: ({ taskId, time }: { taskId: number; time: Date }) => void;
-  taskId: number;
-  date: Date;
-  children: string;
-}) => {
-  const passed = isAfter(new Date(), date);
-  if (passed) return null;
+const AddReminder = ({ add }: { add: (date: Date) => void }) => {
   return (
-    <p
-      className="cursor-pointer text-gray-700 hover:underline dark:text-gray-300"
-      onClick={() =>
-        addReminder({
-          taskId,
-          time: date,
-        })
-      }
-    >
-      {children}
-    </p>
+    <DatePickerPopover date={new Date(Date.now() + 86_400_000)} setDate={add}>
+      <Button
+        variant={"outline"}
+        className="w-full justify-start text-left font-normal text-muted-foreground"
+      >
+        <MdNotificationAdd className="mr-2 h-4 w-4" />
+        Add Reminder
+      </Button>
+    </DatePickerPopover>
   );
 };

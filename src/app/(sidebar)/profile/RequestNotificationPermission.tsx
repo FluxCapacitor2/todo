@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
-import { NotificationSignUp } from "./NotificationSignUp";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { NotificationSignUp } from "./NotificationSignUp";
 
 export const RequestNotificationPermission = () => {
   const [status, setStatus] = useState(Notification.permission);
@@ -23,11 +23,7 @@ export const RequestNotificationPermission = () => {
           receive notification reminders for your tasks.
         </p>
       ) : (
-        <>
-          <Button variant="primary" onClick={request}>
-            Request Notification Permission
-          </Button>
-        </>
+        <Button onClick={request}>Request Notification Permission</Button>
       )}
     </>
   );

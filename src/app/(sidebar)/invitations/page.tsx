@@ -1,12 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/Spinner";
 import { trpc } from "@/util/trpc/trpc";
-import clsx from "clsx";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { MdClose } from "react-icons/md";
+import { MdCheck, MdClose } from "react-icons/md";
 
 export default function Page() {
   const utils = trpc.useContext();
@@ -45,28 +45,26 @@ export default function Page() {
     (!outgoing || outgoing.length === 0);
 
   return (
-    <>
+    <div className="px-2">
       <h2 className="text-center text-3xl font-bold">Invitations</h2>
 
-      <main
-        className={clsx(
-          !empty ? "flex-col" : "flex-col md:flex-row",
-          "mx-auto mt-8 flex max-w-prose justify-center gap-12"
-        )}
-      >
+      <main className="mx-auto mt-8 flex max-w-prose flex-col justify-center gap-12">
         <section className="relative flex flex-col gap-4">
           <h3 className="text-2xl font-bold">Received</h3>
           {incoming && incoming.length > 0 ? (
             incoming?.map((inv) => (
-              <div key={inv.id}>
-                <p>
-                  <b>{inv.from.name}</b> invited <b>you</b> to join{" "}
-                  <b>{inv.project.name}</b>.
-                </p>
-                <Button onClick={() => accept(inv.id)} variant="primary">
-                  Accept
-                </Button>
-              </div>
+              <Card key={inv.id}>
+                <CardContent className="flex items-center justify-between p-4">
+                  <p>
+                    <b>{inv.from.name}</b> invited <b>you</b> to join{" "}
+                    <b>{inv.project.name}</b>.
+                  </p>
+                  <Button className="gap-2" onClick={() => accept(inv.id)}>
+                    <MdCheck />
+                    Accept
+                  </Button>
+                </CardContent>
+              </Card>
             ))
           ) : (
             <div>
@@ -91,18 +89,21 @@ export default function Page() {
           <h3 className="text-2xl font-bold">Sent</h3>
           {outgoing && outgoing.length > 0 ? (
             outgoing?.map((inv) => (
-              <div
-                key={inv.id}
-                className="flex items-center justify-between gap-1 rounded-md bg-gray-100 p-4 dark:bg-gray-700"
-              >
-                <p>
-                  <b>You</b> invited <b>{inv.to.name}</b> to join{" "}
-                  <b>{inv.project.name}</b>.
-                </p>
-                <Button variant="subtle" onClick={() => rescind(inv.id)}>
-                  <MdClose /> Rescind
-                </Button>
-              </div>
+              <Card key={inv.id}>
+                <CardContent className="flex items-center justify-between p-4">
+                  <p>
+                    <b>You</b> invited <b>{inv.to.name}</b> to join{" "}
+                    <b>{inv.project.name}</b>.
+                  </p>
+                  <Button
+                    variant="destructive"
+                    className="gap-2"
+                    onClick={() => rescind(inv.id)}
+                  >
+                    <MdClose /> Rescind
+                  </Button>
+                </CardContent>
+              </Card>
             ))
           ) : (
             <div>
@@ -124,6 +125,6 @@ export default function Page() {
           )}
         </section>
       </main>
-    </>
+    </div>
   );
 }

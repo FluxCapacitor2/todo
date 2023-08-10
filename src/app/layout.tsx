@@ -1,3 +1,4 @@
+import { ThemeProvider } from "@/components/global/ThemeProvider";
 import { Inter } from "next/font/google";
 import { ReactNode } from "react";
 import "./globals.css";
@@ -61,13 +62,14 @@ const inter = Inter({
   display: "swap",
 });
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
-
-//todo
-// 18297463873863682

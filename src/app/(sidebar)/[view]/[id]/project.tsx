@@ -1,26 +1,34 @@
 "use client";
 
+import { DeleteSectionModal } from "@/components/project/DeleteSectionModal";
 import { AddSectionTask } from "@/components/task/AddTask";
 import { TaskCard } from "@/components/task/TaskCard";
-import { Button } from "@/components/ui/Button";
-import { Checkbox } from "@/components/ui/Checkbox";
-import { MenuItem, MenuItems } from "@/components/ui/CustomMenu";
 import { Spinner } from "@/components/ui/Spinner";
-import { TextField } from "@/components/ui/TextField";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCreateSection, useUpdateSection } from "@/hooks/section";
+import { cn } from "@/lib/utils";
 import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
-import { Menu } from "@headlessui/react";
 import { Section, Task } from "@prisma/client";
 import clsx from "clsx";
-import { produce } from "immer";
-import { useRef, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import {
   MdArchive,
   MdCalendarToday,
   MdDelete,
   MdEdit,
-  MdMenu,
+  MdMoreHoriz,
 } from "react-icons/md";
 
 export const ProjectView = ({ id: projectId }: { id: string }) => {
@@ -31,12 +39,12 @@ export const ProjectView = ({ id: projectId }: { id: string }) => {
 
   if (!data) {
     // Loading UI (skeleton)
-    return Skeleton;
+    return ProjectSkeleton;
   }
 
   return (
     <>
-      <div className="flex snap-x snap-mandatory overflow-x-scroll lg:snap-none">
+      <div className="-mr-6 ml-2 flex h-full max-h-full snap-x snap-mandatory overflow-scroll lg:snap-none">
         {data.sections.map((section) => (
           <Section key={section.id} section={section} projectId={data.id} />
         ))}
@@ -48,40 +56,47 @@ export const ProjectView = ({ id: projectId }: { id: string }) => {
   );
 };
 
-export const Skeleton = (
+export const ProjectSkeleton = (
   <div className="flex">
-    {new Array(5).fill(null).map((_, i) => (
+    {new Array(3).fill(null).map((_, i) => (
       <div
         className="mr-4 flex w-80 snap-center flex-col rounded-lg p-2"
         key={i}
       >
         <div className="flex items-center justify-between">
           <div className="h-6 w-52 animate-pulse rounded-md bg-gray-500/50" />
-          <Button variant="flat">
-            <MdMenu />
+          <Button variant="ghost">
+            <MdMoreHoriz />
           </Button>
         </div>
         <div className="flex flex-col gap-2">
-          {new Array([5, 3, 4, 5, 2][i]).fill(null).map((_, j) => (
-            <div
-              className="flex w-80 items-start gap-2 rounded-md border border-gray-500 p-2"
-              key={j}
-            >
-              <Checkbox disabled className="mt-1" checked={j < 2} />
-              <div className="flex flex-col gap-2">
-                <div
-                  className="my-1 h-4 w-48 animate-pulse rounded-md bg-gray-500/50"
-                  style={{ animationDelay: `${i * 100}ms` }}
-                />
-                <div className="flex items-center gap-2">
-                  <MdCalendarToday className="text-sm" />
-                  <div
-                    className="my-1 h-3 w-24 animate-pulse rounded-md bg-gray-500/50"
-                    style={{ animationDelay: `${i * 150}ms` }}
-                  />
+          {new Array([5, 3, 4][i]).fill(null).map((_, j) => (
+            <Card key={j}>
+              <CardContent className="p-2">
+                <div className="flex gap-2">
+                  <div className="grid h-8 items-center">
+                    <Checkbox disabled checked={j < 2} />
+                  </div>
+                  <Skeleton className="mt-1 h-6 w-48" />
                 </div>
-              </div>
-            </div>
+                {(i + j + 1) % 3 !== 0 && (
+                  <Card className="mt-2">
+                    <CardContent className="flex flex-col gap-2 p-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                    </CardContent>
+                  </Card>
+                )}
+                {(i + j) % 2 !== 0 && (
+                  <Card className="mt-2">
+                    <CardContent className="flex gap-2 p-2">
+                      <MdCalendarToday className="text-muted-foreground" />
+                      <Skeleton className="h-4 w-16" />
+                    </CardContent>
+                  </Card>
+                )}
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
@@ -96,76 +111,7 @@ const Section = ({
   section: Section & { tasks: Task[] };
   projectId: string;
 }) => {
-  const utils = trpc.useContext();
-
-  const { mutateAsync: deleteSection } = trpc.sections.delete.useMutation({
-    onMutate: ({ id }) => {
-      const project = utils.projects.get.getData(projectId);
-      const index = project?.sections.findIndex((section) => section.id === id);
-      if (index === -1 || index === undefined) return;
-      const prevSection = project?.sections?.[index];
-
-      utils.projects.get.cancel(projectId);
-      utils.projects.get.setData(projectId, (project) => {
-        if (!project) return undefined;
-
-        const g = {
-          ...project,
-          sections: project.sections.filter((section) => section.id !== id),
-        };
-        return g;
-      });
-
-      return { prevSection, index };
-    },
-    onError: (error, { id }, context) => {
-      if (!context) return;
-      toast.error("There was an error deleting that section!");
-      utils.projects.get.setData(projectId, (project) => {
-        if (!project) return undefined;
-        return produce(project, (project) => {
-          project.sections.splice(context.index!, 0, context.prevSection!);
-        });
-      });
-    },
-    onSettled: () => {
-      utils.projects.get.invalidate(projectId);
-    },
-  });
-
-  const { mutateAsync: updateSection } = trpc.sections.update.useMutation({
-    onMutate: ({ id, archived }) => {
-      utils.projects.get.cancel(projectId);
-      const originalData = utils.projects.get
-        .getData(projectId)
-        ?.sections?.find((section) => section.id === id)?.archived;
-      utils.projects.get.setData(projectId, (project) => {
-        return produce(project, (project) => {
-          project?.sections.forEach((section) => {
-            if (section.id === id) {
-              section.archived = archived === true;
-            }
-          });
-        });
-      });
-      return { originalData };
-    },
-    onError: (error, { id }, context) => {
-      if (!context) return;
-      utils.projects.get.setData(projectId, (project) => {
-        return produce(project, (project) => {
-          project?.sections.forEach((section) => {
-            if (section.id === id) {
-              section.archived = context.originalData === true;
-            }
-          });
-        });
-      });
-    },
-    onSettled: () => {
-      utils.projects.get.invalidate(projectId);
-    },
-  });
+  const { updateSection } = useUpdateSection(projectId);
 
   const archive = () =>
     updateSection({ id: section.id, archived: true })
@@ -176,48 +122,54 @@ const Section = ({
         toast.success("Section archived!");
       });
 
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
   return (
     <div
-      className="mr-4 flex w-80 snap-center flex-col rounded-lg p-2"
+      className={cn(
+        "mr-4 flex w-80 snap-center flex-col rounded-lg",
+        section.id < 0 && "pointer-events-none"
+      )}
       key={section.id}
     >
-      <div
-        className={clsx(
-          "flex items-center justify-between",
-          section.id < 0 && "pointer-events-none opacity-70"
-        )}
+      <SectionName
+        className="sticky top-0"
+        id={section.id}
+        initialName={section.name}
+        projectId={projectId}
+        archived={section.archived}
       >
-        <SectionName
-          id={section.id}
-          initialName={section.name}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            {section.id < 0 ? (
+              <Spinner className="mt-2" />
+            ) : (
+              <Button variant="ghost" size="icon">
+                <MdMoreHoriz />
+              </Button>
+            )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={archive}>
+              <MdArchive /> Archive
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => setDeleteModalOpen(true)}>
+              <MdDelete /> Delete Section
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DeleteSectionModal
+          opened={deleteModalOpen}
+          setOpened={setDeleteModalOpen}
           projectId={projectId}
-          archived={section.archived}
+          sectionId={section.id}
+          sectionName={section.name}
         />
-        <Menu as="div" className="relative">
-          {({ open, close }) => (
-            <>
-              <MenuItems
-                {...{ open, close }}
-                button={
-                  <Menu.Button as={Button} variant="flat">
-                    <MdMenu />
-                  </Menu.Button>
-                }
-              >
-                <MenuItem onClick={archive}>
-                  <MdArchive /> Archive
-                </MenuItem>
-                <MenuItem onClick={() => deleteSection({ id: section.id })}>
-                  <MdDelete /> Delete Section
-                </MenuItem>
-              </MenuItems>
-            </>
-          )}
-        </Menu>
-      </div>
+      </SectionName>
       <div
         className={clsx(
-          "flex min-h-screen w-80 flex-col gap-2",
+          "mt-2 flex w-80 flex-col gap-2",
           section.archived && "opacity-50"
         )}
       >
@@ -231,24 +183,28 @@ const Section = ({
 };
 
 const SectionName = ({
+  className,
   id,
   initialName,
   projectId,
   archived,
+  children,
 }: {
+  className?: string;
   id: number;
   initialName: string;
   projectId: string;
   archived?: boolean;
+  children: ReactNode;
 }) => {
   const utils = trpc.useContext();
   const textField = useRef<HTMLInputElement | null>(null);
-  const { mutateAsync, isLoading } = trpc.sections.update.useMutation();
+  const { updateSection } = useUpdateSection(projectId);
 
   const [name, setName] = useState(initialName);
 
   return (
-    <div className="group relative">
+    <div className={cn("group relative w-full", className)}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -256,12 +212,12 @@ const SectionName = ({
         }}
         className="flex items-center gap-1"
       >
-        <TextField
-          flat
+        <Input
+          type="text"
           ref={textField}
-          className={clsx(
-            "px-1 font-bold",
-            archived && "text-gray-500 line-through"
+          className={cn(
+            "w-full px-2 font-semibold",
+            archived && "text-muted-foreground line-through"
           )}
           value={name}
           onChange={(e) => {
@@ -269,80 +225,38 @@ const SectionName = ({
           }}
           onBlur={async (e) => {
             if (name !== initialName) {
-              await mutateAsync({ id, name });
+              if (name.trim().length === 0) {
+                toast.error("The section name must not be empty!");
+                setName(initialName);
+                return;
+              }
+              await updateSection({ id, name });
               utils.projects.get.invalidate(projectId);
             }
           }}
         />
-        <MdEdit
-          className="cursor-pointer fill-gray-500 opacity-0 transition-opacity group-hover:opacity-100"
-          onClick={() => textField.current?.focus()}
-        />
+        <div className="absolute inset-y-0 right-2">{children}</div>
       </form>
-      {isLoading && (
-        <div className="absolute inset-y-0 right-0">
-          <Spinner />
-        </div>
-      )}
     </div>
   );
 };
 
 const NewSection = ({ projectId }: { projectId: string }) => {
-  const utils = trpc.useContext();
-  const { mutateAsync } = trpc.sections.create.useMutation({
-    onMutate: ({ name, projectId }) => {
-      const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
-
-      utils.projects.get.cancel(projectId);
-      utils.projects.get.setData(projectId, (project) => {
-        if (!project) return undefined;
-        return {
-          ...project,
-          sections: [
-            ...project.sections,
-            {
-              name: "New Section",
-              id: newId,
-              projectId,
-              tasks: [],
-              archived: false,
-            },
-          ],
-        };
-      });
-      return { newId };
-    },
-    onError: (error, variables, context) => {
-      toast.error("There was an error creating that section!");
-      if (!context) return;
-      utils.projects.get.setData(projectId, (project) => {
-        if (!project) return undefined;
-        return {
-          ...project,
-          sections: {
-            ...project.sections.filter((it) => it.id !== context.newId),
-          },
-        };
-      });
-    },
-    onSettled: () => {
-      utils.projects.get.invalidate(projectId);
-    },
-  });
+  const { createSection } = useCreateSection(projectId);
 
   const newSection = async () => {
-    await mutateAsync({
+    await createSection({
       projectId,
       name: "New Section",
     });
-    utils.projects.get.invalidate(projectId);
   };
 
   return (
-    <Button variant="subtle" onClick={newSection}>
-      <MdEdit />
-      New Section
-    </Button>
+    <div className="mr-4 flex w-80 snap-center flex-col rounded-lg">
+      <Button variant="secondary" onClick={newSection}>
+        <MdEdit />
+        New Section
+      </Button>
+    </div>
   );
 };

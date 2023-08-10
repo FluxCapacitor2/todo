@@ -85,4 +85,64 @@ export const userRouter = (t: MyTrpc) =>
         await prisma.apiToken.delete({ where: { id: input } });
         return token;
       }),
+    getTimePresets: t.procedure.query(async ({ ctx }) => {
+      return await prisma.timePreset.findMany({
+        where: {
+          userId: ctx.session.id,
+        },
+      });
+    }),
+    addTimePreset: t.procedure
+      .input(z.number().min(0).max(86400))
+      .mutation(async ({ input, ctx }) => {
+        const existingTimePreset = await prisma.timePreset.findFirst({
+          where: {
+            userId: ctx.session.id,
+            time: input,
+          },
+        });
+
+        if (existingTimePreset !== null) {
+          throw new TRPCError({ code: "CONFLICT" });
+        }
+
+        return (
+          await prisma.user.update({
+            where: {
+              id: ctx.session.id,
+            },
+            data: {
+              timePresets: {
+                create: {
+                  time: input,
+                },
+              },
+            },
+            include: {
+              timePresets: true,
+            },
+          })
+        ).timePresets;
+      }),
+    removeTimePreset: t.procedure
+      .input(z.number().nonnegative())
+      .mutation(async ({ input, ctx }) => {
+        return (
+          await prisma.user.update({
+            where: {
+              id: ctx.session.id,
+            },
+            data: {
+              timePresets: {
+                delete: {
+                  id: input,
+                },
+              },
+            },
+            include: {
+              timePresets: true,
+            },
+          })
+        ).timePresets;
+      }),
   });

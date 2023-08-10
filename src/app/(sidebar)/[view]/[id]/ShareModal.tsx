@@ -1,12 +1,15 @@
-import { Button } from "@/components/ui/Button";
-import { CustomDialog, DialogTitle } from "@/components/ui/CustomDialog";
 import { Spinner } from "@/components/ui/Spinner";
-import { TextField } from "@/components/ui/TextField";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { trpc } from "@/util/trpc/trpc";
 import { AppRouter } from "@/util/trpc/trpc-router";
 import { Role } from "@prisma/client";
 import { TRPCClientError } from "@trpc/client";
 import Image from "next/image";
+import Link from "next/link";
 import { Fragment, useRef } from "react";
 import toast from "react-hot-toast";
 import {
@@ -14,6 +17,7 @@ import {
   MdAdd,
   MdCancel,
   MdEdit,
+  MdSend,
   MdVisibility,
 } from "react-icons/md";
 
@@ -99,90 +103,64 @@ export const ShareModal = ({
   };
 
   return (
-    <CustomDialog opened={opened} close={close}>
-      <div className="flex flex-col gap-4">
-        <DialogTitle>Add People</DialogTitle>
-        <p>Invite others to your project for collaborative editing.</p>
-        <h3 className="text-2xl font-bold">Collaborators</h3>
-        <div className="grid grid-cols-[max-content,1fr,1fr,min-content] gap-2">
-          {project?.owner?.image ? (
-            <Image
-              src={project?.owner?.image}
-              alt=""
-              width={52}
-              height={52}
-              unoptimized
-              className="rounded-full"
-            />
-          ) : (
-            <div className="h-[52px] w-[52px] animate-pulse rounded-full bg-gray-500" />
-          )}
-          <div>
-            <p className="text-lg font-bold">
-              {project?.owner?.name ?? <Spinner />}
-            </p>
-            <p>{project?.owner?.email}</p>
-          </div>
-          <p className="flex items-center gap-2 justify-self-end">
-            <MdAccountCircle /> Owner
-          </p>
-          {/* Extra column to line up with the "remove" button for other collaborators */}
-          <div />
-          {collaborators?.map((c) => (
-            <Fragment key={c.id}>
-              {c.user.image && (
-                <Image
-                  src={c.user.image}
-                  alt=""
-                  width={52}
-                  height={52}
-                  unoptimized
-                  className="rounded-full"
-                />
-              )}
-              <div>
-                <p className="text-lg font-bold">{c.user.name}</p>
-                <p>{c.user.email}</p>
-              </div>
-              <p className="flex items-center gap-2 justify-self-end">
-                {roles[c.role]}
+    <Sheet open={opened} onOpenChange={(open) => !open && close()} modal>
+      <SheetContent>
+        <div className="flex flex-col gap-4">
+          <SheetTitle>Add People</SheetTitle>
+          <p>Invite others to your project for collaborative editing.</p>
+          <h3 className="mt-4 font-bold">Collaborators</h3>
+          <div className="grid grid-cols-[max-content,1fr,min-content] gap-2">
+            {project?.owner?.image ? (
+              <Image
+                src={project?.owner?.image}
+                alt=""
+                width={52}
+                height={52}
+                unoptimized
+                className="rounded-full"
+              />
+            ) : (
+              <div className="h-[52px] w-[52px] animate-pulse rounded-full bg-gray-500" />
+            )}
+            <div>
+              <p className="text-lg font-bold">
+                {project?.owner?.name ?? <Spinner />}
+                <Badge className="ml-1 gap-1">
+                  <MdAccountCircle /> Owner
+                </Badge>
               </p>
-              <Button
-                variant="flat"
-                onClick={() => remove(c.id)}
-                title="Remove collaborator"
-              >
-                <MdCancel />
-              </Button>
-            </Fragment>
-          ))}
-        </div>
-        <h3 className="text-2xl font-bold">Invitations</h3>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!mutating) {
-              add();
-            }
-          }}
-        >
-          <div className="flex gap-2">
-            <TextField
-              ref={emailField}
-              type="email"
-              className="flex-1"
-              placeholder="Type an email address..."
-              disabled={mutating}
-            />
-            <Button variant="primary" type="submit" disabled={mutating}>
-              {mutating ? <Spinner /> : <MdAdd />}
-            </Button>
-          </div>
-        </form>
-        {invitations && invitations.length > 0 ? (
-          <div className="flex flex-col gap-4">
+              <p>{project?.owner?.email}</p>
+            </div>
+            {/* Extra column to line up with the "remove" button for other collaborators */}
+            <div />
+            {collaborators?.map((c) => (
+              <Fragment key={c.id}>
+                {c.user.image && (
+                  <Image
+                    src={c.user.image}
+                    alt=""
+                    width={52}
+                    height={52}
+                    unoptimized
+                    className="rounded-full"
+                  />
+                )}
+                <div>
+                  <p className="text-lg font-bold">
+                    {c.user.name}
+                    <Badge className="ml-1 gap-1">{roles[c.role]}</Badge>
+                  </p>
+                  <p>{c.user.email}</p>
+                </div>
+
+                <Button variant="ghost" onClick={() => remove(c.id)}>
+                  <span className="sr-only">Remove collaborator</span>
+                  <MdCancel />
+                </Button>
+              </Fragment>
+            ))}
             {invitations?.map((inv) => (
-              <div key={inv.id} className="flex gap-2">
+              <Fragment key={inv.id}>
                 {inv.to.image && (
                   <Image
                     src={inv.to.image}
@@ -194,32 +172,57 @@ export const ShareModal = ({
                   />
                 )}
                 <div className="grow">
-                  <p className="text-lg font-bold">{inv.to.name}</p>
+                  <p className="text-lg font-bold">
+                    {inv.to.name}
+                    <Badge className="ml-1 gap-1">
+                      <MdSend />
+                      Invited
+                    </Badge>
+                  </p>
                   <p>{inv.to.email}</p>
                 </div>
-                <Button
-                  variant="flat"
-                  onClick={() => rescind(inv.id)}
-                  title="Rescind invitation"
-                >
+                <Button variant="ghost" onClick={() => rescind(inv.id)}>
+                  <span className="sr-only">Rescind invitation</span>
                   <MdCancel />
                 </Button>
-              </div>
+              </Fragment>
             ))}
           </div>
-        ) : (
-          <i>
-            No invitations. Use the form above to invite people to your project.
-          </i>
-        )}
-
-        <hr className="mt-2 border-b border-t-0 border-gray-500" />
-        <div className="flex justify-end">
-          <Button variant="flat" onClick={() => close()}>
-            Close
-          </Button>
+          <div className="mt-4">
+            <h3 className="font-bold">Invitations</h3>
+            <p>
+              Enter an email address and tell the recipient to check their{" "}
+              <Link href="/invitations" className="font-medium underline">
+                invitations page
+              </Link>
+              .
+            </p>
+          </div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!mutating) {
+                add();
+              }
+            }}
+          >
+            <Label htmlFor="shareEmail">Email address</Label>
+            <div className="flex gap-2">
+              <Input
+                id="shareEmail"
+                ref={emailField}
+                type="email"
+                required
+                className="flex-1"
+                disabled={mutating}
+              />
+              <Button type="submit" disabled={mutating}>
+                {mutating ? <Spinner /> : <MdAdd />}
+              </Button>
+            </div>
+          </form>
         </div>
-      </div>
-    </CustomDialog>
+      </SheetContent>
+    </Sheet>
   );
 };

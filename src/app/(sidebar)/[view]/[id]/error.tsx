@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { AppRouter } from "@/util/trpc/trpc-router";
 import { TRPCClientError } from "@trpc/client";
 import { MdError } from "react-icons/md";
@@ -18,14 +18,19 @@ export default function Error({
       <MdError className="h-16 w-16" />
       <div className="max-w-md">
         <p className="text-center font-bold">
-          There was an error fetching that project!{" "}
-          <span className="text-xs text-gray-500">({code})</span>
+          There was an error fetching that project!
+          {code && (
+            <>
+              {" "}
+              <span className="text-xs text-gray-500">({code})</span>
+            </>
+          )}
         </p>
         <p className="text-black dark:text-white">
           Please try again later and make sure you have access to the project.
         </p>
       </div>
-      <Button onClick={reset} variant="danger">
+      <Button onClick={reset} variant="destructive">
         Retry
       </Button>
     </section>

@@ -1,3 +1,4 @@
+import { getBaseURL } from "@/lib/utils";
 import { prisma } from "@/util/prisma";
 import { EventAttributes, createEvents } from "ics";
 import { NextRequest, NextResponse } from "next/server";
@@ -14,7 +15,7 @@ export const GET = async (
 
   if (!token) {
     return new Response(
-      `Error: Invalid link! Please go to ${process.env.NEXT_PUBLIC_BASE_URL}/profile to generate a new iCal subscription link.`,
+      `Error: Invalid link! Please go to ${getBaseURL()}/profile to generate a new iCal subscription link.`,
       {
         status: 401,
         statusText: "Unauthorized",
@@ -47,7 +48,7 @@ export const GET = async (
 
   const events = tasks.map((task) => {
     const date = task.dueDate!;
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/project/${task.projectId}/${task.id}`;
+    const url = `${getBaseURL()}/project/${task.projectId}/${task.id}`;
     return {
       title: task.name,
       description: task.description + `\n\nEdit task: ${url}`,

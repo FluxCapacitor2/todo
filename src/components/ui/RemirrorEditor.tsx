@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Remirror, useRemirror } from "@remirror/react";
 import {
   BlockquoteExtension,
@@ -17,10 +18,12 @@ import {
 import "remirror/styles/all.css";
 
 export const RemirrorEditor = ({
+  className,
   initialContent,
   setContent,
   editable = true,
 }: {
+  className?: string;
   initialContent: string;
   setContent: (content: string) => void;
   editable: boolean;
@@ -53,21 +56,14 @@ export const RemirrorEditor = ({
   };
 
   return (
-    <div className="prose dark:prose-invert">
+    <div className={cn("prose dark:prose-invert", className)}>
       <Remirror
         editable={editable}
         manager={manager}
         initialContent={state}
         onBlur={save}
         classNames={[
-          "!outline-none",
-          "border",
-          "border-transparent",
-          "focus:border-gray-600",
-          "dark:focus:border-gray-400",
-          "px-2",
-          "py-0",
-          "rounded-lg",
+          "w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         ]}
       />
     </div>

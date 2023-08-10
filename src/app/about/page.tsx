@@ -1,4 +1,5 @@
 import { TopNav } from "@/components/global/TopNav";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import {
   SiNextdotjs,
@@ -70,6 +71,13 @@ export default async function Page() {
                 </td>
               </tr>
               <tr>
+                <td>UI Primitives</td>
+                <td>
+                  <ShadCNIcon className="mr-2 inline h-4 w-4 fill-black dark:fill-white" />
+                  <Link href="https://ui.shadcn.com/">shadcn/ui</Link>
+                </td>
+              </tr>
+              <tr>
                 <td>
                   <abbr title="Object-Relational Mapper">ORM</abbr>
                 </td>
@@ -125,3 +133,29 @@ export default async function Page() {
     </>
   );
 }
+
+const ShadCNIcon = ({ className }: { className: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={cn("h-6 w-6", className)}
+    viewBox="0 0 256 256"
+  >
+    <path fill="none" d="M0 0H256V256H0z"></path>
+    <path
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="16"
+      d="M208 128L128 208"
+    ></path>
+    <path
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="16"
+      d="M192 40L40 192"
+    ></path>
+  </svg>
+);

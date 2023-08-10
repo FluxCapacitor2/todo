@@ -1,9 +1,9 @@
 "use client";
 
+import { TaskCard } from "@/components/task/TaskCard";
 import { trpc } from "@/util/trpc/trpc";
 import { useState } from "react";
 import { Skeleton } from "../[view]/[id]/list";
-import { TaskCard } from "@/components/task/TaskCard";
 
 export default function Page() {
   const [page, setPage] = useState(0);
@@ -13,9 +13,9 @@ export default function Page() {
   );
 
   return (
-    <main className="px-2 md:px-6 md:pt-4">
-      <section className="m-4 mx-auto max-w-xl">
-        <h1 className="mb-4 text-3xl font-bold">Completed Tasks</h1>
+    <main className="p-2 pt-1 md:px-6 md:pt-4">
+      <section className="mx-auto max-w-xl">
+        <h1 className="mb-4 text-2xl font-bold">Completed Tasks</h1>
         {!data || isLoading ? (
           <Skeleton />
         ) : (

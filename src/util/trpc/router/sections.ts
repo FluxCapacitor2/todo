@@ -52,7 +52,7 @@ export const sectionsRouter = (t: MyTrpc) =>
       .input(
         z.object({
           id: z.number(),
-          name: z.optional(z.string()),
+          name: z.optional(z.string().nonempty().max(100)),
           archived: z.optional(z.boolean()),
         })
       )

@@ -1,77 +1,95 @@
-import { DatePicker } from "@/components/ui/DatePicker";
 import {
-  autoUpdate,
-  shift,
-  useClick,
-  useDismiss,
-  useFloating,
-  useInteractions,
-} from "@floating-ui/react";
-import { Portal } from "@headlessui/react";
-import { PropsWithChildren, useState } from "react";
-
-type DatePickerPopoverProps = PropsWithChildren<
-  Omit<Parameters<typeof DatePicker>[0], "close" | "confirm"> & {
-    setDate: (date: Date) => void;
-  }
->;
+  combineDateAndTime,
+  extractTimeFromDate,
+  formatTimeInSeconds,
+} from "@/lib/utils";
+import { trpc } from "@/util/trpc/trpc";
+import { PopoverClose } from "@radix-ui/react-popover";
+import { ReactNode, useState } from "react";
+import { Spinner } from "./Spinner";
+import { Button } from "./button";
+import { Calendar } from "./calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 
 export const DatePickerPopover = ({
+  date: inDate,
+  setDate: confirm,
   children,
-  setDate,
-  ...rest
-}: DatePickerPopoverProps) => {
+}: {
+  date: Date | null;
+  setDate: (arg0: Date) => void;
+  children: ReactNode;
+}) => {
+  const {
+    data: timePresets,
+    isLoading,
+    isError,
+  } = trpc.user.getTimePresets.useQuery();
+
+  const defaultTime = inDate ? extractTimeFromDate(inDate) : 0;
+
   const [open, setOpen] = useState(false);
-
-  const { refs, floatingStyles, context } = useFloating({
-    placement: "bottom-start",
-    middleware: [shift()],
-    open,
-    onOpenChange: setOpen,
-    whileElementsMounted: autoUpdate,
-  });
-
-  const click = useClick(context);
-  const dismiss = useDismiss(context, { bubbles: false });
-
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    click,
-    dismiss,
-  ]);
+  const [date, setDate] = useState<Date | null>(inDate);
+  const [time, setTime] = useState<number>(defaultTime);
 
   return (
-    <div className="relative">
-      <div
-        className="flex items-center gap-2"
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent
+        className="grid min-w-min gap-2"
         onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className="w-full cursor-pointer hover:underline"
-          ref={refs.setReference}
-          {...getReferenceProps()}
+        <Calendar
+          mode="single"
+          selected={date ?? undefined}
+          onSelect={(date) => {
+            setDate(date ?? null);
+          }}
+          initialFocus
+        />
+        <Select
+          onValueChange={(value) => setTime(parseInt(value))}
+          defaultValue={defaultTime.toString()}
         >
-          {children}
+          <SelectTrigger>
+            <SelectValue placeholder="Pick a time..." />
+          </SelectTrigger>
+          <SelectContent position="popper">
+            {!timePresets?.some((it) => it.time === defaultTime) && (
+              <SelectItem value={defaultTime.toString()}>
+                {formatTimeInSeconds(defaultTime)}
+              </SelectItem>
+            )}
+            {isLoading && (
+              <SelectItem disabled value={Math.random().toString()}>
+                <Spinner className="inline" /> Loading time presets...
+              </SelectItem>
+            )}
+            {timePresets?.map((preset) => (
+              <SelectItem value={preset.time.toString()} key={preset.id}>
+                {formatTimeInSeconds(preset.time)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="flex justify-end">
+          <PopoverClose asChild>
+            <Button
+              onClick={() => confirm(combineDateAndTime(date, time)!)}
+              disabled={date === null}
+            >
+              Confirm
+            </Button>
+          </PopoverClose>
         </div>
-      </div>
-      {open && (
-        <Portal>
-          <div
-            className="overflow-hidden rounded-lg bg-gray-200 p-4 shadow-lg dark:bg-gray-950"
-            ref={refs.setFloating}
-            style={floatingStyles}
-            {...getFloatingProps()}
-          >
-            <DatePicker
-              close={() => setOpen(false)}
-              confirm={(newDate) => {
-                setOpen(false);
-                setDate(newDate);
-              }}
-              {...rest}
-            />
-          </div>
-        </Portal>
-      )}
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 };
