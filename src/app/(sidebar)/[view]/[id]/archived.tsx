@@ -3,28 +3,18 @@
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useUpdateSection } from "@/hooks/section";
 import { trpc } from "@/util/trpc/trpc";
-import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { MdChecklist, MdUnarchive } from "react-icons/md";
 
 export const ArchivedView = ({ id: projectId }: { id: string }) => {
   const { data, isLoading } = trpc.sections.getArchived.useQuery(projectId);
-
-  const utils = trpc.useContext();
-  const router = useRouter();
-
-  const { mutateAsync: updateSection, isLoading: isMutating } =
-    trpc.sections.update.useMutation({
-      onSettled: () => {
-        utils.sections.getArchived.invalidate(projectId);
-      },
-    });
+  const { updateSection } = useUpdateSection(projectId);
 
   const unarchive = (id: number) => {
     updateSection({ id, archived: false })
       .then(() => {
-        router.push(`/project/${projectId}`);
         toast.success("Section unarchived!");
       })
       .catch(() => {

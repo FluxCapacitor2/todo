@@ -1,5 +1,6 @@
 "use client";
 
+import { DeleteSectionModal } from "@/components/project/DeleteSectionModal";
 import { AddSectionTask } from "@/components/task/AddTask";
 import { TaskCard } from "@/components/task/TaskCard";
 import { Spinner } from "@/components/ui/Spinner";
@@ -14,13 +15,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCreateSection } from "@/hooks/section";
+import { useCreateSection, useUpdateSection } from "@/hooks/section";
 import { cn } from "@/lib/utils";
 import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
 import { Section, Task } from "@prisma/client";
 import clsx from "clsx";
-import { produce } from "immer";
 import { ReactNode, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import {
@@ -111,76 +111,7 @@ const Section = ({
   section: Section & { tasks: Task[] };
   projectId: string;
 }) => {
-  const utils = trpc.useContext();
-
-  const { mutateAsync: deleteSection } = trpc.sections.delete.useMutation({
-    onMutate: ({ id }) => {
-      const project = utils.projects.get.getData(projectId);
-      const index = project?.sections.findIndex((section) => section.id === id);
-      if (index === -1 || index === undefined) return;
-      const prevSection = project?.sections?.[index];
-
-      utils.projects.get.cancel(projectId);
-      utils.projects.get.setData(projectId, (project) => {
-        if (!project) return undefined;
-
-        const g = {
-          ...project,
-          sections: project.sections.filter((section) => section.id !== id),
-        };
-        return g;
-      });
-
-      return { prevSection, index };
-    },
-    onError: (error, { id }, context) => {
-      if (!context) return;
-      toast.error("There was an error deleting that section!");
-      utils.projects.get.setData(projectId, (project) => {
-        if (!project) return undefined;
-        return produce(project, (project) => {
-          project.sections.splice(context.index!, 0, context.prevSection!);
-        });
-      });
-    },
-    onSettled: () => {
-      utils.projects.get.invalidate(projectId);
-    },
-  });
-
-  const { mutateAsync: updateSection } = trpc.sections.update.useMutation({
-    onMutate: ({ id, archived }) => {
-      utils.projects.get.cancel(projectId);
-      const originalData = utils.projects.get
-        .getData(projectId)
-        ?.sections?.find((section) => section.id === id)?.archived;
-      utils.projects.get.setData(projectId, (project) => {
-        return produce(project, (project) => {
-          project?.sections.forEach((section) => {
-            if (section.id === id) {
-              section.archived = archived === true;
-            }
-          });
-        });
-      });
-      return { originalData };
-    },
-    onError: (error, { id }, context) => {
-      if (!context) return;
-      utils.projects.get.setData(projectId, (project) => {
-        return produce(project, (project) => {
-          project?.sections.forEach((section) => {
-            if (section.id === id) {
-              section.archived = context.originalData === true;
-            }
-          });
-        });
-      });
-    },
-    onSettled: () => {
-      utils.projects.get.invalidate(projectId);
-    },
-  });
+  const { updateSection } = useUpdateSection(projectId);
 
   const archive = () =>
     updateSection({ id: section.id, archived: true })
@@ -190,6 +121,8 @@ const Section = ({
       .then(() => {
         toast.success("Section archived!");
       });
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   return (
     <div
@@ -208,7 +141,7 @@ const Section = ({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             {section.id < 0 ? (
-              <Spinner />
+              <Spinner className="mt-2" />
             ) : (
               <Button variant="ghost" size="icon">
                 <MdMoreHoriz />
@@ -219,11 +152,19 @@ const Section = ({
             <DropdownMenuItem onClick={archive}>
               <MdArchive /> Archive
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => deleteSection({ id: section.id })}>
+
+            <DropdownMenuItem onClick={() => setDeleteModalOpen(true)}>
               <MdDelete /> Delete Section
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <DeleteSectionModal
+          opened={deleteModalOpen}
+          setOpened={setDeleteModalOpen}
+          projectId={projectId}
+          sectionId={section.id}
+          sectionName={section.name}
+        />
       </SectionName>
       <div
         className={clsx(
@@ -255,7 +196,7 @@ const SectionName = ({
 }) => {
   const utils = trpc.useContext();
   const textField = useRef<HTMLInputElement | null>(null);
-  const { mutateAsync, isLoading } = trpc.sections.update.useMutation();
+  const { updateSection } = useUpdateSection(projectId);
 
   const [name, setName] = useState(initialName);
 
@@ -283,9 +224,10 @@ const SectionName = ({
             if (name !== initialName) {
               if (name.trim().length === 0) {
                 toast.error("The section name must not be empty!");
+                setName(initialName);
                 return;
               }
-              await mutateAsync({ id, name });
+              await updateSection({ id, name });
               utils.projects.get.invalidate(projectId);
             }
           }}
