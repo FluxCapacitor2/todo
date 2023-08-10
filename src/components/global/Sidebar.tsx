@@ -83,8 +83,8 @@ const SidebarContents = ({ isModal }: { isModal: boolean }) => {
   return (
     <nav
       className={clsx(
-        isModal ? "z-20 flex" : "z-20 border-r bg-background",
-        "sticky top-0 flex h-screen min-w-[16rem] flex-col"
+        isModal ? "z-20 flex" : "z-20 hidden border-r bg-background md:flex",
+        "sticky top-0 h-screen min-w-[16rem] flex-col"
       )}
     >
       <Link href="/profile">

@@ -51,11 +51,11 @@ export const ArchivedView = ({ id: projectId }: { id: string }) => {
             ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center gap-4">
+        <div className="my-auto flex flex-col items-center justify-center gap-4 px-4">
           <div className="rounded-full bg-primary-100 p-6 dark:bg-primary-950">
             <MdChecklist size={36} />
           </div>
-          <p className="w-96">
+          <p className="max-w-sm [text-wrap:balance]">
             <strong>You don&apos;t have any archived sections.</strong> Click
             the &quot;Archive Section&quot; button in a section&apos;s dropdown
             menu to archive it.
