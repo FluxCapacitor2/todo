@@ -19,8 +19,8 @@ import {
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 
-const activeClass = "";
-const inactiveClass = "";
+const activeClass = "transition-colors bg-secondary";
+const inactiveClass = "transition-colors hover:bg-secondary/80";
 
 export const Sidebar = () => {
   const [shown, setShown] = useState(false);

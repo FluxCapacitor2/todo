@@ -47,7 +47,7 @@ export const TaskModal = ({
   return (
     <Sheet open={modalShown} onOpenChange={setModalShown}>
       {children && <SheetTrigger asChild>{children}</SheetTrigger>}
-      <SheetContent className="max-w-screen w-screen overflow-y-auto sm:w-auto sm:max-w-2xl">
+      <SheetContent className="max-w-screen w-screen overflow-y-auto sm:w-[40rem] sm:max-w-[initial]">
         <SheetHeader className="-mt-2">
           {fullTask?.parentTask?.name && (
             <a
@@ -200,9 +200,12 @@ export const TaskModal = ({
                   {fullTask.subTasks.map((task) => (
                     <TaskCard task={task} key={task.id} isListItem />
                   ))}
-                </div>
 
-                <AddSubtask projectId={task.projectId} parentTaskId={task.id} />
+                  <AddSubtask
+                    projectId={task.projectId}
+                    parentTaskId={task.id}
+                  />
+                </div>
               </>
             ) : loadingSubTasks ? (
               <Spinner />
