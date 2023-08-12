@@ -23,8 +23,6 @@ export const TrpcProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const session = useSession();
 
-  console.log(session.status);
-
   const [queryClient] = useState(
     () =>
       new QueryClient({

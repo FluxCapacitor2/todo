@@ -11,7 +11,6 @@ import {
   MdToday,
 } from "react-icons/md";
 import { DatePickerPopover } from "../ui/DatePickerPopover";
-import { RemirrorEditor } from "../ui/RemirrorEditor";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
@@ -21,7 +20,6 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "../ui/context-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { TaskModal } from "./TaskModal";
 import { TaskProvider } from "./TaskProvider";
 
@@ -82,35 +80,16 @@ export const TaskCard = ({
                     {details && (
                       <div className="mt-2 flex flex-col gap-2">
                         {task.description && (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Card
-                                onClick={(e) => e.stopPropagation()}
-                                className="w-full resize-none text-sm text-muted-foreground"
-                              >
-                                <CardContent
-                                  className={cn(
-                                    "overflow-hidden py-2",
-                                    isListItem ? "line-clamp-1" : "line-clamp-2"
-                                  )}
-                                >
-                                  {task.description}
-                                </CardContent>
-                              </Card>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              onClick={(e) => e.stopPropagation()}
+                          <Card className="w-full resize-none text-sm text-muted-foreground">
+                            <CardContent
+                              className={cn(
+                                "overflow-hidden py-2",
+                                isListItem ? "line-clamp-1" : "line-clamp-2"
+                              )}
                             >
-                              <h3 className="font-bold">Edit Description</h3>
-                              <RemirrorEditor
-                                editable
-                                initialContent={task.description}
-                                setContent={(content) =>
-                                  setTask({ ...task, description: content })
-                                }
-                              />
-                            </PopoverContent>
-                          </Popover>
+                              {task.description}
+                            </CardContent>
+                          </Card>
                         )}
                         {task.dueDate && (
                           <DatePickerPopover
