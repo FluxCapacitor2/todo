@@ -118,7 +118,7 @@ export const HomePage = () => {
                 <h2 className="text-4xl font-bold">Start and Due Dates</h2>
                 <p className="text-muted-foreground">
                   Get an expected progress for your tasks calculated linearly
-                  with the current date and the task's start and due dates.
+                  with the current date and the task&apos;s start and due dates.
                 </p>
               </div>
 
@@ -138,8 +138,8 @@ export const HomePage = () => {
               <div className="mb-6">
                 <h2 className="text-4xl font-bold">Dark Mode</h2>
                 <p className="text-muted-foreground">
-                  Uses your system's theme by default. More readable during the
-                  day, and won't blind you at night.
+                  Uses your system&apos;s theme by default. More readable during
+                  the day, and won&apos;t blind you at night.
                 </p>
               </div>
 
