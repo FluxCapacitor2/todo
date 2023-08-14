@@ -4,6 +4,8 @@
 
 @layer base {
   :root {
+    @apply scroll-p-24 scroll-smooth;
+
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
@@ -58,6 +60,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground accent-primary-500 selection:bg-primary-300 dark:selection:bg-primary-700 dark:selection:text-white;
     font-feature-settings: "rlig" 1, "calt" 1;
