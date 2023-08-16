@@ -54,7 +54,7 @@ export const HomePage = () => {
           </div>
         </section>
 
-        <div className="mt-24 flex justify-between lg:gap-8 lg:px-6">
+        <div className="mt-24 flex justify-between px-2 md:px-6 lg:gap-8">
           <div className="relative">
             <aside className="sticky top-24 hidden w-56 flex-col gap-2 lg:flex">
               <NavLink href="#categorize" active={activeSection}>
@@ -239,19 +239,19 @@ export const HomePage = () => {
       </div>
       <div className="relative flex h-96 items-center py-12">
         <div
-          className="absolute inset-0 -z-20 bg-primary-100"
+          className="absolute inset-0 -z-20 hidden bg-primary-100 md:block"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute inset-0 -z-10 bg-[url(/tile.png)] opacity-20 [background-size:10rem]"
+          className="pointer-events-none absolute inset-0 -z-10 hidden bg-[url(/tile.png)] opacity-20 [background-size:10rem] md:block"
           aria-hidden="true"
         />
-        <Card className="mx-auto">
+        <Card className="mx-auto border-none md:border-solid">
           <CardContent className="p-8 px-16">
             <h2 className="mb-4 text-center text-3xl font-bold">
               What are you waiting for?
             </h2>
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
               <Link href="/signin">
                 <Button>Sign Up</Button>
               </Link>
