@@ -2,9 +2,13 @@
 
 import { AddSectionTask } from "@/components/task/AddTask";
 import { TaskCard } from "@/components/task/TaskCard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
+import { MdCalendarToday } from "react-icons/md";
 
 export const ListView = ({ id: projectId }: { id: string }) => {
   const { data } = trpc.projects.get.useQuery(projectId, {
@@ -14,7 +18,7 @@ export const ListView = ({ id: projectId }: { id: string }) => {
 
   if (!data) {
     // Loading UI (skeleton)
-    return <Skeleton />;
+    return <ListSkeleton />;
   }
 
   const tasks = sortByDueDate(
@@ -23,7 +27,7 @@ export const ListView = ({ id: projectId }: { id: string }) => {
 
   return (
     <section className="m-4 mx-auto max-w-xl">
-      <ul className="flex flex-col gap-4">
+      <ul className="flex w-96 flex-col gap-4">
         {tasks.map((task) => (
           <TaskCard task={task} key={task.id} isListItem details />
         ))}
@@ -33,23 +37,29 @@ export const ListView = ({ id: projectId }: { id: string }) => {
   );
 };
 
-export const Skeleton = () => (
+export const ListSkeleton = () => (
   <section className="m-4 mx-auto max-w-xl">
     <ul className="flex flex-col gap-2">
       {new Array(5).fill(null).map((_, i) => (
-        <div key={i} className="flex items-start gap-2">
-          <Checkbox disabled className="mt-1" checked={i < 3} />
-          <div className="flex flex-col gap-2">
-            <div
-              className="my-1 h-8 w-64 animate-pulse rounded-md bg-gray-500/50"
-              style={{ animationDelay: `${i * 100}ms` }}
-            />
-            <div
-              className="my-1 h-4 w-48 animate-pulse rounded-md bg-gray-500/50"
-              style={{ animationDelay: `${i * 150}ms` }}
-            />
-          </div>
-        </div>
+        <Card key={i} className="w-96">
+          <CardContent className="flex flex-col gap-2 p-4 py-2">
+            <div className="flex gap-2">
+              <div className="h-6">
+                <Checkbox className="my-1" disabled checked={i < 3} />
+              </div>
+              <Skeleton className="h-6 w-48" />
+            </div>
+            <Card>
+              <CardContent className="flex flex-col gap-2 p-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-24" />
+              </CardContent>
+            </Card>
+            <Button className="justify-start gap-2" disabled variant="outline">
+              <MdCalendarToday /> Due <Skeleton className="h-4 w-8" />
+            </Button>
+          </CardContent>
+        </Card>
       ))}
     </ul>
   </section>

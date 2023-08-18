@@ -17,6 +17,7 @@ import {
   MdMenu,
 } from "react-icons/md";
 import { Divider } from "../ui/Divider";
+import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Skeleton } from "../ui/skeleton";
@@ -136,9 +137,7 @@ const SidebarContents = ({ isModal }: { isModal: boolean }) => {
           <MdGroups />
           <p>Invitations</p>
           {invitations && invitations.length > 0 && (
-            <p className="rounded-md bg-red-500 px-1 text-white">
-              {invitations.length}
-            </p>
+            <Badge>{invitations.length}</Badge>
           )}
         </div>
       </Link>
@@ -183,7 +182,7 @@ const SidebarContents = ({ isModal }: { isModal: boolean }) => {
               className="flex h-16 items-center gap-2 p-4 font-medium"
               key={i}
             >
-              <div className="h-5 w-32 animate-pulse bg-gray-300 dark:bg-gray-800" />
+              <Skeleton className="h-6 w-32" />
             </div>
           ))}
         </div>

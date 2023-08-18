@@ -48,15 +48,17 @@ export const ShareModal = ({
 
   const { data: collaborators } = trpc.projects.collaborators.list.useQuery(
     projectId,
-    { refetchInterval: 120_000 }
+    { enabled: opened, refetchInterval: 120_000 }
   );
 
   const { data: invitations } =
     trpc.projects.collaborators.listInvitations.useQuery(projectId, {
+      enabled: opened,
       refetchInterval: 60_000,
     });
 
   const { data: project } = trpc.projects.get.useQuery(projectId, {
+    enabled: opened,
     refetchInterval: false,
   });
 

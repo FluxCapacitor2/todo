@@ -145,6 +145,7 @@ model Section {
   archived  Boolean @default(false)
 
   @@index([projectId])
+  @@index([archived])
 }
 
 model Task {
@@ -173,6 +174,7 @@ model Task {
   @@index([ownerId])
   @@index([sectionId])
   @@index([parentTaskId])
+  @@index([completed])
 }
 
 model Reminder {

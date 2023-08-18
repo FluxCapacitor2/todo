@@ -39,7 +39,7 @@ export const ProjectView = ({ id: projectId }: { id: string }) => {
 
   if (!data) {
     // Loading UI (skeleton)
-    return ProjectSkeleton;
+    return <ProjectSkeleton />;
   }
 
   return (
@@ -56,23 +56,22 @@ export const ProjectView = ({ id: projectId }: { id: string }) => {
   );
 };
 
-export const ProjectSkeleton = (
-  <div className="flex">
-    {new Array(3).fill(null).map((_, i) => (
-      <div
-        className="mr-4 flex w-80 snap-center flex-col rounded-lg p-2"
-        key={i}
-      >
-        <div className="flex items-center justify-between">
-          <div className="h-6 w-52 animate-pulse rounded-md bg-gray-500/50" />
-          <Button variant="ghost">
-            <MdMoreHoriz />
-          </Button>
+export const ProjectSkeleton = () => (
+  <div className="ml-2 flex">
+    {new Array(5).fill(null).map((_, i) => (
+      <div className="mr-4 flex w-80 snap-center flex-col rounded-lg" key={i}>
+        <div className="relative mb-2 flex h-10 w-full items-center justify-between rounded-md border border-border pl-2">
+          <Skeleton className="h-6 w-52" />
+          <div className="absolute inset-y-0 right-2">
+            <Button variant="ghost" size="icon" disabled>
+              <MdMoreHoriz />
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col gap-2">
-          {new Array([5, 3, 4][i]).fill(null).map((_, j) => (
+        <div className="flex w-80 flex-col gap-2">
+          {new Array([5, 3, 4, 3, 2][i]).fill(null).map((_, j) => (
             <Card key={j}>
-              <CardContent className="p-2">
+              <CardContent className="p-4 py-2">
                 <div className="flex gap-2">
                   <div className="grid h-8 items-center">
                     <Checkbox disabled checked={j < 2} />

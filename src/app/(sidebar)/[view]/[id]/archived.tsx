@@ -1,8 +1,14 @@
 "use client";
 
-import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useUpdateSection } from "@/hooks/section";
 import { trpc } from "@/util/trpc/trpc";
 import { toast } from "react-hot-toast";
@@ -25,9 +31,7 @@ export const ArchivedView = ({ id: projectId }: { id: string }) => {
   return (
     <>
       {isLoading ? (
-        <div className="flex items-center justify-center">
-          <Spinner />
-        </div>
+        <ArchivedSkeleton />
       ) : data && data.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {data
@@ -39,14 +43,16 @@ export const ArchivedView = ({ id: projectId }: { id: string }) => {
                 </CardHeader>
                 <CardContent>
                   <p>{section._count?.tasks} tasks</p>
+                </CardContent>
+                <CardFooter>
                   <Button
                     variant="secondary"
-                    className="mt-2"
+                    className="w-full"
                     onClick={() => unarchive(section.id)}
                   >
                     <MdUnarchive /> Unarchive
                   </Button>
-                </CardContent>
+                </CardFooter>
               </Card>
             ))}
         </div>
@@ -65,3 +71,26 @@ export const ArchivedView = ({ id: projectId }: { id: string }) => {
     </>
   );
 };
+
+const ArchivedSkeleton = () => (
+  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    {new Array(5).fill(null).map((_, i) => (
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Skeleton className="h-6 w-48" />
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          <Skeleton className="h-6 w-24" />
+        </CardContent>
+        <CardFooter>
+          <Button variant="secondary" disabled className="w-full">
+            <MdUnarchive /> Unarchive
+          </Button>
+        </CardFooter>
+      </Card>
+    ))}
+  </div>
+);
