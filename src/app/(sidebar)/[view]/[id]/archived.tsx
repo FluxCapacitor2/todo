@@ -75,7 +75,7 @@ export const ArchivedView = ({ id: projectId }: { id: string }) => {
 const ArchivedSkeleton = () => (
   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     {new Array(5).fill(null).map((_, i) => (
-      <Card>
+      <Card key={i}>
         <CardHeader>
           <CardTitle>
             <Skeleton className="h-6 w-48" />

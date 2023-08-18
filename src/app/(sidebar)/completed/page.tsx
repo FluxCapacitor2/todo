@@ -3,7 +3,7 @@
 import { TaskCard } from "@/components/task/TaskCard";
 import { trpc } from "@/util/trpc/trpc";
 import { useState } from "react";
-import { Skeleton } from "../[view]/[id]/list";
+import { ListSkeleton } from "../[view]/[id]/list";
 
 export default function Page() {
   const [page, setPage] = useState(0);
@@ -14,7 +14,7 @@ export default function Page() {
       <section className="mx-auto max-w-xl">
         <h1 className="mb-4 text-2xl font-bold">Completed Tasks</h1>
         {!data || isLoading ? (
-          <Skeleton />
+          <ListSkeleton />
         ) : (
           <ul className="flex flex-col gap-4">
             {data.map((task) => (

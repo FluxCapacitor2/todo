@@ -70,7 +70,7 @@ const HideOnRouteChange = ({ hide }: { hide: () => void }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  useEffect(hide, [pathname, searchParams]);
+  useEffect(hide, [pathname, searchParams, hide]);
 
   return <></>;
 };

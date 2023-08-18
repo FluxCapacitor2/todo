@@ -4,7 +4,7 @@ import { ProjectSelector } from "@/components/project/ProjectSelector";
 import { TaskCard } from "@/components/task/TaskCard";
 import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
-import { Skeleton } from "../[view]/[id]/list";
+import { ListSkeleton } from "../[view]/[id]/list";
 
 export default function Page() {
   const { data, isLoading, isError } = trpc.tasks.listTopLevel.useQuery();
@@ -22,7 +22,7 @@ export default function Page() {
           return (
             <>
               {isLoading || !filtered ? (
-                <Skeleton />
+                <ListSkeleton />
               ) : (
                 <>
                   {filtered.map((task) => (
