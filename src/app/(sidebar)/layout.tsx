@@ -2,10 +2,15 @@
 
 import { Sidebar } from "@/components/global/Sidebar";
 import { TrpcProvider } from "@/components/global/TrpcProvider";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import { MdOfflineBolt } from "react-icons/md";
 import { RouteAttribute } from "./[view]/[id]/RouteAttribute";
+
+const CommandMenu = dynamic(
+  async () => (await import("./CommandMenu")).CommandMenu
+);
 
 const useOnline = () => {
   const [online, setOnline] = useState(
@@ -62,6 +67,7 @@ export default function SignedInLayout({
             {children}
           </div>
           <Toaster position="top-right" />
+          <CommandMenu />
         </div>
       </TrpcProvider>
       <RouteAttribute />

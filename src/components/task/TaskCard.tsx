@@ -1,6 +1,7 @@
 import { useCopyTaskURL, useDeleteTask } from "@/hooks/task";
 import { cn, shortDateFormat } from "@/lib/utils";
 import { Task } from "@prisma/client";
+import { isAfter } from "date-fns";
 import { useState } from "react";
 import {
   MdCalendarToday,
@@ -103,7 +104,10 @@ export const TaskCard = ({
                               variant={"outline"}
                               className={cn(
                                 "w-full justify-start text-left font-normal",
-                                !task.dueDate && "text-muted-foreground"
+                                !task.dueDate && "text-muted-foreground",
+                                task.dueDate &&
+                                  isAfter(new Date(), task.dueDate) &&
+                                  "text-destructive"
                               )}
                             >
                               <MdCalendarToday className="mr-2 h-4 w-4" />
