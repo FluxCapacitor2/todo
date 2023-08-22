@@ -47,7 +47,10 @@ export const Reminders = ({
 
 const AddReminder = ({ add }: { add: (date: Date) => void }) => {
   return (
-    <DatePickerPopover date={new Date(Date.now() + 86_400_000)} setDate={add}>
+    <DatePickerPopover
+      date={new Date(Date.now() + 86_400_000)}
+      setDate={(date) => date && add(date)}
+    >
       <Button
         variant={"outline"}
         className="w-full justify-start text-left font-normal text-muted-foreground"

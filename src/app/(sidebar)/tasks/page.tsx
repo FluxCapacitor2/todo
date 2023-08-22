@@ -16,7 +16,7 @@ export default function Page() {
         {(included) => {
           const filtered = data
             ? sortByDueDate(data).filter((task) =>
-                included?.some((it) => it.id === task.section?.projectId)
+                included?.some((it) => it.id === task.projectId)
               )
             : undefined;
           return (
