@@ -74,3 +74,9 @@
     @apply overflow-auto;
   }
 }
+
+@layer utilities {
+  .text-destructive {
+    @apply dark:text-red-500;
+  }
+}

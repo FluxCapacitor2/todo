@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/Spinner";
-import { getBaseURL } from "@/lib/utils";
+import { cn, getBaseURL } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
 import { MdRefresh } from "react-icons/md";
 
@@ -24,12 +24,12 @@ export const CalendarFeed = () => {
       <Input
         type="text"
         readOnly
+        disabled={isLoading}
         value={
           isLoading
             ? "Loading..."
             : getBaseURL() + "/api/calendar/" + apiToken?.id
         }
-        className="w-96"
         onClick={(e) => e.currentTarget.select()}
       />
       <Button
@@ -38,7 +38,11 @@ export const CalendarFeed = () => {
         onClick={() => rotate(apiToken!.id)}
         disabled={isLoading || rotating}
       >
-        {isLoading || rotating ? <Spinner /> : <MdRefresh />}
+        {isLoading ? (
+          <Spinner />
+        ) : (
+          <MdRefresh className={cn(rotating && "animate-spin")} />
+        )}
       </Button>
     </div>
   );

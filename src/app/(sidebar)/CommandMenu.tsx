@@ -1,5 +1,3 @@
-"use client";
-
 import {
   CommandDialog,
   CommandEmpty,
@@ -14,7 +12,7 @@ import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export const CommandMenu = () => {
+export const CommandMenu = ({ newProject }: { newProject: () => void }) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -65,6 +63,14 @@ export const CommandMenu = () => {
               {project.name}
             </CommandItem>
           ))}
+          <CommandItem
+            onSelect={() => {
+              setOpen(false);
+              newProject();
+            }}
+          >
+            New Project
+          </CommandItem>
         </CommandGroup>
         <CommandGroup heading="Theme">
           <CommandItem

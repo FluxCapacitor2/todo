@@ -1,5 +1,3 @@
-"use client";
-
 import { ExtSession } from "@/pages/api/auth/[...nextauth]";
 import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
@@ -7,17 +5,16 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useLayoutEffect, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { BsFillGridFill } from "react-icons/bs";
 import {
+  MdAddBox,
   MdCheckCircle,
   MdChecklist,
   MdError,
   MdGroups,
   MdMenu,
 } from "react-icons/md";
-import { Divider } from "../ui/Divider";
-import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Skeleton } from "../ui/skeleton";
@@ -25,7 +22,7 @@ import { Skeleton } from "../ui/skeleton";
 const activeClass = "transition-colors bg-secondary";
 const inactiveClass = "transition-colors hover:bg-secondary/80";
 
-export const Sidebar = () => {
+export const Sidebar = ({ newProject }: { newProject: () => void }) => {
   const [shown, setShown] = useState(false);
 
   useLayoutEffect(() => {
@@ -45,20 +42,24 @@ export const Sidebar = () => {
       <Sheet open={shown} onOpenChange={setShown}>
         <div className="absolute right-1 top-3 z-50 flex justify-end md:hidden">
           <SheetTrigger asChild>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setShown(!shown)}
-            >
+            <Button size="icon" variant="ghost">
               <MdMenu className="h-4 w-4" />
             </Button>
           </SheetTrigger>
         </div>
         <SheetContent className="w-screen max-w-xl p-2" side="left">
-          <SidebarContents isModal={true} />
+          <SidebarContents
+            isModal={true}
+            newProject={newProject}
+            close={() => setShown(false)}
+          />
         </SheetContent>
       </Sheet>
-      <SidebarContents isModal={false} />
+      <SidebarContents
+        isModal={false}
+        newProject={newProject}
+        close={() => {}}
+      />
       <Suspense>
         <HideOnRouteChange hide={() => setShown(false)} />
       </Suspense>
@@ -69,13 +70,22 @@ export const Sidebar = () => {
 const HideOnRouteChange = ({ hide }: { hide: () => void }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const hideSidebar = useMemo(() => hide, []);
 
-  useEffect(hide, [pathname, searchParams, hide]);
+  useEffect(hideSidebar, [pathname, searchParams, hideSidebar]);
 
   return <></>;
 };
 
-const SidebarContents = ({ isModal }: { isModal: boolean }) => {
+const SidebarContents = ({
+  isModal,
+  newProject,
+  close,
+}: {
+  isModal: boolean;
+  newProject: () => void;
+  close: () => void;
+}) => {
   const session = useSession();
   const pathname = usePathname();
 
@@ -83,17 +93,10 @@ const SidebarContents = ({ isModal }: { isModal: boolean }) => {
     refetchInterval: 300_000, // 5 minutes
   });
 
-  const { data: invitations } = trpc.invitation.listIncoming.useQuery(
-    undefined,
-    {
-      refetchInterval: 300_000, // 5 minutes
-    }
-  );
-
   return (
     <nav
       className={clsx(
-        isModal ? "z-20 flex" : "z-20 hidden border-r bg-background md:flex",
+        isModal ? "flex" : "z-20 hidden border-r bg-background md:flex",
         "sticky top-0 h-screen min-w-[16rem] flex-col"
       )}
     >
@@ -127,20 +130,6 @@ const SidebarContents = ({ isModal }: { isModal: boolean }) => {
         </div>
       </Link>
       <Divider />
-      <Link href="/invitations">
-        <div
-          className={clsx(
-            "flex items-center gap-2 p-4 font-medium",
-            pathname === "/invitations" ? activeClass : inactiveClass
-          )}
-        >
-          <MdGroups />
-          <p>Invitations</p>
-          {invitations && invitations.length > 0 && (
-            <Badge>{invitations.length}</Badge>
-          )}
-        </div>
-      </Link>
       <Link href="/projects">
         <div
           className={clsx(
@@ -179,7 +168,7 @@ const SidebarContents = ({ isModal }: { isModal: boolean }) => {
         <div className="flex w-full flex-col">
           {new Array(4).fill(undefined).map((_, i) => (
             <div
-              className="flex h-16 items-center gap-2 p-4 font-medium"
+              className="flex h-14 items-center gap-2 p-4 font-medium"
               key={i}
             >
               <Skeleton className="h-6 w-32" />
@@ -201,11 +190,29 @@ const SidebarContents = ({ isModal }: { isModal: boolean }) => {
               key={project.id}
             />
           ))}
+          <Divider />
+
+          <button
+            className={clsx(
+              "flex items-center justify-start gap-2 p-4 font-medium",
+              inactiveClass
+            )}
+            onClick={() => {
+              close();
+              newProject();
+            }}
+          >
+            <MdAddBox /> New Project
+          </button>
         </>
       )}
     </nav>
   );
 };
+
+const Divider = () => (
+  <hr className="h-0 w-full border-b border-t-0 border-border" />
+);
 
 const ProjectItem = ({
   name,
@@ -234,7 +241,7 @@ const ProjectItem = ({
         )}
       >
         <p className="grow">
-          <span className="mr-2">{name}</span>
+          <span className="mr-2 overflow-hidden truncate">{name}</span>
           {isCollaborator && (
             <MdGroups className="inline fill-gray-700 dark:fill-gray-300" />
           )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { NewProject } from "@/components/global/NewProjectModal";
 import { Sidebar } from "@/components/global/Sidebar";
 import { TrpcProvider } from "@/components/global/TrpcProvider";
 import { useIsMutating } from "@tanstack/react-query";
@@ -50,6 +51,8 @@ export default function SignedInLayout({
     }
   }, [online]);
 
+  const [newProjectOpen, setNewProjectOpen] = useState(false);
+
   return (
     <>
       {!online && (
@@ -63,14 +66,15 @@ export default function SignedInLayout({
       )}
       <TrpcProvider>
         <div className="conditional-overflow-hidden flex flex-col md:flex-row">
-          <Sidebar />
+          <Sidebar newProject={() => setNewProjectOpen(true)} />
           <div className="conditional-overflow-hidden h-screen w-full pt-3">
             {children}
           </div>
           <Toaster position="top-right" />
-          <CommandMenu />
+          <CommandMenu newProject={() => setNewProjectOpen(true)} />
           <BeforeLeaveHook />
         </div>
+        <NewProject opened={newProjectOpen} setOpened={setNewProjectOpen} />
       </TrpcProvider>
       <RouteAttribute />
     </>
