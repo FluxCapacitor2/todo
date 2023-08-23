@@ -29,7 +29,11 @@ export const projectsRouter = (t: MyTrpc) =>
             select: {
               _count: {
                 select: {
-                  tasks: true,
+                  tasks: {
+                    where: {
+                      completed: false,
+                    },
+                  },
                 },
               },
             },
