@@ -9,7 +9,10 @@ import { del, get, set } from "idb-keyval";
  * Creates an Indexed DB persister
  * @see https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
  */
-export function createIDBPersister(idbValidKey: IDBValidKey = "reactQuery") {
+export function createIDBPersister(
+  idbValidKey: IDBValidKey = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ??
+    "todo-app"
+) {
   return {
     persistClient: async (client: PersistedClient) => {
       set(idbValidKey, client);
