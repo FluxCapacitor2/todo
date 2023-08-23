@@ -106,6 +106,7 @@ export const TaskCard = ({
                                 "w-full justify-start text-left font-normal",
                                 !task.dueDate && "text-muted-foreground",
                                 task.dueDate &&
+                                  !task.completed &&
                                   isAfter(new Date(), task.dueDate) &&
                                   "text-destructive"
                               )}
