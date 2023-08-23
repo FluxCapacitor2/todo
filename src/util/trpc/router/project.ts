@@ -21,6 +21,23 @@ export const projectsRouter = (t: MyTrpc) =>
             },
           ],
         },
+        select: {
+          id: true,
+          name: true,
+          ownerId: true,
+          sections: {
+            select: {
+              _count: {
+                select: {
+                  tasks: true,
+                },
+              },
+            },
+            where: {
+              archived: false,
+            },
+          },
+        },
       });
     }),
     get: t.procedure.input(z.string()).query(async ({ ctx, input }) => {

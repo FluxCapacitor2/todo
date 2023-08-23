@@ -64,9 +64,12 @@ export const TaskModal = ({
           )}
           <SheetTitle className="flex items-center gap-1">
             <Checkbox
-              onCheckedChange={(checked) =>
-                setTask({ ...task, completed: checked === true })
-              }
+              onCheckedChange={(checked) => {
+                setTask({ ...task, completed: checked === true });
+                if (checked === true) {
+                  setModalShown(false);
+                }
+              }}
               checked={task.completed}
               className="absolute left-8 inline-block h-5 w-5"
             />

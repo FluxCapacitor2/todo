@@ -2,6 +2,7 @@
 
 import { Sidebar } from "@/components/global/Sidebar";
 import { TrpcProvider } from "@/components/global/TrpcProvider";
+import { useIsMutating } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
@@ -68,9 +69,23 @@ export default function SignedInLayout({
           </div>
           <Toaster position="top-right" />
           <CommandMenu />
+          <BeforeLeaveHook />
         </div>
       </TrpcProvider>
       <RouteAttribute />
     </>
   );
 }
+
+const BeforeLeaveHook = () => {
+  const isMutating = useIsMutating();
+  useEffect(() => {
+    if (isMutating) {
+      window.onbeforeunload = () => {};
+    } else {
+      window.onbeforeunload = null;
+    }
+  }, [isMutating]);
+
+  return null;
+};

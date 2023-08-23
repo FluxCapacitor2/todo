@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/util/trpc/trpc";
 import Link from "next/link";
-import { useMemo } from "react";
 import { MdError } from "react-icons/md";
 
 export const ProjectCards = () => {
@@ -56,6 +55,11 @@ export const ProjectCards = () => {
                   key={project.id}
                   projectId={project.id}
                   name={project.name}
+                  sections={project.sections.length}
+                  tasks={project.sections.reduce(
+                    (acc, section) => acc + section._count.tasks,
+                    0
+                  )}
                 />
               ))}
             </div>
@@ -69,47 +73,29 @@ export const ProjectCards = () => {
 const ProjectCard = ({
   projectId,
   name,
+  sections,
+  tasks,
 }: {
   projectId: string;
   name: string;
+  sections: number;
+  tasks: number;
 }) => {
-  const { data, isLoading, isError } = trpc.projects.get.useQuery(projectId, {
-    refetchInterval: 300_000,
-  });
-
-  const total = useMemo(
-    () => data?.sections.reduce((acc, s) => acc + s.tasks.length, 0),
-    [data]
-  );
-
   return (
     <Link href={`/project/${projectId}`}>
       <Card key={projectId} className="flex h-full flex-col justify-between">
         <CardHeader>
-          <CardTitle>{data?.name ?? name}</CardTitle>
+          <CardTitle>{name}</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-6 w-32" />
-            </div>
-          ) : isError ? (
-            <span className="text-red-500">
-              <MdError className="inline" /> Error loading tasks.
-            </span>
-          ) : (
-            <>
-              <p>
-                <b>{data?.sections.length}</b> section
-                {data?.sections?.length === 1 ? "" : "s"}
-              </p>
-              <p>
-                <b>{total}</b> task
-                {total === 1 ? "" : "s"}
-              </p>
-            </>
-          )}
+          <p>
+            <b>{sections}</b> section
+            {sections === 1 ? "" : "s"}
+          </p>
+          <p>
+            <b>{tasks}</b> task
+            {tasks === 1 ? "" : "s"}
+          </p>
         </CardContent>
       </Card>
     </Link>

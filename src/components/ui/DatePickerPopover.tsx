@@ -55,31 +55,29 @@ export const DatePickerPopover = ({
         />
 
         <Popover open={timePickerOpen} onOpenChange={setTimePickerOpen}>
-          {date && (
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className="w-full justify-between"
-              >
-                {time ? formatTimeInSeconds(time) : "Select a time..."}
-                {time !== 0 && (
-                  <Button
-                    variant="ghost"
-                    onClick={(e) => {
-                      setTime(0);
-                      e.stopPropagation();
-                    }}
-                    size="icon"
-                    className="ml-2 h-4 w-4 shrink-0"
-                  >
-                    <MdClose />
-                  </Button>
-                )}
-              </Button>
-            </PopoverTrigger>
-          )}
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between"
+            >
+              {time ? formatTimeInSeconds(time) : "Select a time..."}
+              {time !== 0 && (
+                <Button
+                  variant="ghost"
+                  onClick={(e) => {
+                    setTime(0);
+                    e.stopPropagation();
+                  }}
+                  size="icon"
+                  className="ml-2 h-4 w-4 shrink-0"
+                >
+                  <MdClose />
+                </Button>
+              )}
+            </Button>
+          </PopoverTrigger>
           <PopoverContent className="max-w-[300px]">
             <p className="text-sm font-medium leading-none">Use a preset</p>
             <div className="my-2 grid grid-cols-2 gap-2">
