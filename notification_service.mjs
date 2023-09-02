@@ -33,13 +33,16 @@ const sendNotifications = async () => {
       },
     },
     include: {
-      Task: {
+      user: {
         include: {
-          owner: {
-            include: {
-              notificationTokens: true,
-            },
-          },
+          notificationTokens: true,
+        },
+      },
+      Task: {
+        select: {
+          name: true,
+          dueDate: true,
+          id: true,
         },
       },
     },
@@ -47,7 +50,7 @@ const sendNotifications = async () => {
 
   if (reminders.length > 0) {
     const messages = reminders.flatMap((notif) => {
-      const tokens = notif.Task.owner.notificationTokens.map((it) => it.token);
+      const tokens = notif.user.notificationTokens.map((it) => it.token);
       return tokens.map((token) => ({
         notification: {
           title: notif.Task.name,
@@ -69,6 +72,9 @@ const sendNotifications = async () => {
         token,
       }));
     });
+
+    if (messages.length === 0) return;
+
     const results = await messaging.sendEach(messages);
 
     let tokensToRemove = [];
