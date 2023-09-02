@@ -62,8 +62,8 @@ const sendNotifications = async () => {
         },
         webpush: {
           notification: {
-            icon: "https://todo-app-seven-lime.vercel.app/icon.png",
-            click_action: `https://todo-app-seven-lime.vercel.app/project/${notif.projectId}/${notif.Task.id}`,
+            icon: "https://todo.bswanson.dev/icon.png",
+            click_action: `https://todo.bswanson.dev/project/${notif.projectId}/${notif.Task.id}`,
           },
         },
         data: {

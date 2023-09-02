@@ -64,12 +64,12 @@
       "icons": [{ "src": "/icons/tasks.png", "sizes": "192x192" }]
     },
     {
-      "name": "Calendar",
-      "url": "/calendar",
-      "icons": [{ "src": "/icons/calendar.png", "sizes": "192x192" }]
+      "name": "Completed",
+      "url": "/completed",
+      "icons": [{ "src": "/icons/completed.png", "sizes": "192x192" }]
     }
   ],
-  "start_url": "https://todo-app-seven-lime.vercel.app/projects",
+  "start_url": "https://todo.bswanson.dev/projects",
   "__start_url": "http://localhost:3000/projects",
   "id": "/projects",
   "display": "fullscreen",
