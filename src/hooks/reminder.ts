@@ -11,7 +11,7 @@ export const useAddReminder = (task: Task) => {
       const newId = Math.floor(Math.random() * Number.MIN_SAFE_INTEGER);
       utils.notification.list.setData(taskId, (list) => {
         if (!list) return undefined;
-        return [...list, { id: newId, projectId, taskId, time }];
+        return [...list, { id: newId, projectId, taskId, time, userId: "" }];
       });
       return { newId };
     },
