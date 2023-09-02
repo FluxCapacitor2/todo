@@ -14,7 +14,11 @@ import { trpc } from "@/util/trpc/trpc";
 import { toast } from "react-hot-toast";
 import { MdChecklist, MdUnarchive } from "react-icons/md";
 
-export const ArchivedView = ({ id: projectId }: { id: string }) => {
+export default function ArchivedView({
+  params: { id: projectId },
+}: {
+  params: { id: string };
+}) {
   const { data, isLoading } = trpc.sections.getArchived.useQuery(projectId);
   const { updateSection } = useUpdateSection(projectId);
 
@@ -61,7 +65,7 @@ export const ArchivedView = ({ id: projectId }: { id: string }) => {
           <div className="rounded-full bg-primary-100 p-6 dark:bg-primary-950">
             <MdChecklist size={36} />
           </div>
-          <p className="max-w-sm [text-wrap:balance]">
+          <p className="max-w-sm text-center [text-wrap:balance]">
             <strong>You don&apos;t have any archived sections.</strong> Click
             the &quot;Archive Section&quot; button in a section&apos;s dropdown
             menu to archive it.
@@ -70,7 +74,7 @@ export const ArchivedView = ({ id: projectId }: { id: string }) => {
       )}
     </>
   );
-};
+}
 
 const ArchivedSkeleton = () => (
   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

@@ -8,7 +8,6 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import { MdOfflineBolt } from "react-icons/md";
-import { RouteAttribute } from "./[view]/[id]/RouteAttribute";
 
 const CommandMenu = dynamic(
   async () => (await import("./CommandMenu")).CommandMenu
@@ -65,18 +64,17 @@ export default function SignedInLayout({
         </div>
       )}
       <TrpcProvider>
-        <div className="conditional-overflow-hidden flex flex-col md:flex-row">
+        <div className="flex h-screen w-screen flex-col overflow-hidden md:flex-row">
           <Sidebar newProject={() => setNewProjectOpen(true)} />
-          <div className="conditional-overflow-hidden h-screen w-full pt-3">
+          <div className="h-screen w-full overflow-x-hidden pt-3">
             {children}
           </div>
-          <Toaster position="top-right" />
-          <CommandMenu newProject={() => setNewProjectOpen(true)} />
-          <BeforeLeaveHook />
         </div>
         <NewProject opened={newProjectOpen} setOpened={setNewProjectOpen} />
+        <Toaster position="top-right" />
+        <CommandMenu newProject={() => setNewProjectOpen(true)} />
+        <BeforeLeaveHook />
       </TrpcProvider>
-      <RouteAttribute />
     </>
   );
 }

@@ -5,15 +5,13 @@ import { TaskProvider } from "@/components/task/TaskProvider";
 import { trpc } from "@/util/trpc/trpc";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { getView } from "../_views";
+import ProjectView from "../page";
 
 export default function Page({
-  params: { view, id, task: taskId },
+  params: { id, task: taskId },
 }: {
-  params: { view: string; id: string; task: string };
+  params: { id: string; task: string };
 }) {
-  const component = getView(view, id);
-
   const {
     data: task,
     isLoading,
@@ -23,7 +21,7 @@ export default function Page({
     { refetchInterval: 30_000 }
   );
 
-  const backPath = `/${view}/${id}`;
+  const backPath = `/project/${id}`;
   const router = useRouter();
   if (typeof window !== "undefined") {
     router.prefetch(backPath);
@@ -36,7 +34,7 @@ export default function Page({
 
   return (
     <>
-      {component}
+      <ProjectView params={{ id }} />
       {task && (
         <>
           <TaskProvider task={task}>

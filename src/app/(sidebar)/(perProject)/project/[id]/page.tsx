@@ -31,7 +31,11 @@ import {
   MdMoreHoriz,
 } from "react-icons/md";
 
-export const ProjectView = ({ id: projectId }: { id: string }) => {
+export default function ProjectView({
+  params: { id: projectId },
+}: {
+  params: { id: string };
+}) {
   const { data } = trpc.projects.get.useQuery(projectId, {
     useErrorBoundary: true,
     refetchInterval: 30_000,
@@ -43,20 +47,18 @@ export const ProjectView = ({ id: projectId }: { id: string }) => {
   }
 
   return (
-    <>
-      <div className="-mr-6 ml-2 flex h-full max-h-full snap-x snap-mandatory overflow-scroll lg:snap-none">
+    <div className="h-full max-h-full snap-x snap-mandatory overflow-scroll lg:snap-none">
+      <div className="ml-2 flex w-max">
         {data.sections.map((section) => (
           <Section key={section.id} section={section} projectId={data.id} />
         ))}
-        <div>
-          <NewSection projectId={data.id} />
-        </div>
+        <NewSection projectId={data.id} />
       </div>
-    </>
+    </div>
   );
-};
+}
 
-export const ProjectSkeleton = () => (
+const ProjectSkeleton = () => (
   <div className="ml-2 flex">
     {new Array(5).fill(null).map((_, i) => (
       <div className="mr-4 flex w-80 snap-center flex-col rounded-lg" key={i}>
@@ -251,8 +253,8 @@ const NewSection = ({ projectId }: { projectId: string }) => {
   };
 
   return (
-    <div className="mr-4 flex w-80 snap-center flex-col rounded-lg">
-      <Button variant="secondary" onClick={newSection}>
+    <div className="mr-4 flex w-80 shrink-0 snap-center flex-col rounded-lg">
+      <Button variant="secondary" onClick={newSection} className="sticky top-0">
         <MdEdit />
         New Section
       </Button>

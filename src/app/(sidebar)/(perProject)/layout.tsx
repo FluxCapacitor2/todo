@@ -1,19 +1,20 @@
 "use client";
 
 import { ViewSelector } from "@/components/project/ViewSelector";
+import { useParams } from "next/navigation";
 import { ReactNode } from "react";
 
 export default function ProjectViewLayout({
-  params: { view, id },
   children,
 }: {
-  params: { view: string; id: string };
   children: ReactNode;
 }) {
+  const params = useParams();
+  const id = params!.id as string;
   return (
-    <main className="conditional-overflow-hidden flex h-full flex-col md:px-6 md:pt-4">
+    <main className="flex h-full flex-col overflow-hidden md:pl-6 md:pt-4">
       <ViewSelector id={id} className="mb-2" />
-      {children}
+      <div className="h-full overflow-y-auto">{children}</div>
     </main>
   );
 }

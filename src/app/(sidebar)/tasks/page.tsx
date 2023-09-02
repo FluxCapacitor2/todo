@@ -4,7 +4,7 @@ import { ProjectSelector } from "@/components/project/ProjectSelector";
 import { TaskCard } from "@/components/task/TaskCard";
 import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
-import { ListSkeleton } from "../[view]/[id]/list";
+import { ListSkeleton } from "../(perProject)/list/[id]/ListSkeleton";
 
 export default function Page() {
   const { data, isLoading, isError } = trpc.tasks.listTopLevel.useQuery();

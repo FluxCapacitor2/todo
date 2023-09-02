@@ -1,6 +1,6 @@
 "use client";
 
-import { ProjectMenu } from "@/app/(sidebar)/[view]/[id]/ProjectMenu";
+import { ProjectMenu } from "@/app/(sidebar)/(perProject)/project/[id]/ProjectMenu";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
 import Link from "next/link";

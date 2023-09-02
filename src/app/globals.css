@@ -65,18 +65,14 @@
     @apply bg-background text-foreground accent-primary-500 selection:bg-primary-300 dark:selection:bg-primary-700 dark:selection:text-white;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-
-  [data-route="project"] .conditional-overflow-hidden {
-    @apply overflow-hidden;
-  }
-
-  :not([data-route="project"]) .conditional-overflow-hidden {
-    @apply overflow-auto;
-  }
 }
 
 @layer utilities {
   .text-destructive {
     @apply dark:text-red-500;
   }
+}
+
+html {
+  overflow-x: hidden;
 }

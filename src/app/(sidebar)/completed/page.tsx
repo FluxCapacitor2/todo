@@ -3,7 +3,7 @@
 import { TaskCard } from "@/components/task/TaskCard";
 import { trpc } from "@/util/trpc/trpc";
 import { useState } from "react";
-import { ListSkeleton } from "../[view]/[id]/list";
+import { ListSkeleton } from "../(perProject)/list/[id]/ListSkeleton";
 
 export default function Page() {
   const [page, setPage] = useState(0);
