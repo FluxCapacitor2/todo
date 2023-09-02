@@ -186,6 +186,11 @@ export const tasksRouter = (t: MyTrpc) =>
                   },
                 },
               },
+              {
+                project: {
+                  ownerId: ctx.session.id,
+                },
+              },
             ],
           },
           include: {

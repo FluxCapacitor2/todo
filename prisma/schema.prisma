@@ -53,6 +53,7 @@ model User {
   apiTokens           ApiToken[]
   Collaborator        Collaborator[]
   timePresets         TimePreset[]
+  reminders           Reminder[]
 }
 
 model TimePreset {
@@ -179,12 +180,16 @@ model Task {
 
 model Reminder {
   id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
   Task      Task     @relation(fields: [taskId], references: [id])
   taskId    Int
   projectId String
   time      DateTime
 
+  @@index([userId])
   @@index([taskId])
+  @@index([taskId, userId])
 }
 
 model Label {

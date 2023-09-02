@@ -5,15 +5,35 @@ import { MyTrpc } from "../trpc-router";
 
 export const notificationRouter = (t: MyTrpc) =>
   t.router({
+    listAll: t.procedure.query(async ({ ctx }) => {
+      return await prisma.reminder.findMany({
+        orderBy: {
+          time: "asc",
+        },
+        where: {
+          userId: ctx.session.id,
+          time: {
+            // Only return notifications in the next 24 hours
+            lte: new Date(new Date().getTime() + 86_400_000),
+          },
+        },
+        include: {
+          Task: {
+            select: {
+              name: true,
+              dueDate: true,
+              completed: true,
+            },
+          },
+        },
+        take: 50,
+      });
+    }),
     list: t.procedure.input(z.number()).query(async ({ ctx, input }) => {
       return await prisma.reminder.findMany({
         where: {
-          AND: {
-            taskId: input,
-            Task: {
-              ownerId: ctx.session.id,
-            },
-          },
+          taskId: input,
+          userId: ctx.session.id,
         },
       });
     }),
@@ -59,6 +79,7 @@ export const notificationRouter = (t: MyTrpc) =>
               create: {
                 time: input.time,
                 projectId: input.projectId,
+                userId: ctx.session.id,
               },
             },
           },
@@ -69,9 +90,7 @@ export const notificationRouter = (t: MyTrpc) =>
         where: {
           AND: {
             id: input,
-            Task: {
-              ownerId: ctx.session.id,
-            },
+            userId: ctx.session.id,
           },
         },
       });
