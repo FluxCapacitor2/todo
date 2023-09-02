@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { isAfter } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdAdd, MdCancel, MdSend } from "react-icons/md";
 import { z } from "zod";
@@ -141,6 +141,8 @@ const AddTask = ({
     },
   });
 
+  const formRef = useRef<HTMLFormElement | null>(null);
+
   const reset = () => {
     form.reset();
     setDueDate(null);
@@ -163,6 +165,7 @@ const AddTask = ({
       <PopoverContent align="center" className="w-80">
         <Form {...form}>
           <form
+            ref={formRef}
             onSubmit={form.handleSubmit(newTask)}
             className="flex flex-col gap-2"
           >
@@ -218,7 +221,15 @@ const AddTask = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea id="addTaskDescription" {...field} />
+                    <Textarea
+                      id="addTaskDescription"
+                      onKeyDown={(e) => {
+                        if (e.ctrlKey && e.key === "Enter") {
+                          formRef.current?.requestSubmit();
+                        }
+                      }}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
