@@ -38,7 +38,7 @@ export const tasksRouter = (t: MyTrpc) =>
           throw new TRPCError({ code: "NOT_FOUND" });
         }
 
-        await prisma.section.update({
+        const result = await prisma.section.update({
           where: {
             id: input.sectionId,
           },
@@ -54,6 +54,8 @@ export const tasksRouter = (t: MyTrpc) =>
             },
           },
         });
+
+        return result.id;
       }),
     delete: t.procedure.input(z.number()).mutation(async ({ ctx, input }) => {
       await deleteTask(input, ctx.session.id);
