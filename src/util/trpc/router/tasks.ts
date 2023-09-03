@@ -38,20 +38,14 @@ export const tasksRouter = (t: MyTrpc) =>
           throw new TRPCError({ code: "NOT_FOUND" });
         }
 
-        const result = await prisma.section.update({
-          where: {
-            id: input.sectionId,
-          },
+        const result = await prisma.task.create({
           data: {
-            tasks: {
-              create: {
-                name: input.name,
-                description: input.description ?? "",
-                ownerId: ctx.session.id,
-                dueDate: input.dueDate,
-                projectId: section.projectId,
-              },
-            },
+            sectionId: input.sectionId,
+            name: input.name,
+            description: input.description ?? "",
+            ownerId: ctx.session.id,
+            dueDate: input.dueDate,
+            projectId: section.projectId,
           },
         });
 
@@ -149,25 +143,19 @@ export const tasksRouter = (t: MyTrpc) =>
         if (!task) {
           throw new TRPCError({ code: "NOT_FOUND" });
         }
-        await prisma.task.update({
-          where: {
-            id: input.id,
-          },
+
+        const result = await prisma.task.create({
           data: {
-            subTasks: {
-              create: [
-                {
-                  name: input.name,
-                  description: input.description,
-                  ownerId: ctx.session.id,
-                  dueDate: input.dueDate,
-                  projectId: task.projectId,
-                },
-              ],
-            },
+            name: input.name,
+            description: input.description,
+            ownerId: ctx.session.id,
+            dueDate: input.dueDate,
+            projectId: task.projectId,
+            parentTaskId: input.id,
           },
-          select: null,
         });
+
+        return result.id;
       }),
     get: t.procedure
       .input(z.object({ id: z.number() }))

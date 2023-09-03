@@ -105,7 +105,7 @@ const AddTask = ({
     description: string;
     sectionId: number | null;
     dueDate: Date | null;
-  }) => Promise<void>;
+  }) => Promise<number>;
   projectId: string;
   section?: number;
   sectionEditable?: boolean;
