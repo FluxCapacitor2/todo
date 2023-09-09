@@ -1,5 +1,6 @@
 import { Providers } from "@/components/global/Providers";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import { ReactNode } from "react";
 import "./globals.css";
 
@@ -67,6 +68,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body className={inter.className}>
         <Providers>{children}</Providers>
+
+        <Script
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={'{"token": "343c6fb2a45f424dac0de8affe3c0ece"}'}
+        />
       </body>
     </html>
   );
