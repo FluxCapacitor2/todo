@@ -90,7 +90,7 @@ const SidebarContents = ({
   const pathname = usePathname();
 
   const { data, isLoading, isError } = trpc.projects.list.useQuery(undefined, {
-    refetchInterval: 300_000, // 5 minutes
+    refetchInterval: 60_000 * 10, // 10 minutes
   });
 
   return (

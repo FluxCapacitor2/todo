@@ -20,7 +20,9 @@ export const ProjectCards = () => {
     data: projects,
     isLoading,
     isError,
-  } = trpc.projects.list.useQuery(undefined, { refetchInterval: 120_000 });
+  } = trpc.projects.list.useQuery(undefined, {
+    refetchInterval: 60_000 * 2, // 2 minutes
+  });
 
   const { data: invitations } = trpc.invitation.listIncoming.useQuery(
     undefined,

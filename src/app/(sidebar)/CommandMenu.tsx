@@ -33,7 +33,10 @@ export const CommandMenu = ({ newProject }: { newProject: () => void }) => {
     setOpen(false);
   }, [pathname]);
 
-  const { data: projects } = trpc.projects.list.useQuery();
+  const { data: projects } = trpc.projects.list.useQuery(undefined, {
+    enabled: open,
+    refetchInterval: 300_000,
+  });
   const router = useRouter();
 
   const goto = (path: string) => {

@@ -10,7 +10,7 @@ export const ProjectSelector = ({
   children: (included: Project[] | undefined) => ReactNode;
 }) => {
   const { data: projects } = trpc.projects.list.useQuery(undefined, {
-    refetchInterval: 300_000,
+    refetchInterval: 60_000 * 10, // 10 minutes
   });
   const [included, setIncluded] = useState(projects);
 
