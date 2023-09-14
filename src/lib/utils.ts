@@ -22,7 +22,10 @@ export function cn(...inputs: ClassValue[]) {
 export function getBaseURL() {
   if (typeof window !== "undefined") {
     return `${window.location.protocol}//${window.location.host}`;
-  } else if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+  } else if (
+    process.env.NEXT_PUBLIC_VERCEL_URL &&
+    process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
+  ) {
     return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
   } else {
     return process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
