@@ -90,6 +90,9 @@ export const userRouter = (t: MyTrpc) =>
         where: {
           userId: ctx.session.id,
         },
+        orderBy: {
+          time: "asc",
+        },
       });
     }),
     addTimePreset: t.procedure
@@ -119,7 +122,11 @@ export const userRouter = (t: MyTrpc) =>
               },
             },
             include: {
-              timePresets: true,
+              timePresets: {
+                orderBy: {
+                  time: "asc",
+                },
+              },
             },
           })
         ).timePresets;
@@ -140,7 +147,11 @@ export const userRouter = (t: MyTrpc) =>
               },
             },
             include: {
-              timePresets: true,
+              timePresets: {
+                orderBy: {
+                  time: "asc",
+                },
+              },
             },
           })
         ).timePresets;
