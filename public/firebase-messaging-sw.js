@@ -22,22 +22,6 @@ firebase.initializeApp({
 // messages.
 const messaging = firebase.messaging();
 
-// https://firebase.google.com/docs/cloud-messaging/concept-options
-messaging.onBackgroundMessage(function (payload) {
-  console.log(
-    "[firebase-messaging-sw.js] Received background message ",
-    payload
-  );
-  // Customize notification here
-  // const notificationTitle = payload.notification.title;
-  // const notificationOptions = {
-  //   body: payload.notification.body,
-  //   icon: "/icon.png",
-  // };
-
-  // self.registration.showNotification(notificationTitle, notificationOptions);
-});
-
 self.addEventListener("notificationclick", (event) => {
   const clickedNotification = event.notification;
   clickedNotification.close();
@@ -55,11 +39,28 @@ self.addEventListener("notificationclick", (event) => {
       body: JSON.stringify([{ json: { completed: true } }]),
     })
       .then((res) => res.text())
-      .then((text) => console.log("Complete task returned response: ", text));
+      .then((text) => console.log("Complete task returned response: ", text))
+      .then(() => self.clients.openWindow(clickedNotification.data.url));
 
     event.waitUntil(promise);
   } else {
     // If no action was selected, open the task in a new tab/window
     event.waitUntil(self.clients.openWindow(clickedNotification.data.url));
   }
+});
+
+// https://firebase.google.com/docs/cloud-messaging/concept-options
+messaging.onBackgroundMessage(function (payload) {
+  console.log(
+    "[firebase-messaging-sw.js] Received background message ",
+    payload
+  );
+  // Customize notification here
+  // const notificationTitle = payload.notification.title;
+  // const notificationOptions = {
+  //   body: payload.notification.body,
+  //   icon: "/icon.png",
+  // };
+
+  // self.registration.showNotification(notificationTitle, notificationOptions);
 });
