@@ -91,7 +91,7 @@ const sendNotifications = async () => {
             id: notif.id.toString(),
             url: taskLink,
             projectId: notif.projectId,
-            taskId: notif.Task.id,
+            taskId: notif.Task.id.toString(),
           },
           token,
         }));
