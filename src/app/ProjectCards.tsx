@@ -1,5 +1,6 @@
 "use client";
 
+import { NewProject } from "@/components/global/NewProjectModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,8 +13,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/util/trpc/trpc";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { MdError } from "react-icons/md";
+import { MdAdd, MdError } from "react-icons/md";
 
 export const ProjectCards = () => {
   const {
@@ -51,9 +53,21 @@ export const ProjectCards = () => {
     },
   });
 
+  const [newProjectOpen, setNewProjectOpen] = useState(false);
+
+  useEffect(() => {
+    if (projects !== undefined && projects.length === 0) {
+      setNewProjectOpen(true);
+    }
+  }, [projects]);
+
   return (
     <>
       <h2 className="text-2xl font-bold">Projects</h2>
+      <NewProject
+        opened={newProjectOpen}
+        setOpened={(state) => setNewProjectOpen(state)}
+      />
       {isLoading ? (
         <div className="flex justify-center">
           {/* Fallback/skeleton UI */}
@@ -80,38 +94,52 @@ export const ProjectCards = () => {
           <MdError />
           Error loading projects.
         </p>
+      ) : projects.length > 0 ? (
+        <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {projects.map((project) => {
+            const tasks = project.sections.reduce(
+              (acc, section) => acc + section._count.tasks,
+              0
+            );
+            return (
+              <Link href={`/project/${project.id}`} key={project.id}>
+                <Card className="flex h-full flex-col justify-between">
+                  <CardHeader>
+                    <CardTitle>{project.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p>
+                      <b>{project.sections.length}</b> section
+                      {project.sections.length === 1 ? "" : "s"}
+                    </p>
+                    <p>
+                      <b>{tasks}</b> task
+                      {tasks === 1 ? "" : "s"}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
       ) : (
-        projects.length > 0 && (
-          <>
-            <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project) => {
-                const tasks = project.sections.reduce(
-                  (acc, section) => acc + section._count.tasks,
-                  0
-                );
-                return (
-                  <Link href={`/project/${project.id}`} key={project.id}>
-                    <Card className="flex h-full flex-col justify-between">
-                      <CardHeader>
-                        <CardTitle>{project.name}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p>
-                          <b>{project.sections.length}</b> section
-                          {project.sections.length === 1 ? "" : "s"}
-                        </p>
-                        <p>
-                          <b>{tasks}</b> task
-                          {tasks === 1 ? "" : "s"}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
-          </>
-        )
+        <Card className="flex h-full flex-col">
+          <CardHeader>
+            <CardTitle>Create Project</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>
+              Projects are used to organize tasks. Get started by creating your
+              first project.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={() => setNewProjectOpen(true)} className="gap-2">
+              <MdAdd />
+              Create
+            </Button>
+          </CardFooter>
+        </Card>
       )}
 
       {invitations && invitations.length > 0 && (
