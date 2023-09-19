@@ -49,6 +49,18 @@ export const notificationRouter = (t: MyTrpc) =>
         const task = await prisma.task.findFirst({
           where: {
             id: input.taskId,
+            project: {
+              OR: [
+                { ownerId: ctx.session.id },
+                {
+                  collaborators: {
+                    some: {
+                      userId: ctx.session.id,
+                    },
+                  },
+                },
+              ],
+            },
           },
           include: {
             _count: {
@@ -59,7 +71,7 @@ export const notificationRouter = (t: MyTrpc) =>
           },
         });
 
-        if (task?.ownerId !== ctx.session.id) {
+        if (!task) {
           throw new TRPCError({ code: "FORBIDDEN" });
         }
 
