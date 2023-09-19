@@ -39,11 +39,6 @@ const sendNotifications = async () => {
         },
       },
       Task: {
-        select: {
-          name: true,
-          dueDate: true,
-          id: true,
-        },
         include: {
           project: {
             select: {
