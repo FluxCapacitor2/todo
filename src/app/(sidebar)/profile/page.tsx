@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -35,71 +35,70 @@ export default function ProfilePage() {
               unoptimized
               className="rounded-full"
             />
-            <div>
+            <div className="ml-2">
               <h1 className="text-3xl font-bold">{session.data!.user!.name}</h1>
-              <p>{session.data!.user!.email}</p>
+              <p className="text-sm text-muted-foreground">
+                {session.data!.user!.email}
+              </p>
             </div>
           </>
         )}
       </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Calendar</CardTitle>
-            <p className="text-muted-foreground">
-              Subscribe to your tasks as a calendar feed.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <CalendarFeed />
-            <p className="max-w-prose text-sm text-muted-foreground [text-wrap:balance]">
-              <b>Note</b>: Anyone with the link can view your tasks! If you
-              accidentally share the link, you can reset it by clicking the
-              rotate button above.
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Time Presets</CardTitle>
-            <p className="text-muted-foreground">
-              Change the recommended time presets for start and due dates and
-              reminders.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <TimePresets />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Notifications</CardTitle>
-            <p className="text-muted-foreground">
-              Get notified for important due dates.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <RequestNotificationPermission />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Theme Preference</CardTitle>
-            <p className="text-muted-foreground">Applies to this device.</p>
-          </CardHeader>
-          <CardContent>
-            <ThemeToggle />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign Out</CardTitle>
-            <p className="text-muted-foreground">Applies for this device.</p>
-          </CardHeader>
-          <CardContent>
-            <SignOutButton />
-          </CardContent>
-        </Card>
+      <div className="flex flex-col gap-12 px-4">
+        <div className="w-full max-w-prose border-b pb-12">
+          <h2 className="text-2xl font-bold">Archived Projects</h2>
+          <p className="mb-2 text-muted-foreground">
+            Free up space in your sidebar by archiving projects, and restore
+            them here.
+          </p>
+
+          <Link href="/projects/archived">
+            <Button>View Archived Projects</Button>
+          </Link>
+        </div>
+
+        <div className="w-full max-w-prose border-b pb-12">
+          <h2 className="text-2xl font-bold">Calendar</h2>
+          <p className="text-muted-foreground">
+            Subscribe to your tasks as a calendar feed.
+          </p>
+
+          <CalendarFeed />
+          <p className="max-w-prose text-sm text-muted-foreground [text-wrap:balance]">
+            <b>Note</b>: Anyone with the link can view your tasks! If you
+            accidentally share the link, you can reset it by clicking the rotate
+            button above.
+          </p>
+        </div>
+        <div className="w-full max-w-prose border-b pb-12">
+          <h2 className="text-2xl font-bold">Time Presets</h2>
+          <p className="text-muted-foreground">
+            Change the recommended time presets for start and due dates and
+            reminders.
+          </p>
+
+          <TimePresets />
+        </div>
+        <div className="w-full max-w-prose border-b pb-12">
+          <h2 className="text-2xl font-bold">Notifications</h2>
+          <p className="text-muted-foreground">
+            Get notified for important due dates.
+          </p>
+
+          <RequestNotificationPermission />
+        </div>
+        <div className="w-full max-w-prose border-b pb-12">
+          <h2 className="text-2xl font-bold">Theme Preference</h2>
+          <p className="text-muted-foreground">Applies to this device.</p>
+
+          <ThemeToggle />
+        </div>
+        <div className="w-full max-w-prose border-b pb-12">
+          <h2 className="text-2xl font-bold">Sign Out</h2>
+          <p className="text-muted-foreground">Applies for this device.</p>
+
+          <SignOutButton />
+        </div>
       </div>
       <Link
         href="https://www.flaticon.com/free-icons/foursquare-check-in"

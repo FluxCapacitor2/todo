@@ -1,6 +1,7 @@
 import { useCopyTaskURL, useDeleteTask } from "@/hooks/task";
 import { cn, shortDateFormat } from "@/lib/utils";
 import { Task } from "@prisma/client";
+import clsx from "clsx";
 import { isAfter } from "date-fns";
 import { useState } from "react";
 import {
@@ -29,11 +30,13 @@ export const TaskCard = ({
   isListItem,
   details,
   showCheckbox = true,
+  readonly = false,
 }: {
   task: Task;
   isListItem?: boolean;
   details?: boolean;
   showCheckbox?: boolean;
+  readonly?: boolean;
 }) => {
   const subTasks =
     "subTasks" in inTask ? (inTask.subTasks as { completed: boolean }[]) : [];
@@ -45,7 +48,7 @@ export const TaskCard = ({
       {({ task, setTask, isSaving }) => (
         <TaskModal
           {...{
-            modalShown,
+            modalShown: modalShown && !readonly,
             setModalShown,
             task,
             setTask,
@@ -54,7 +57,13 @@ export const TaskCard = ({
         >
           <div onClick={() => setModalShown(true)} role="button">
             <ContextMenu>
-              <ContextMenuTrigger asChild>
+              <ContextMenuTrigger
+                asChild
+                disabled={readonly}
+                className={clsx(
+                  readonly && "pointer-events-none cursor-not-allowed"
+                )}
+              >
                 <Card>
                   <CardContent className="p-4 py-2">
                     <div className="flex gap-2">
@@ -66,6 +75,7 @@ export const TaskCard = ({
                             }}
                             checked={task.completed}
                             onClick={(e) => e.stopPropagation()}
+                            disabled={readonly}
                           />
                         </div>
                       )}
@@ -102,6 +112,7 @@ export const TaskCard = ({
                             <Button
                               onClick={(e) => e.stopPropagation()}
                               variant={"outline"}
+                              disabled={readonly}
                               className={cn(
                                 "w-full justify-start text-left font-normal",
                                 !task.dueDate && "text-muted-foreground",
@@ -139,7 +150,11 @@ export const TaskCard = ({
                 </Card>
               </ContextMenuTrigger>
               <ContextMenuContent onClick={(e) => e.stopPropagation()}>
-                <TaskContextMenuItems task={task} setTask={setTask} />
+                <TaskContextMenuItems
+                  task={task}
+                  setTask={setTask}
+                  readonly={readonly}
+                />
               </ContextMenuContent>
             </ContextMenu>
           </div>
@@ -152,25 +167,33 @@ export const TaskCard = ({
 const TaskContextMenuItems = ({
   task,
   setTask,
+  readonly = false,
 }: {
   task: Task;
   setTask: (task: Task) => void;
+  readonly?: boolean;
 }) => {
   const { deleteAsync } = useDeleteTask(task);
   const { copy } = useCopyTaskURL(task);
 
   return (
     <>
-      <ContextMenuItem onClick={() => deleteAsync(task.id)}>
+      <ContextMenuItem onClick={() => deleteAsync(task.id)} disabled={readonly}>
         <MdDelete /> Delete Task
       </ContextMenuItem>
       {task.dueDate && (
-        <ContextMenuItem onClick={() => setTask({ ...task, dueDate: null })}>
+        <ContextMenuItem
+          onClick={() => setTask({ ...task, dueDate: null })}
+          disabled={readonly}
+        >
           <MdToday /> Remove Due Date
         </ContextMenuItem>
       )}
       {task.startDate && (
-        <ContextMenuItem onClick={() => setTask({ ...task, startDate: null })}>
+        <ContextMenuItem
+          onClick={() => setTask({ ...task, startDate: null })}
+          disabled={readonly}
+        >
           <MdRemoveCircle /> Remove Start Date
         </ContextMenuItem>
       )}

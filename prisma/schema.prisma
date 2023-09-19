@@ -127,6 +127,7 @@ model VerificationToken {
 model Project {
   id            String         @id @default(cuid())
   name          String
+  archived      Boolean        @default(false)
   ownerId       String
   owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   collaborators Collaborator[]

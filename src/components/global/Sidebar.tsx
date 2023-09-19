@@ -1,3 +1,4 @@
+import { ProjectMenu } from "@/app/(sidebar)/(perProject)/project/[id]/ProjectMenu";
 import { ExtSession } from "@/pages/api/auth/[...nextauth]";
 import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
@@ -233,7 +234,7 @@ const ProjectItem = ({
   const active = pathname?.startsWith(`/project/${id}`);
 
   return (
-    <Link href={`/project/${id}`}>
+    <Link href={`/project/${id}`} className="group">
       <div
         className={clsx(
           "flex items-center justify-between p-4 font-medium",
@@ -245,6 +246,9 @@ const ProjectItem = ({
           {isCollaborator && (
             <MdGroups className="inline fill-gray-700 dark:fill-gray-300" />
           )}
+          <div className="mr-auto inline-block h-0 opacity-0 transition-opacity group-hover:opacity-100">
+            <ProjectMenu id={id} />
+          </div>
         </p>
       </div>
     </Link>

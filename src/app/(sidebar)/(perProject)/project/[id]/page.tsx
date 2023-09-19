@@ -50,9 +50,14 @@ export default function ProjectView({
     <div className="h-full max-h-full snap-x snap-mandatory overflow-scroll lg:snap-none">
       <div className="ml-2 flex w-max">
         {data.sections.map((section) => (
-          <Section key={section.id} section={section} projectId={data.id} />
+          <Section
+            key={section.id}
+            section={section}
+            projectId={data.id}
+            readonly={data.archived}
+          />
         ))}
-        <NewSection projectId={data.id} />
+        {!data.archived && <NewSection projectId={data.id} />}
       </div>
     </div>
   );
@@ -108,9 +113,11 @@ const ProjectSkeleton = () => (
 const Section = ({
   section,
   projectId,
+  readonly,
 }: {
   section: Section & { tasks: Task[] };
   projectId: string;
+  readonly: boolean;
 }) => {
   const { updateSection } = useUpdateSection(projectId);
 
@@ -139,34 +146,39 @@ const Section = ({
         initialName={section.name}
         projectId={projectId}
         archived={section.archived}
+        disabled={readonly}
       >
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            {section.id < 0 ? (
-              <Spinner className="mt-2" />
-            ) : (
-              <Button variant="ghost" size="icon">
-                <MdMoreHoriz />
-              </Button>
-            )}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={archive}>
-              <MdArchive /> Archive
-            </DropdownMenuItem>
+        {!readonly && (
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                {section.id < 0 ? (
+                  <Spinner className="mt-2" />
+                ) : (
+                  <Button variant="ghost" size="icon">
+                    <MdMoreHoriz />
+                  </Button>
+                )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={archive}>
+                  <MdArchive /> Archive
+                </DropdownMenuItem>
 
-            <DropdownMenuItem onClick={() => setDeleteModalOpen(true)}>
-              <MdDelete /> Delete Section
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DeleteSectionModal
-          opened={deleteModalOpen}
-          setOpened={setDeleteModalOpen}
-          projectId={projectId}
-          sectionId={section.id}
-          sectionName={section.name}
-        />
+                <DropdownMenuItem onClick={() => setDeleteModalOpen(true)}>
+                  <MdDelete /> Delete Section
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DeleteSectionModal
+              opened={deleteModalOpen}
+              setOpened={setDeleteModalOpen}
+              projectId={projectId}
+              sectionId={section.id}
+              sectionName={section.name}
+            />
+          </>
+        )}
       </SectionName>
       <div
         className={clsx(
@@ -175,9 +187,11 @@ const Section = ({
         )}
       >
         {sortByDueDate(section.tasks).map((task) => (
-          <TaskCard task={task} key={task.id} details />
+          <TaskCard task={task} key={task.id} details readonly={readonly} />
         ))}
-        <AddSectionTask projectId={projectId} sectionId={section.id} />
+        {!readonly && (
+          <AddSectionTask projectId={projectId} sectionId={section.id} />
+        )}
       </div>
     </div>
   );
@@ -190,6 +204,7 @@ const SectionName = ({
   projectId,
   archived,
   children,
+  disabled,
 }: {
   className?: string;
   id: number;
@@ -197,6 +212,7 @@ const SectionName = ({
   projectId: string;
   archived?: boolean;
   children: ReactNode;
+  disabled: boolean;
 }) => {
   const utils = trpc.useContext();
   const textField = useRef<HTMLInputElement | null>(null);
@@ -216,6 +232,7 @@ const SectionName = ({
         <Input
           type="text"
           ref={textField}
+          disabled={disabled}
           className={cn(
             "w-full px-2 font-semibold",
             archived && "text-muted-foreground line-through"

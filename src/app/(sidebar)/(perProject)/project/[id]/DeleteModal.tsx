@@ -32,8 +32,10 @@ export const DeleteModal = ({
   const deleteProject = async () => {
     await mutateAsync(projectId);
     utils.projects.list.invalidate();
+    utils.projects.listArchived.invalidate();
     router.push("/projects");
     toast.success("Project deleted!");
+    setOpened(false);
   };
 
   const [isCorrect, setCorrect] = useState(false);
