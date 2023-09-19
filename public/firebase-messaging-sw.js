@@ -24,6 +24,7 @@ const messaging = firebase.messaging();
 
 self.addEventListener("notificationclick", (event) => {
   const clickedNotification = event.notification;
+  console.log("Clicked notification:", clickedNotification);
   clickedNotification.close();
 
   const action = event.action;
@@ -36,10 +37,12 @@ self.addEventListener("notificationclick", (event) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify([{ json: { completed: true } }]),
+      body: JSON.stringify({
+        json: { id: clickedNotification.data.taskId, completed: true },
+      }),
     })
-      .then((res) => res.text())
-      .then((text) => console.log("Complete task returned response: ", text))
+      .then((res) => res.json())
+      .then((json) => console.log("Complete task returned response: ", json))
       .then(() => self.clients.openWindow(clickedNotification.data.url));
 
     event.waitUntil(promise);
