@@ -1,10 +1,9 @@
 "use client";
 
 import { AddSectionTask } from "@/components/task/AddTask";
-import { TaskCard } from "@/components/task/TaskCard";
-import { sortByDueDate } from "@/util/sort";
 import { trpc } from "@/util/trpc/trpc";
 import { ListSkeleton } from "./ListSkeleton";
+import { TaskList } from "./TaskList";
 
 export default function ListView({
   params: { id: projectId },
@@ -21,15 +20,11 @@ export default function ListView({
     return <ListSkeleton />;
   }
 
-  const tasks = sortByDueDate(
-    data.sections.flatMap((section) => section.tasks)
-  );
+  const tasks = data.sections.flatMap((section) => section.tasks);
 
   return (
     <section className="m-4 mx-auto flex w-full max-w-xl flex-col gap-4">
-      {tasks.map((task) => (
-        <TaskCard task={task} key={task.id} isListItem details />
-      ))}
+      <TaskList tasks={tasks} />
       <AddSectionTask projectId={projectId} />
     </section>
   );

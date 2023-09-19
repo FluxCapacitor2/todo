@@ -7,13 +7,11 @@ import toast from "react-hot-toast";
 
 const defaultTask = {
   completed: false,
-  createdAt: new Date(),
   dueDate: null,
   ownerId: "",
   parentTaskId: null,
   priority: 0,
   startDate: null,
-  updatedAt: new Date(),
   subTasks: [],
 };
 
@@ -39,6 +37,8 @@ export const useCreateTask = (projectId: string) => {
                 description: description ?? "",
                 dueDate,
                 projectId,
+                createdAt: new Date(),
+                updatedAt: new Date(),
               });
             }
           }
@@ -92,6 +92,8 @@ export const useCreateSubtask = (projectId: string, parentTaskId: number) => {
               description: description ?? "",
               dueDate,
               projectId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
             },
           ],
         };
