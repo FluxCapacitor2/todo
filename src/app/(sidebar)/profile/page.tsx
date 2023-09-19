@@ -34,6 +34,7 @@ export default function ProfilePage() {
               alt="Profile picture"
               unoptimized
               className="rounded-full"
+              priority
             />
             <div className="ml-2">
               <h1 className="text-3xl font-bold">{session.data!.user!.name}</h1>

@@ -13,6 +13,7 @@ export const useUpdateProject = (id: string) => {
       onSettled: () => {
         utils.projects.get.invalidate(id);
         utils.projects.list.invalidate();
+        utils.projects.listArchived.invalidate();
       },
     });
 

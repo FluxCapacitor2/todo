@@ -26,8 +26,8 @@ export default function ListView({
 
   return (
     <section className="m-4 mx-auto flex w-full max-w-xl flex-col gap-4">
-      <TaskList tasks={tasks} />
-      <AddSectionTask projectId={projectId} />
+      <TaskList tasks={tasks} readonly={data.archived} />
+      {!data.archived && <AddSectionTask projectId={projectId} />}
     </section>
   );
 }

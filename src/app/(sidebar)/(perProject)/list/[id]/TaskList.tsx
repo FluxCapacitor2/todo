@@ -16,11 +16,13 @@ import { Fragment } from "react";
 
 export const TaskList = ({
   tasks: inTasks,
+  readonly = false,
 }: {
   tasks: (Task & {
     project?: Pick<Project, "name">;
     section: Pick<Section, "name"> | null | undefined;
   })[];
+  readonly?: boolean;
 }) => {
   const groups = group(sortByDueDate(inTasks));
 
@@ -43,7 +45,7 @@ export const TaskList = ({
                   {task.section?.name}
                 </p>
               )}
-              <TaskCard task={task} isListItem details />
+              <TaskCard task={task} isListItem details readonly={readonly} />
             </div>
           ))}
         </Fragment>

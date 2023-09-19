@@ -123,6 +123,7 @@ const SidebarContents = ({
                   height={32}
                   className="rounded-full"
                   unoptimized
+                  priority
                 />
               )}
               <p>{session?.data?.user?.name}</p>
