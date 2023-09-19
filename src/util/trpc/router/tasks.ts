@@ -52,6 +52,17 @@ export const tasksRouter = (t: MyTrpc) =>
         return result.id;
       }),
     delete: t.procedure.input(z.number()).mutation(async ({ ctx, input }) => {
+      const task = await prisma.task.findFirst({
+        where: { id: input },
+        select: { project: { select: { archived: true } } },
+      });
+
+      if (!task) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      } else if (task.project.archived) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
       await deleteTask(input, ctx.session.id);
     }),
     update: t.procedure
@@ -108,8 +119,9 @@ export const tasksRouter = (t: MyTrpc) =>
             createdAt: input.createdAt,
             updatedAt: new Date(),
             completed: input.completed,
-            startDate: input.startDate ?? null,
-            dueDate: input.dueDate ?? null,
+            startDate:
+              input.startDate !== undefined ? input.startDate : undefined,
+            dueDate: input.dueDate !== undefined ? input.dueDate : undefined,
           },
         });
       }),
@@ -139,9 +151,25 @@ export const tasksRouter = (t: MyTrpc) =>
               },
             ],
           },
+          include: {
+            project: {
+              select: {
+                archived: true,
+              },
+            },
+            section: {
+              select: {
+                archived: true,
+              },
+            },
+          },
         });
         if (!task) {
           throw new TRPCError({ code: "NOT_FOUND" });
+        }
+
+        if (task.project.archived || task.section?.archived) {
+          throw new TRPCError({ code: "FORBIDDEN" });
         }
 
         const result = await prisma.task.create({
@@ -213,6 +241,9 @@ export const tasksRouter = (t: MyTrpc) =>
               section: {
                 archived: false,
               },
+              project: {
+                archived: false,
+              },
             },
           },
           take: 20,
@@ -240,6 +271,9 @@ export const tasksRouter = (t: MyTrpc) =>
               },
             ],
             section: {
+              archived: false,
+            },
+            project: {
               archived: false,
             },
             parentTaskId: null,

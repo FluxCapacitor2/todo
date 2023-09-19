@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { trpc } from "@/util/trpc/trpc";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Badge } from "../ui/badge";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -36,6 +37,9 @@ export const ViewSelector = ({
       ) : (
         <h1 className="mb-2 flex items-center gap-2 text-2xl font-bold">
           {project?.name}
+          {project?.archived === true && (
+            <Badge variant="outline">Archived</Badge>
+          )}
           <ProjectMenu id={id} />
         </h1>
       )}

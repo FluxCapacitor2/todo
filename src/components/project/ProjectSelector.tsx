@@ -7,7 +7,7 @@ import { Checkbox } from "../ui/checkbox";
 export const ProjectSelector = ({
   children,
 }: {
-  children: (included: Project[] | undefined) => ReactNode;
+  children: (included: Omit<Project, "archived">[] | undefined) => ReactNode;
 }) => {
   const { data: projects } = trpc.projects.list.useQuery(undefined, {
     refetchInterval: 60_000 * 10, // 10 minutes

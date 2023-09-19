@@ -44,34 +44,64 @@ const sendNotifications = async () => {
           dueDate: true,
           id: true,
         },
+        include: {
+          project: {
+            select: {
+              archived: true,
+            },
+          },
+        },
       },
     },
   });
 
   if (reminders.length > 0) {
-    const messages = reminders.flatMap((notif) => {
-      const tokens = notif.user.notificationTokens.map((it) => it.token);
-      return tokens.map((token) => ({
-        notification: {
-          title: notif.Task.name,
-          body: notif.Task.dueDate
-            ? `⏰ Due ${formatDistanceToNow(notif.Task.dueDate, {
-                addSuffix: true,
-              })}.`
-            : "🔔 You set a reminder for this task.",
-        },
-        webpush: {
+    const messages = reminders
+      .flatMap((notif) => {
+        if (notif.Task.project.archived) {
+          return undefined;
+        }
+
+        const taskLink = `https://todo.bswanson.dev/project/${notif.projectId}/${notif.Task.id}`;
+
+        const tokens = notif.user.notificationTokens.map((it) => it.token);
+        return tokens.map((token) => ({
           notification: {
-            icon: "https://todo.bswanson.dev/icon.png",
-            click_action: `https://todo.bswanson.dev/project/${notif.projectId}/${notif.Task.id}`,
+            title: notif.Task.name,
+            body: notif.Task.dueDate
+              ? `⏰ Due ${formatDistanceToNow(notif.Task.dueDate, {
+                  addSuffix: true,
+                })}.`
+              : "🔔 You set a reminder for this task.",
           },
-        },
-        data: {
-          id: notif.id.toString(),
-        },
-        token,
-      }));
-    });
+          webpush: {
+            notification: {
+              icon: "https://todo.bswanson.dev/icon.png",
+              click_action: taskLink,
+              actions: [
+                {
+                  action: "complete",
+                  title: "Complete",
+                },
+              ],
+              tag: `todo-task-${notif.Task.id}`,
+              timestamp: notif.time.getTime(),
+              renotify: true,
+            },
+            fcm_options: {
+              link: taskLink,
+            },
+          },
+          data: {
+            id: notif.id.toString(),
+            url: url,
+            projectId: notif.projectId,
+            taskId: notif.Task.id,
+          },
+          token,
+        }));
+      })
+      .filter((it) => it !== undefined);
 
     if (messages.length === 0) return;
 

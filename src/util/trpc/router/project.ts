@@ -20,6 +20,7 @@ export const projectsRouter = (t: MyTrpc) =>
               },
             },
           ],
+          archived: false,
         },
         select: {
           id: true,
@@ -41,6 +42,27 @@ export const projectsRouter = (t: MyTrpc) =>
               archived: false,
             },
           },
+        },
+      });
+    }),
+    listArchived: t.procedure.query(async ({ ctx }) => {
+      return await prisma.project.findMany({
+        where: {
+          OR: [
+            { ownerId: ctx.session.id },
+            {
+              collaborators: {
+                some: {
+                  userId: ctx.session.id,
+                },
+              },
+            },
+          ],
+          archived: true,
+        },
+        select: {
+          name: true,
+          id: true,
         },
       });
     }),
@@ -104,6 +126,30 @@ export const projectsRouter = (t: MyTrpc) =>
           },
         });
         return id;
+      }),
+    update: t.procedure
+      .input(
+        z
+          .object({
+            name: z.string().nonempty().max(100),
+            archived: z.boolean(),
+          })
+          .partial()
+          .extend({
+            id: z.string().nonempty(),
+          })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await prisma.project.update({
+          where: {
+            id: input.id,
+            ownerId: ctx.session.id,
+          },
+          data: {
+            name: input.name,
+            archived: input.archived,
+          },
+        });
       }),
     delete: t.procedure.input(z.string()).mutation(async ({ ctx, input }) => {
       const project = await prisma.project.findFirst({
