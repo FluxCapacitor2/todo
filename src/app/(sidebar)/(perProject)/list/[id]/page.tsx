@@ -20,7 +20,9 @@ export default function ListView({
     return <ListSkeleton />;
   }
 
-  const tasks = data.sections.flatMap((section) => section.tasks);
+  const tasks = data.sections.flatMap((section) =>
+    section.tasks.map((task) => ({ ...task, section }))
+  );
 
   return (
     <section className="m-4 mx-auto flex w-full max-w-xl flex-col gap-4">

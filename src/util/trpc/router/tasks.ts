@@ -249,7 +249,13 @@ export const tasksRouter = (t: MyTrpc) =>
         include: {
           section: {
             select: {
+              name: true,
               projectId: true,
+            },
+          },
+          project: {
+            select: {
+              name: true,
             },
           },
         },
