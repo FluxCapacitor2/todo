@@ -1,6 +1,6 @@
 import { Task } from "@prisma/client";
 
-export function sortByDueDate<T extends Task[]>(tasks: T) {
+export function sortByDueDate<T extends Task>(tasks: T[]): T[] {
   const tasksWithDueDate = tasks.filter((task) => task.dueDate !== null);
   const tasksWithoutDueDate = tasks.filter((task) => task.dueDate === null);
 
