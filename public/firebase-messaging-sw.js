@@ -37,3 +37,29 @@ messaging.onBackgroundMessage(function (payload) {
 
   // self.registration.showNotification(notificationTitle, notificationOptions);
 });
+
+self.addEventListener("notificationclick", (event) => {
+  const clickedNotification = event.notification;
+  clickedNotification.close();
+
+  const action = event.action;
+
+  if (action === "complete") {
+    // Complete the task
+
+    const promise = fetch(`/api/trpc/tasks.update`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify([{ json: { completed: true } }]),
+    })
+      .then((res) => res.text())
+      .then((text) => console.log("Complete task returned response: ", text));
+
+    event.waitUntil(promise);
+  } else {
+    // If no action was selected, open the task in a new tab/window
+    event.waitUntil(self.clients.openWindow(clickedNotification.data.url));
+  }
+});

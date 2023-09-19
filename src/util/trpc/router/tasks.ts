@@ -119,8 +119,9 @@ export const tasksRouter = (t: MyTrpc) =>
             createdAt: input.createdAt,
             updatedAt: new Date(),
             completed: input.completed,
-            startDate: input.startDate ?? null,
-            dueDate: input.dueDate ?? null,
+            startDate:
+              input.startDate !== undefined ? input.startDate : undefined,
+            dueDate: input.dueDate !== undefined ? input.dueDate : undefined,
           },
         });
       }),
