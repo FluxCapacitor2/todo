@@ -28,6 +28,8 @@ self.addEventListener("notificationclick", (event) => {
   clickedNotification.close();
 
   const action = event.action;
+  const data = clickedNotification.data.FCM_MSG.data;
+  console.log("Data:", data);
 
   if (action === "complete") {
     // Complete the task
@@ -38,17 +40,17 @@ self.addEventListener("notificationclick", (event) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        json: { id: clickedNotification.data.taskId, completed: true },
+        json: { id: data.taskId, completed: true },
       }),
     })
       .then((res) => res.json())
       .then((json) => console.log("Complete task returned response: ", json))
-      .then(() => self.clients.openWindow(clickedNotification.data.url));
+      .then(() => self.clients.openWindow(data.url));
 
     event.waitUntil(promise);
   } else {
     // If no action was selected, open the task in a new tab/window
-    event.waitUntil(self.clients.openWindow(clickedNotification.data.url));
+    event.waitUntil(self.clients.openWindow(data.url));
   }
 });
 
