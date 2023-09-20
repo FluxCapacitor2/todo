@@ -22,6 +22,10 @@ firebase.initializeApp({
 // messages.
 const messaging = firebase.messaging();
 
+self.addEventListener("push", (event) => {
+  console.log("Push event received!", event);
+});
+
 self.addEventListener("notificationclick", (event) => {
   const clickedNotification = event.notification;
   console.log("Clicked notification:", clickedNotification);
@@ -40,7 +44,7 @@ self.addEventListener("notificationclick", (event) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        json: { id: data.taskId, completed: true },
+        json: { id: parseInt(data.taskId), completed: true },
       }),
     })
       .then((res) => res.json())
