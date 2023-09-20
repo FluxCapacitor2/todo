@@ -247,10 +247,10 @@ const ProjectItem = ({
           {isCollaborator && (
             <MdGroups className="inline fill-gray-700 dark:fill-gray-300" />
           )}
-          <div className="mr-auto inline-block h-0 opacity-0 transition-opacity group-hover:opacity-100">
-            <ProjectMenu id={id} />
-          </div>
         </p>
+        <div className="inline-block opacity-0 transition-opacity group-hover:opacity-100">
+          <ProjectMenu id={id} />
+        </div>
       </div>
     </Link>
   );
