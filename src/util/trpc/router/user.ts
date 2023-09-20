@@ -6,7 +6,7 @@ import { MyTrpc } from "../trpc-router";
 export const userRouter = (t: MyTrpc) =>
   t.router({
     addNotifToken: t.procedure
-      .input(z.string())
+      .input(z.object({ token: z.string(), userAgent: z.string() }))
       .mutation(async ({ input, ctx }) => {
         await prisma.user.update({
           where: {
@@ -16,11 +16,12 @@ export const userRouter = (t: MyTrpc) =>
             notificationTokens: {
               upsert: {
                 create: {
-                  token: input,
+                  token: input.token,
+                  userAgent: input.userAgent,
                 },
                 update: {},
                 where: {
-                  token: input,
+                  token: input.token,
                 },
               },
             },

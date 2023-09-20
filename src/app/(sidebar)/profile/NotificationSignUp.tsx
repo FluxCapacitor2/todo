@@ -35,7 +35,10 @@ const component = () => {
     const permission = await Notification.requestPermission();
     if (permission == "granted") {
       console.log(token);
-      await addAsync(token!);
+      await addAsync({
+        token: token!,
+        userAgent: navigator.userAgent ?? "Unknown",
+      });
       utils.user.getNotifTokens.invalidate();
     }
   };

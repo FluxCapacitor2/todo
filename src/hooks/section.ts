@@ -21,6 +21,7 @@ export const useCreateSection = (projectId: string) => {
               projectId,
               tasks: [],
               archived: false,
+              createdAt: new Date(),
             },
           ],
         };
@@ -78,6 +79,7 @@ export const useUpdateSection = (projectId: string) => {
               name: originalData!.name,
               _count: { tasks: 0 },
               projectId,
+              createdAt: new Date(),
             });
           } else if (archived === false) {
             sections = sections?.filter((section) => section.id !== id);
@@ -113,6 +115,7 @@ export const useUpdateSection = (projectId: string) => {
               name: context.originalData!.name,
               _count: { tasks: 0 },
               projectId,
+              createdAt: new Date(),
             });
           }
         });

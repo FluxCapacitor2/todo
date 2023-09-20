@@ -43,6 +43,7 @@ model User {
   email               String?             @unique
   emailVerified       DateTime?
   image               String?
+  createdAt           DateTime            @default(now())
   accounts            Account[]
   projects            Project[]
   sessions            Session[]
@@ -57,10 +58,11 @@ model User {
 }
 
 model TimePreset {
-  id     Int     @id @default(autoincrement())
-  time   Int
-  User   User?   @relation(fields: [userId], references: [id])
-  userId String?
+  id        Int      @id @default(autoincrement())
+  time      Int
+  createdAt DateTime @default(now())
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    String?
 
   @@index([userId])
 }
@@ -96,6 +98,7 @@ model Collaborator {
   Project   Project? @relation(fields: [projectId], references: [id])
   projectId String?
   role      Role
+  joinedAt  DateTime @default(now())
 
   @@index([userId])
   @@index([projectId])
@@ -110,6 +113,7 @@ model NotificationToken {
   id          String   @id @default(cuid())
   token       String   @unique
   generatedAt DateTime @default(now())
+  userAgent   String
   User        User?    @relation(fields: [userId], references: [id])
   userId      String?
 
@@ -134,17 +138,19 @@ model Project {
   sections      Section[]
   invitations   Invitation[]
   Task          Task[]
+  createdAt     DateTime       @default(now())
 
   @@index([ownerId])
 }
 
 model Section {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
   projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   tasks     Task[]
-  archived  Boolean @default(false)
+  archived  Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   @@index([projectId])
   @@index([archived])
@@ -187,6 +193,7 @@ model Reminder {
   taskId    Int
   projectId String
   time      DateTime
+  createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([taskId])
@@ -194,8 +201,9 @@ model Reminder {
 }
 
 model Label {
-  id    String @id @default(cuid())
-  name  String
-  color String
-  tasks Task[] @relation("LabelToTask")
+  id        String   @id @default(cuid())
+  name      String
+  color     String
+  createdAt DateTime @default(now())
+  tasks     Task[]   @relation("LabelToTask")
 }

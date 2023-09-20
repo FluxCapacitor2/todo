@@ -4,6 +4,7 @@ import type { Project, Section, Task } from "@prisma/client";
 import {
   addMonths,
   addWeeks,
+  endOfToday,
   endOfTomorrow,
   isBefore,
   startOfMonth,
@@ -65,6 +66,10 @@ const group = <T extends Task>(tasks: T[]): Record<string, T[]> =>
 
     if (date < now) {
       return "Overdue";
+    }
+
+    if (isBefore(date, endOfToday())) {
+      return "Today";
     }
 
     if (isBefore(date, endOfTomorrow())) {
