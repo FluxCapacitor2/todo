@@ -121,19 +121,19 @@ export const sectionsRouter = (t: MyTrpc) =>
 /**
  * Deletes a section, removing any tasks/sub-tasks in the process.
  */
-export async function deleteSection(id: number, ownerId: string) {
+export async function deleteSection(id: number, userId: string) {
   const section = await prisma.section.findFirst({
     where: {
       id,
       project: {
         OR: [
           {
-            ownerId: ownerId,
+            ownerId: userId,
           },
           {
             collaborators: {
               some: {
-                userId: ownerId,
+                userId: userId,
                 role: Role.EDITOR,
               },
             },
@@ -153,7 +153,7 @@ export async function deleteSection(id: number, ownerId: string) {
 
   for (const task of section?.tasks ?? []) {
     if (task.subTasks.length > 0 || task.reminders.length > 0) {
-      await deleteTask(task.id, ownerId);
+      await deleteTask(task.id, userId);
     }
   }
 

@@ -302,7 +302,7 @@ export const tasksRouter = (t: MyTrpc) =>
  */
 export async function deleteTask(
   id: number,
-  ownerId: string,
+  userId: string,
   depth: number = 0
 ) {
   if (depth > 8) {
@@ -315,7 +315,18 @@ export async function deleteTask(
     const task = await tx.task.findFirst({
       where: {
         id,
-        ownerId,
+        OR: [
+          { ownerId: userId },
+          {
+            project: {
+              collaborators: {
+                some: {
+                  userId: userId,
+                },
+              },
+            },
+          },
+        ],
       },
       include: {
         subTasks: {
@@ -339,7 +350,7 @@ export async function deleteTask(
     });
 
     await Promise.all(
-      task.subTasks.map((subTask) => deleteTask(subTask.id, ownerId, depth + 1))
+      task.subTasks.map((subTask) => deleteTask(subTask.id, userId, depth + 1))
     );
 
     return await tx.task.delete({
