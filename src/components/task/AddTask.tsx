@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { useCreateSubtask, useCreateTask } from "@/hooks/task";
+import { graphql } from "@/gql";
 import { cn, shortDateFormat } from "@/lib/utils";
-import { trpc } from "@/util/trpc/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { isAfter } from "date-fns";
@@ -9,6 +8,7 @@ import { CalendarIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdAdd, MdCancel, MdSend } from "react-icons/md";
+import { useMutation, useQuery } from "urql";
 import { z } from "zod";
 import { DatePickerPopover } from "../ui/DatePickerPopover";
 import {
@@ -30,6 +30,56 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 
+const CreateTaskMutation = graphql(`
+  mutation createTask(
+    $sectionId: Int!
+    $name: String!
+    $description: String
+    $dueDate: DateTime
+  ) {
+    createTask(
+      sectionId: $sectionId
+      name: $name
+      description: $description
+      dueDate: $dueDate
+    ) {
+      id
+      sectionId
+      parentTaskId
+      projectId
+      name
+      description
+      completed
+      subtaskCounts
+    }
+  }
+`);
+
+const CreateSubTaskMutation = graphql(`
+  mutation createSubTask(
+    $parentTaskId: Int!
+    $name: String!
+    $description: String
+    $dueDate: DateTime
+  ) {
+    createSubTask(
+      parentTaskId: $parentTaskId
+      name: $name
+      description: $description
+      dueDate: $dueDate
+    ) {
+      id
+      sectionId
+      parentTaskId
+      projectId
+      name
+      description
+      completed
+      subtaskCounts
+    }
+  }
+`);
+
 export const AddSectionTask = ({
   sectionId,
   projectId,
@@ -37,7 +87,7 @@ export const AddSectionTask = ({
   sectionId?: number;
   projectId: string;
 }) => {
-  const { createTask } = useCreateTask(projectId);
+  const [_createTaskStatus, createTask] = useMutation(CreateTaskMutation);
 
   return (
     <AddTask
@@ -57,15 +107,17 @@ export const AddSubtask = ({
   projectId: string;
   parentTaskId: number;
 }) => {
-  const { createSubtask } = useCreateSubtask(projectId, parentTaskId);
+  const [_createSubTaskStatus, createSubTask] = useMutation(
+    CreateSubTaskMutation
+  );
 
   return (
     <AddTask
       sectionEditable={false}
       projectId={projectId}
       onAdd={({ name, description, dueDate }) =>
-        createSubtask({
-          id: parentTaskId,
+        createSubTask({
+          parentTaskId,
           name,
           description,
           dueDate,
@@ -89,6 +141,21 @@ const FormSchema = (sectionEditable: boolean) =>
       : z.optional(z.any()),
   });
 
+const SectionsListQuery = graphql(`
+  query getSections($projectId: String!) {
+    me {
+      id
+      project(id: $projectId) {
+        id
+        sections {
+          id
+          name
+        }
+      }
+    }
+  }
+`);
+
 const AddTask = ({
   onAdd,
   projectId,
@@ -105,17 +172,21 @@ const AddTask = ({
     description: string;
     sectionId: number | null;
     dueDate: Date | null;
-  }) => Promise<number>;
+  }) => void;
   projectId: string;
   section?: number;
   sectionEditable?: boolean;
 }) => {
-  const { data, isLoading, isError } = trpc.projects.get.useQuery(projectId, {
-    refetchInterval: 60_000,
-  });
-
   const [popoverShown, setPopoverShown] = useState(false);
   const [dueDate, setDueDate] = useState<Date | null>(null);
+
+  const [{ data }] = useQuery({
+    query: SectionsListQuery,
+    variables: { projectId },
+    pause: !popoverShown,
+  });
+
+  const sections = data?.me?.project?.sections;
 
   const newTask = async ({
     name,
@@ -198,7 +269,7 @@ const AddTask = ({
                           <SelectValue placeholder="Choose a section..." />
                         </SelectTrigger>
                         <SelectContent>
-                          {data?.sections.map((section) => (
+                          {sections?.map((section) => (
                             <SelectItem
                               key={section.id}
                               value={section.id.toString()}

@@ -1,42 +1,60 @@
+import { graphql } from "@/gql";
 import {
   combineDateAndTime,
   extractTimeFromDate,
   formatTimeInSeconds,
 } from "@/lib/utils";
-import { trpc } from "@/util/trpc/trpc";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { useRouter } from "next/navigation";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { MdAddBox, MdClear, MdClose } from "react-icons/md";
+import { useQuery } from "urql";
 import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { Input } from "./input";
 import { Label } from "./label";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
+export const GetTimePresetsQuery = graphql(`
+  query getTimePresets {
+    me {
+      id
+      timePresets {
+        id
+        time
+      }
+    }
+  }
+`);
+
 export const DatePickerPopover = ({
   date: inDate,
   setDate: confirm,
   children,
 }: {
-  date: Date | null;
+  date: Date | null | undefined;
   setDate: (arg0: Date | null) => void;
   children: ReactNode;
 }) => {
-  const {
-    data: timePresets,
-    isLoading,
-    isError,
-  } = trpc.user.getTimePresets.useQuery();
+  const [{ data, fetching }] = useQuery({ query: GetTimePresetsQuery });
+  const timePresets = data?.me?.timePresets;
 
   const defaultTime = inDate ? extractTimeFromDate(inDate) : 0;
 
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState<Date | null>(inDate);
+  const [date, setDate] = useState<Date | null | undefined>(inDate);
   const [time, setTime] = useState<number>(defaultTime);
   const [timePickerOpen, setTimePickerOpen] = useState(false);
 
   const router = useRouter();
+
+  useEffect(() => {
+    setDate(inDate);
+  }, [inDate]);
+
+  if (date === undefined) {
+    return <>{children}</>;
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

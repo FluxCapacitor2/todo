@@ -1,12 +1,41 @@
 "use client";
 
 import { ProjectSelector } from "@/components/project/ProjectSelector";
-import { trpc } from "@/util/trpc/trpc";
+import { graphql } from "@/gql";
+import { useQuery } from "urql";
 import { ListSkeleton } from "../(perProject)/list/[id]/ListSkeleton";
 import { TaskList } from "../(perProject)/list/[id]/TaskList";
 
+const GetTasksQuery = graphql(`
+  query getTasks {
+    me {
+      id
+      tasks {
+        id
+        name
+        description
+        completed
+        section {
+          id
+          name
+          archived
+        }
+        projectId
+        dueDate
+        startDate
+        createdAt
+        project {
+          id
+          name
+        }
+      }
+    }
+  }
+`);
+
 export default function Page() {
-  const { data, isLoading, isError } = trpc.tasks.listTopLevel.useQuery();
+  const [{ data, fetching }] = useQuery({ query: GetTasksQuery });
+  const tasks = data?.me?.tasks;
 
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-4 p-2">
@@ -14,14 +43,20 @@ export default function Page() {
       <ProjectSelector>
         {(included) => {
           const filtered = data
-            ? data.filter((task) =>
-                included?.some((it) => it.id === task.projectId)
-              )
+            ? tasks
+                ?.filter((task) =>
+                  included?.some((it) => it.id === task.projectId)
+                )
+                ?.map((task) => ({
+                  ...task,
+                  dueDate: task.dueDate ?? null,
+                  startDate: task.startDate ?? null,
+                }))
             : undefined;
 
           return (
             <>
-              {isLoading || !filtered ? (
+              {fetching || !filtered ? (
                 <ListSkeleton />
               ) : (
                 <TaskList tasks={filtered} />

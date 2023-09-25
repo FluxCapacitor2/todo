@@ -1,22 +1,38 @@
 "use client";
 
+import { UpdateProjectMutation } from "@/app/queries";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
-import { useUpdateProject } from "@/hooks/project";
-import { trpc } from "@/util/trpc/trpc";
-import { Project } from "@prisma/client";
+import { graphql } from "@/gql";
+import { Project } from "@/gql/graphql";
+import { RequireOf } from "@/lib/utils";
 import Link from "next/link";
 import { useState } from "react";
 import { MdDelete, MdUnarchive } from "react-icons/md";
+import { useMutation, useQuery } from "urql";
 import { DeleteModal } from "../../(perProject)/project/[id]/DeleteModal";
 
+const GetArchivedProjectsQuery = graphql(`
+  query getArchivedProjects {
+    me {
+      id
+      projects(archived: true) {
+        id
+        name
+        archived
+      }
+    }
+  }
+`);
+
 export default function Page() {
-  const { data: projects, isLoading } = trpc.projects.listArchived.useQuery();
+  const [{ data, fetching }] = useQuery({ query: GetArchivedProjectsQuery });
+  const projects = data?.me?.projects;
 
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-4 p-2">
       <h1 className="text-3xl font-bold">Archived Projects</h1>
-      {isLoading ? (
+      {fetching ? (
         <Spinner />
       ) : projects?.length ?? 0 > 0 ? (
         <div className="flex flex-col gap-4">
@@ -36,9 +52,11 @@ export default function Page() {
 const ArchivedProjectCard = ({
   project,
 }: {
-  project: Pick<Project, "id" | "name">;
+  project: RequireOf<Project, "id" | "name">;
 }) => {
-  const { updateProject, isMutating } = useUpdateProject(project.id);
+  const [updateProjectStatus, updateProject] = useMutation(
+    UpdateProjectMutation
+  );
 
   const [opened, setOpened] = useState(false);
 
@@ -56,8 +74,8 @@ const ArchivedProjectCard = ({
           <Button variant="secondary">View</Button>
         </Link>
         <Button
-          onClick={() => updateProject({ archived: false })}
-          disabled={isMutating}
+          onClick={() => updateProject({ id: project.id, archived: false })}
+          disabled={updateProjectStatus.fetching}
         >
           <MdUnarchive />
           Unarchive

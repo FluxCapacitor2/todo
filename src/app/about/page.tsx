@@ -2,12 +2,12 @@ import { TopNav } from "@/components/global/TopNav";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import {
+  SiGraphql,
   SiNextdotjs,
   SiPlanetscale,
   SiPrisma,
   SiReact,
   SiTailwindcss,
-  SiTrpc,
   SiVercel,
 } from "react-icons/si";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
@@ -59,8 +59,19 @@ export default async function Page() {
               <tr>
                 <td>API</td>
                 <td>
-                  <SiTrpc className="mr-2 inline h-4 w-4 fill-[#2596BE]" />
-                  <Link href="https://trpc.io/">tRPC</Link>
+                  <SiGraphql className="mr-2 inline h-4 w-4 fill-[#E10098]" />
+                  <Link href="https://the-guild.dev/graphql/yoga-server">
+                    GraphQL Yoga
+                  </Link>
+                </td>
+              </tr>
+              <tr>
+                <td>API Client</td>
+                <td>
+                  <SiGraphql className="mr-2 inline h-4 w-4 fill-[#E10098]" />
+                  <Link href="https://formidable.com/open-source/urql/">
+                    urql
+                  </Link>
                 </td>
               </tr>
               <tr>

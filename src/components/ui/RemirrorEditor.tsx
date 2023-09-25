@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Remirror, useRemirror } from "@remirror/react";
+import { useEffect } from "react";
 import {
   BlockquoteExtension,
   BoldExtension,
@@ -49,6 +50,10 @@ export const RemirrorEditor = ({
     content: initialContent,
     stringHandler: "markdown",
   });
+
+  useEffect(() => {
+    getContext()!.setContent(initialContent);
+  }, [initialContent]);
 
   const save = async () => {
     const markdown = getContext()!.helpers.getMarkdown();

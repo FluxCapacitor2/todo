@@ -3,7 +3,6 @@
 import { DeleteSectionModal } from "@/components/project/DeleteSectionModal";
 import { AddSectionTask } from "@/components/task/AddTask";
 import { TaskCard } from "@/components/task/TaskCard";
-import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,13 +14,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCreateSection, useUpdateSection } from "@/hooks/section";
-import { cn } from "@/lib/utils";
+import { Section, Task } from "@/gql/graphql";
+import { RequireOf, cn } from "@/lib/utils";
 import { sortByDueDate } from "@/util/sort";
-import { trpc } from "@/util/trpc/trpc";
-import { Section, Task } from "@prisma/client";
 import clsx from "clsx";
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import {
   MdArchive,
@@ -30,18 +27,25 @@ import {
   MdEdit,
   MdMoreHoriz,
 } from "react-icons/md";
+import { useMutation, useQuery } from "urql";
+import {
+  CreateSectionMutation,
+  GetProjectQuery,
+  UpdateSectionMutation,
+} from "../../../../queries";
 
 export default function ProjectView({
   params: { id: projectId },
 }: {
   params: { id: string };
 }) {
-  const { data } = trpc.projects.get.useQuery(projectId, {
-    useErrorBoundary: true,
-    refetchInterval: 30_000,
+  const [{ data, fetching }] = useQuery({
+    query: GetProjectQuery,
+    variables: { id: projectId },
   });
+  const project = data?.me?.project;
 
-  if (!data) {
+  if (!data || fetching) {
     // Loading UI (skeleton)
     return <ProjectSkeleton />;
   }
@@ -49,15 +53,24 @@ export default function ProjectView({
   return (
     <div className="h-full max-h-full snap-x snap-mandatory overflow-scroll lg:snap-none">
       <div className="ml-2 flex w-max">
-        {data.sections.map((section) => (
+        {project?.sections?.map((section) => (
           <Section
             key={section.id}
-            section={section}
-            projectId={data.id}
-            readonly={data.archived}
+            section={{
+              ...section,
+              tasks: section.tasks.map((it) => ({
+                ...it,
+                dueDate: it.dueDate ?? null,
+                startDate: it.startDate ?? null,
+              })),
+            }}
+            projectId={project.id}
+            readonly={project.archived}
           />
         ))}
-        {!data.archived && <NewSection projectId={data.id} />}
+        {project !== undefined && !project.archived && (
+          <NewSection projectId={project.id} />
+        )}
       </div>
     </div>
   );
@@ -115,14 +128,28 @@ const Section = ({
   projectId,
   readonly,
 }: {
-  section: Section & { tasks: Task[] };
+  section: Omit<RequireOf<Section, "id">, "tasks"> & {
+    tasks: RequireOf<
+      Task,
+      | "id"
+      | "dueDate"
+      | "createdAt"
+      | "completed"
+      | "description"
+      | "name"
+      | "projectId"
+      | "startDate"
+    >[];
+  };
   projectId: string;
   readonly: boolean;
 }) => {
-  const { updateSection } = useUpdateSection(projectId);
+  const [updateSectionStatus, updateSection] = useMutation(
+    UpdateSectionMutation
+  );
 
   const archive = () =>
-    updateSection({ id: section.id, archived: true })
+    updateSection({ id: parseInt(section.id), archived: true })
       .catch((err) => {
         toast.error("There was a problem archiving that section!");
       })
@@ -134,17 +161,13 @@ const Section = ({
 
   return (
     <div
-      className={cn(
-        "mr-4 flex w-80 snap-center flex-col rounded-lg",
-        section.id < 0 && "pointer-events-none"
-      )}
+      className={cn("mr-4 flex w-80 snap-center flex-col rounded-lg")}
       key={section.id}
     >
       <SectionName
         className="sticky top-0"
-        id={section.id}
-        initialName={section.name}
-        projectId={projectId}
+        id={parseInt(section.id)}
+        initialName={section.name ?? ""}
         archived={section.archived}
         disabled={readonly}
       >
@@ -152,13 +175,9 @@ const Section = ({
           <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                {section.id < 0 ? (
-                  <Spinner className="mt-2" />
-                ) : (
-                  <Button variant="ghost" size="icon">
-                    <MdMoreHoriz />
-                  </Button>
-                )}
+                <Button variant="ghost" size="icon">
+                  <MdMoreHoriz />
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={archive}>
@@ -174,8 +193,8 @@ const Section = ({
               opened={deleteModalOpen}
               setOpened={setDeleteModalOpen}
               projectId={projectId}
-              sectionId={section.id}
-              sectionName={section.name}
+              sectionId={parseInt(section.id)}
+              sectionName={section.name ?? ""}
             />
           </>
         )}
@@ -190,7 +209,10 @@ const Section = ({
           <TaskCard task={task} key={task.id} details readonly={readonly} />
         ))}
         {!readonly && (
-          <AddSectionTask projectId={projectId} sectionId={section.id} />
+          <AddSectionTask
+            projectId={projectId}
+            sectionId={parseInt(section.id)}
+          />
         )}
       </div>
     </div>
@@ -201,7 +223,6 @@ const SectionName = ({
   className,
   id,
   initialName,
-  projectId,
   archived,
   children,
   disabled,
@@ -209,16 +230,21 @@ const SectionName = ({
   className?: string;
   id: number;
   initialName: string;
-  projectId: string;
   archived?: boolean;
   children: ReactNode;
   disabled: boolean;
 }) => {
-  const utils = trpc.useContext();
   const textField = useRef<HTMLInputElement | null>(null);
-  const { updateSection } = useUpdateSection(projectId);
+
+  const [_updateSectionStatus, updateSection] = useMutation(
+    UpdateSectionMutation
+  );
 
   const [name, setName] = useState(initialName);
+
+  useEffect(() => {
+    setName(initialName);
+  }, [initialName]);
 
   return (
     <div className={cn("group relative w-full", className)}>
@@ -249,7 +275,6 @@ const SectionName = ({
                 return;
               }
               await updateSection({ id, name });
-              utils.projects.get.invalidate(projectId);
             }
           }}
         />
@@ -260,18 +285,24 @@ const SectionName = ({
 };
 
 const NewSection = ({ projectId }: { projectId: string }) => {
-  const { createSection } = useCreateSection(projectId);
+  const [createSectionStatus, createSection] = useMutation(
+    CreateSectionMutation
+  );
 
   const newSection = async () => {
     await createSection({
       projectId,
-      name: "New Section",
     });
   };
 
   return (
     <div className="mr-4 flex w-80 shrink-0 snap-center flex-col rounded-lg">
-      <Button variant="secondary" onClick={newSection} className="sticky top-0">
+      <Button
+        variant="secondary"
+        onClick={newSection}
+        className="sticky top-0"
+        disabled={createSectionStatus.fetching}
+      >
         <MdEdit />
         New Section
       </Button>

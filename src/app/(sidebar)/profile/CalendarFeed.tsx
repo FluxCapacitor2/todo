@@ -3,30 +3,44 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/Spinner";
+import { graphql } from "@/gql";
 import { cn, getBaseURL } from "@/lib/utils";
-import { trpc } from "@/util/trpc/trpc";
 import { MdRefresh } from "react-icons/md";
+import { useMutation, useQuery } from "urql";
+
+const GetApiTokenQuery = graphql(`
+  query getApiToken {
+    me {
+      id
+      apiToken {
+        id
+      }
+    }
+  }
+`);
+
+const RerollTokenMutation = graphql(`
+  mutation rerollApiToken($id: String!) {
+    rerollApiToken(id: $id) {
+      id
+    }
+  }
+`);
 
 export const CalendarFeed = () => {
-  const utils = trpc.useContext();
-  const { data: apiToken, isLoading } = trpc.user.getApiToken.useQuery(
-    undefined,
-    { refetchInterval: false, staleTime: Infinity }
-  );
+  const [{ data, fetching }] = useQuery({ query: GetApiTokenQuery });
+  const apiToken = data?.me?.apiToken;
 
-  const { mutateAsync: rotate, isLoading: rotating } =
-    trpc.user.invalidateApiToken.useMutation({
-      onSettled: () => utils.user.getApiToken.refetch(),
-    });
+  const [rotateStatus, rotate] = useMutation(RerollTokenMutation);
 
   return (
     <div className="flex gap-2">
       <Input
         type="text"
         readOnly
-        disabled={isLoading}
+        disabled={fetching}
         value={
-          isLoading
+          fetching
             ? "Loading..."
             : getBaseURL() + "/api/calendar/" + apiToken?.id
         }
@@ -35,13 +49,13 @@ export const CalendarFeed = () => {
       <Button
         variant="secondary"
         title="Get a new link"
-        onClick={() => rotate(apiToken!.id)}
-        disabled={isLoading || rotating}
+        onClick={() => rotate({ id: apiToken!.id })}
+        disabled={fetching || rotateStatus.fetching}
       >
-        {isLoading ? (
+        {fetching ? (
           <Spinner />
         ) : (
-          <MdRefresh className={cn(rotating && "animate-spin")} />
+          <MdRefresh className={cn(rotateStatus.fetching && "animate-spin")} />
         )}
       </Button>
     </div>

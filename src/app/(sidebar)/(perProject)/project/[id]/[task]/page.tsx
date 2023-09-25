@@ -1,10 +1,10 @@
 "use client";
 
-import { TaskModal } from "@/components/task/TaskModal";
+import { GetTaskQuery, TaskModal } from "@/components/task/TaskModal";
 import { TaskProvider } from "@/components/task/TaskProvider";
-import { trpc } from "@/util/trpc/trpc";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { useQuery } from "urql";
 import ProjectView from "../page";
 
 export default function Page({
@@ -12,14 +12,11 @@ export default function Page({
 }: {
   params: { id: string; task: string };
 }) {
-  const {
-    data: task,
-    isLoading,
-    isError,
-  } = trpc.tasks.get.useQuery(
-    { id: parseInt(taskId) },
-    { refetchInterval: 30_000 }
-  );
+  const [{ data, fetching, error }] = useQuery({
+    query: GetTaskQuery,
+    variables: { projectId: id, taskId: parseInt(taskId) },
+  });
+  const task = data?.me?.project?.task;
 
   const backPath = `/project/${id}`;
   const router = useRouter();
@@ -27,7 +24,7 @@ export default function Page({
     router.prefetch(backPath);
   }
 
-  if (isError) {
+  if (error !== undefined) {
     router.push(backPath);
     toast.error("There was an error finding that task!");
   }
@@ -46,7 +43,11 @@ export default function Page({
                     router.push(backPath);
                   }
                 }}
-                task={task}
+                task={{
+                  ...task,
+                  dueDate: task.dueDate ?? null,
+                  startDate: task.startDate ?? null,
+                }}
                 setTask={setTask}
                 isSaving={isSaving}
               />

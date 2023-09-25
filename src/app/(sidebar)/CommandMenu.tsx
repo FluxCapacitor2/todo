@@ -1,3 +1,4 @@
+import { ProjectsListQuery } from "@/components/global/Sidebar";
 import {
   CommandDialog,
   CommandEmpty,
@@ -6,11 +7,11 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { trpc } from "@/util/trpc/trpc";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useQuery } from "urql";
 
 export const CommandMenu = ({ newProject }: { newProject: () => void }) => {
   const [open, setOpen] = useState(false);
@@ -33,10 +34,8 @@ export const CommandMenu = ({ newProject }: { newProject: () => void }) => {
     setOpen(false);
   }, [pathname]);
 
-  const { data: projects } = trpc.projects.list.useQuery(undefined, {
-    enabled: open,
-    refetchInterval: 300_000,
-  });
+  const [{ data }] = useQuery({ query: ProjectsListQuery, pause: !open });
+  const projects = data?.me?.projects;
   const router = useRouter();
 
   const goto = (path: string) => {

@@ -5,8 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useUpdateProject } from "@/hooks/project";
-import { trpc } from "@/util/trpc/trpc";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import {
   MdArchive,
@@ -15,18 +14,31 @@ import {
   MdShare,
   MdUnarchive,
 } from "react-icons/md";
+import { useMutation, useQuery } from "urql";
+import {
+  GetProjectMetaQuery,
+  UpdateProjectMutation,
+} from "../../../../queries";
 import { DeleteModal } from "./DeleteModal";
 import { ShareModal } from "./ShareModal";
 
 export const ProjectMenu = ({ id }: { id: string }) => {
+  const [open, setOpen] = useState(false);
+  const session = useSession();
+
   const [shareModalShown, setShareModalShown] = useState(false);
   const [deleteModalShown, setDeleteModalShown] = useState(false);
 
-  const [open, setOpen] = useState(false);
+  const [{ data, fetching }] = useQuery({
+    query: GetProjectMetaQuery,
+    variables: { id },
+    pause: !open,
+  });
+  const project = data?.me?.project;
 
-  const { data: project } = trpc.projects.get.useQuery(id, { enabled: open });
-
-  const { updateProject, isMutating } = useUpdateProject(id);
+  const [{ fetching: isMutating }, updateProject] = useMutation(
+    UpdateProjectMutation
+  );
 
   return (
     <>
@@ -39,19 +51,31 @@ export const ProjectMenu = ({ id }: { id: string }) => {
         <DropdownMenuContent>
           <DropdownMenuItem
             onClick={() => setShareModalShown(true)}
-            disabled={project?.archived}
+            disabled={
+              project?.archived || project?.ownerId !== session.data?.id
+            }
           >
             <MdShare /> Share
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setDeleteModalShown(true)}
-            disabled={project === undefined}
+            disabled={
+              fetching ||
+              project === undefined ||
+              project.ownerId !== session.data?.id
+            }
           >
             <MdDelete /> Delete Project
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => updateProject({ archived: !project?.archived })}
-            disabled={isMutating || project === undefined}
+            onClick={() =>
+              updateProject({ id: project!.id, archived: !project?.archived })
+            }
+            disabled={
+              isMutating ||
+              project === undefined ||
+              project.ownerId !== session.data?.id
+            }
           >
             {project?.archived ? (
               <>
@@ -70,7 +94,7 @@ export const ProjectMenu = ({ id }: { id: string }) => {
         opened={shareModalShown}
         close={() => setShareModalShown(false)}
       />
-      {project?.name !== undefined && (
+      {!!project?.name && (
         <DeleteModal
           projectId={id}
           projectName={project?.name}

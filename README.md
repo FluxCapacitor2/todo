@@ -1,6 +1,6 @@
 # `todo`
 
-A simple todo app built with Next.js, Prisma, tRPC, and TailwindCSS.
+A simple todo app built with Next.js, Prisma, GraphQL, and TailwindCSS.
 
 ## Features
 

@@ -2,11 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
+import { graphql } from "@/gql";
 import { app } from "@/util/firebase";
-import { trpc } from "@/util/trpc/trpc";
 import { getMessaging, getToken } from "firebase/messaging";
 import dynamic from "next/dynamic";
 import { use } from "react";
+import { useMutation, useQuery } from "urql";
 
 const getNotificationToken = () => {
   return getToken(getMessaging(app), {
@@ -15,54 +16,86 @@ const getNotificationToken = () => {
   });
 };
 
-const component = () => {
-  const { data: tokens, isLoading } = trpc.user.getNotifTokens.useQuery(
-    undefined,
-    {
-      refetchInterval: false,
+export const GetNotificationTokensQuery = graphql(`
+  query getNotificationTokens {
+    me {
+      id
+      notificationTokens {
+        id
+        token
+      }
     }
-  );
-  const { mutateAsync: addAsync, isLoading: isAdding } =
-    trpc.user.addNotifToken.useMutation();
-  const { mutateAsync: removeAsync, isLoading: isRemoving } =
-    trpc.user.removeNotifToken.useMutation();
+  }
+`);
 
-  const utils = trpc.useContext();
+const AddNotificationTokenMutation = graphql(`
+  mutation addNotificationToken($token: String!, $userAgent: String!) {
+    addNotificationToken(token: $token, userAgent: $userAgent) {
+      id
+      token
+      userAgent
+    }
+  }
+`);
+
+const RemoveNotificationTokenMutation = graphql(`
+  mutation removeNotificationToken($token: String!) {
+    removeNotificationToken(token: $token) {
+      id
+    }
+  }
+`);
+
+const ClientComponent = () => {
+  const [{ data, fetching }] = useQuery({
+    query: GetNotificationTokensQuery,
+  });
+  const tokens = data?.me?.notificationTokens;
+
+  const [{ fetching: isAdding }, addAsync] = useMutation(
+    AddNotificationTokenMutation
+  );
+  const [{ fetching: isRemoving }, removeAsync] = useMutation(
+    RemoveNotificationTokenMutation
+  );
 
   const token = use(getNotificationToken());
 
   const request = async () => {
     const permission = await Notification.requestPermission();
     if (permission == "granted") {
-      console.log(token);
       await addAsync({
         token: token!,
         userAgent: navigator.userAgent ?? "Unknown",
       });
-      utils.user.getNotifTokens.invalidate();
     }
   };
 
   const revoke = async () => {
     console.log("Removing", token);
-    await removeAsync(token!);
-    utils.user.getNotifTokens.invalidate();
+    await removeAsync({ token });
   };
 
   const signedUp = tokens?.some((t) => t.token === token);
+
   return (
     <>
-      {isLoading ? (
-        <Loading />
+      {fetching ? (
+        <Button variant="secondary" disabled={true}>
+          <Spinner />
+          Loading...
+        </Button>
       ) : signedUp ? (
-        <Button variant="secondary" onClick={revoke}>
-          Disable Notifications
-          {isRemoving && <Spinner />}
+        <Button
+          variant="secondary"
+          onClick={revoke}
+          disabled={isAdding || isRemoving}
+        >
+          {isRemoving ? "Disabling..." : "Disable Notifications"}
         </Button>
       ) : (
-        <Button onClick={request}>
-          Enable Notifications
-          {isAdding && <Spinner />}
+        <Button onClick={request} disabled={isAdding || isRemoving}>
+          {isRemoving ? "Enabling..." : "Enable Notifications"}
         </Button>
       )}
     </>
@@ -76,6 +109,9 @@ const Loading = () => (
   </Button>
 );
 
-export const NotificationSignUp = dynamic(() => Promise.resolve(component), {
-  loading: () => <Loading />,
-});
+export const NotificationSignUp = dynamic(
+  () => Promise.resolve(ClientComponent),
+  {
+    loading: () => <Loading />,
+  }
+);

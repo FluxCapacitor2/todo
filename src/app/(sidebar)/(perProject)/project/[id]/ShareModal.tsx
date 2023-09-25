@@ -1,17 +1,15 @@
+import { RejectInvitationMutation } from "@/app/ProjectCards";
 import { Spinner } from "@/components/ui/Spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { trpc } from "@/util/trpc/trpc";
-import { AppRouter } from "@/util/trpc/trpc-router";
+import { graphql } from "@/gql";
 import { Role } from "@prisma/client";
-import { TRPCClientError } from "@trpc/client";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useRef } from "react";
-import toast from "react-hot-toast";
 import {
   MdAccountCircle,
   MdAdd,
@@ -20,6 +18,7 @@ import {
   MdSend,
   MdVisibility,
 } from "react-icons/md";
+import { useMutation, useQuery } from "urql";
 
 const roles = {
   [Role.EDITOR]: (
@@ -34,6 +33,59 @@ const roles = {
   ),
 };
 
+const ShareModalQuery = graphql(`
+  query shareModal($id: String!) {
+    me {
+      id
+      project(id: $id) {
+        id
+        owner {
+          id
+          name
+          email
+          image
+        }
+        invitations {
+          id
+          to {
+            name
+            email
+            image
+          }
+        }
+        collaborators {
+          id
+          role
+          user {
+            id
+            name
+            email
+            image
+          }
+        }
+      }
+    }
+  }
+`);
+
+const RemoveCollaboratorMutation = graphql(`
+  mutation removeCollaborator($id: String!, $projectId: String!) {
+    removeCollaborator(id: $id, projectId: $projectId) {
+      collaborators {
+        id
+      }
+    }
+  }
+`);
+
+const InviteCollaboratorMutation = graphql(`
+  mutation inviteCollaborator($projectId: String!, $email: String!) {
+    inviteCollaborator(projectId: $projectId, email: $email) {
+      id
+    }
+  }
+`);
+
 export const ShareModal = ({
   projectId,
   opened,
@@ -44,56 +96,30 @@ export const ShareModal = ({
   close: () => void;
 }) => {
   const emailField = useRef<HTMLInputElement | null>(null);
-  const utils = trpc.useContext();
 
-  const { data: collaborators } = trpc.projects.collaborators.list.useQuery(
-    projectId,
-    { enabled: opened, refetchInterval: 120_000 }
+  const [{ data, fetching }] = useQuery({
+    query: ShareModalQuery,
+    variables: { id: projectId },
+    pause: !opened,
+  });
+  const project = data?.me?.project;
+  const collaborators = project?.collaborators;
+  const invitations = project?.invitations;
+
+  const [removeCollaboratorStatus, remove] = useMutation(
+    RemoveCollaboratorMutation
+  );
+  const [inviteCollaboratorStatus, invite] = useMutation(
+    InviteCollaboratorMutation
+  );
+  const [rejectInvitationResult, reject] = useMutation(
+    RejectInvitationMutation
   );
 
-  const { data: invitations } =
-    trpc.projects.collaborators.listInvitations.useQuery(projectId, {
-      enabled: opened,
-      refetchInterval: 60_000,
-    });
-
-  const { data: project } = trpc.projects.get.useQuery(projectId, {
-    enabled: opened,
-    refetchInterval: false,
-  });
-
-  const { mutateAsync: remove } =
-    trpc.projects.collaborators.remove.useMutation({
-      onSettled: () => utils.projects.collaborators.list.invalidate(projectId),
-    });
-
-  const { mutateAsync: rescind } = trpc.invitation.rescind.useMutation({
-    onSettled: () =>
-      utils.projects.collaborators.listInvitations.invalidate(projectId),
-  });
-
-  const { mutateAsync: invite, isLoading: mutating } =
-    trpc.projects.collaborators.invite.useMutation({
-      onError: (error, variables, context) => {
-        const code = (error as TRPCClientError<AppRouter>).data?.code;
-        console.log(error, Array.isArray(error));
-        if (code === "NOT_FOUND") {
-          toast.error(
-            "That user was not found! Make sure you typed their email address correctly."
-          );
-        } else if (code === "BAD_REQUEST") {
-          const message = (error as TRPCClientError<AppRouter>).message;
-          if (message === "ALREADY_INVITED") {
-            toast.error("That user has already been invited to this project!");
-          } else {
-            toast.error("Invalid email address!");
-          }
-        }
-      },
-      onSettled: () => {
-        utils.projects.collaborators.listInvitations.invalidate(projectId);
-      },
-    });
+  const mutating =
+    removeCollaboratorStatus.fetching ||
+    inviteCollaboratorStatus.fetching ||
+    rejectInvitationResult.fetching;
 
   const add = () => {
     if (emailField.current) {
@@ -155,7 +181,10 @@ export const ShareModal = ({
                   <p>{c.user.email}</p>
                 </div>
 
-                <Button variant="ghost" onClick={() => remove(c.id)}>
+                <Button
+                  variant="ghost"
+                  onClick={() => remove({ id: c.id, projectId })}
+                >
                   <span className="sr-only">Remove collaborator</span>
                   <MdCancel />
                 </Button>
@@ -183,7 +212,7 @@ export const ShareModal = ({
                   </p>
                   <p>{inv.to.email}</p>
                 </div>
-                <Button variant="ghost" onClick={() => rescind(inv.id)}>
+                <Button variant="ghost" onClick={() => reject({ id: inv.id })}>
                   <span className="sr-only">Rescind invitation</span>
                   <MdCancel />
                 </Button>
@@ -194,7 +223,7 @@ export const ShareModal = ({
             <h3 className="font-bold">Invitations</h3>
             <p>
               Enter an email address and tell the recipient to check their{" "}
-              <Link href="/invitations" className="font-medium underline">
+              <Link href="/projects" className="font-medium underline">
                 invitations page
               </Link>
               .

@@ -1,6 +1,7 @@
-import { trpc } from "@/util/trpc/trpc";
+import { ProjectListQuery } from "@/app/queries";
 import { Project } from "@prisma/client";
 import { ReactNode, useEffect, useState } from "react";
+import { useQuery } from "urql";
 import { Spinner } from "../ui/Spinner";
 import { Checkbox } from "../ui/checkbox";
 
@@ -11,22 +12,20 @@ export const ProjectSelector = ({
     included: Omit<Project, "archived" | "createdAt">[] | undefined
   ) => ReactNode;
 }) => {
-  const { data: projects } = trpc.projects.list.useQuery(undefined, {
-    refetchInterval: 60_000 * 10, // 10 minutes
-  });
-  const [included, setIncluded] = useState(projects);
+  const [{ data, fetching }] = useQuery({ query: ProjectListQuery });
+  const [included, setIncluded] = useState(data?.me?.projects);
 
   useEffect(() => {
     if (included === undefined) {
-      setIncluded(projects);
+      setIncluded(data?.me?.projects);
     }
-  }, [projects, included]);
+  }, [data?.me?.projects, included]);
 
   return (
     <>
       <div className="flex flex-wrap gap-4">
         {included ? (
-          projects?.map((project, i) => (
+          data?.me?.projects?.map((project, i) => (
             <div
               className="inline-flex items-center gap-3 rounded-full bg-gray-100 px-3 py-1 font-medium dark:bg-gray-800"
               key={project.id}

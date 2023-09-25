@@ -2,8 +2,6 @@
 
 import { NewProject } from "@/components/global/NewProjectModal";
 import { Sidebar } from "@/components/global/Sidebar";
-import { TrpcProvider } from "@/components/global/TrpcProvider";
-import { useIsMutating } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
@@ -63,31 +61,13 @@ export default function SignedInLayout({
           </span>
         </div>
       )}
-      <TrpcProvider>
-        <div className="flex h-screen w-screen flex-col overflow-hidden md:flex-row">
-          <Sidebar newProject={() => setNewProjectOpen(true)} />
-          <div className="h-screen w-full overflow-x-hidden pt-3">
-            {children}
-          </div>
-        </div>
-        <NewProject opened={newProjectOpen} setOpened={setNewProjectOpen} />
-        <Toaster position="top-right" />
-        <CommandMenu newProject={() => setNewProjectOpen(true)} />
-        <BeforeLeaveHook />
-      </TrpcProvider>
+      <div className="flex h-screen w-screen flex-col overflow-hidden md:flex-row">
+        <Sidebar newProject={() => setNewProjectOpen(true)} />
+        <div className="h-screen w-full overflow-x-hidden pt-3">{children}</div>
+      </div>
+      <NewProject opened={newProjectOpen} setOpened={setNewProjectOpen} />
+      <Toaster position="top-right" />
+      <CommandMenu newProject={() => setNewProjectOpen(true)} />
     </>
   );
 }
-
-const BeforeLeaveHook = () => {
-  const isMutating = useIsMutating();
-  useEffect(() => {
-    if (isMutating) {
-      window.onbeforeunload = () => {};
-    } else {
-      window.onbeforeunload = null;
-    }
-  }, [isMutating]);
-
-  return null;
-};
