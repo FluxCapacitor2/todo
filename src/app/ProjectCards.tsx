@@ -37,6 +37,7 @@ const ProjectsListQuery = graphql(`
         collaborators {
           id
           user {
+            id
             name
             image
           }
@@ -99,25 +100,28 @@ export const ProjectCards = () => {
         setOpened={(state) => setNewProjectOpen(state)}
       />
       {fetching ? (
-        <div className="flex justify-center">
+        <div className="grid">
           {/* Fallback/skeleton UI */}
-          <div className="grid w-full grid-cols-1 justify-around gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {new Array(4).fill(undefined).map((_, i) => (
-              <Card key={i}>
-                <CardHeader>
-                  <CardTitle>
-                    <Skeleton className="h-8 w-40" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {new Array(4).fill(undefined).map((_, i) => (
+            <div className="mb-2 flex justify-between border-b py-8" key={i}>
+              <div>
+                <Skeleton className="mb-1 h-6 w-48" />
+                <Skeleton className="mb-1 h-4 w-12" />
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded-full" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
+              </div>
+              <div className="flex flex-row-reverse items-center">
+                {new Array(2 + (i % 2)).fill(undefined).map((_, i) => (
+                  <Skeleton
+                    key={i}
+                    className="-mx-1 h-12 w-12 rounded-full border-2 border-background"
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       ) : error !== undefined ? (
         <p className="flex items-center gap-2 font-bold text-red-500">

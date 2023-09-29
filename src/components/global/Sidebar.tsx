@@ -183,10 +183,10 @@ const SidebarContents = ({
         <div className="flex w-full flex-col">
           {new Array(4).fill(undefined).map((_, i) => (
             <div
-              className="flex h-14 items-center gap-2 p-4 font-medium"
+              className="flex items-center gap-2 px-4 py-6 font-medium"
               key={i}
             >
-              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-5 w-36" />
             </div>
           ))}
         </div>
