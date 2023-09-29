@@ -10,20 +10,8 @@ import {
   SiTailwindcss,
   SiVercel,
 } from "react-icons/si";
-import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
 export default async function Page() {
-  const readme = await (
-    await fetch(
-      "https://raw.githubusercontent.com/FluxCapacitor2/FluxCapacitor2/master/README.md",
-      {
-        next: {
-          revalidate: 86400,
-        },
-      }
-    )
-  ).text();
-
   return (
     <>
       <TopNav />
@@ -123,19 +111,6 @@ export default async function Page() {
               </tr>
             </tbody>
           </table>
-          <h2 className="text-left">About Me</h2>
-
-          <div className="overflow-hidden rounded-md bg-gray-100 shadow-md dark:bg-gray-900">
-            <div className="border-b border-gray-500 bg-gray-200 px-4 pt-0.5 dark:bg-gray-800">
-              <p className="my-2">
-                Sourced from my{" "}
-                <Link href="https://github.com/FluxCapacitor2/FluxCapacitor2/blob/master/README.md">
-                  GitHub profile
-                </Link>
-              </p>
-            </div>
-            <ReactMarkdown className="px-4">{readme}</ReactMarkdown>
-          </div>
         </div>
 
         {/* Extra padding at the bottom of the page*/}

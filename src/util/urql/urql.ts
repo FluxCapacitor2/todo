@@ -19,7 +19,7 @@ const storage =
       })
     : undefined;
 
-const optimisticId = () => "temp-optimistic-" + Math.random();
+const optimisticId = () => "optimistic-" + Math.random();
 
 const cache = cacheExchange<GraphCacheConfig>({
   schema,
