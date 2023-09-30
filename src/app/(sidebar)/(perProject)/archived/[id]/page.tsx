@@ -2,13 +2,7 @@
 
 import { GetArchivedSectionsQuery, UpdateSectionMutation } from "@/app/queries";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "react-hot-toast";
 import { MdChecklist, MdUnarchive } from "react-icons/md";
@@ -89,9 +83,6 @@ const ArchivedSkeleton = () => (
           </CardTitle>
         </CardHeader>
 
-        <CardContent>
-          <Skeleton className="h-6 w-24" />
-        </CardContent>
         <CardFooter>
           <Button variant="secondary" disabled className="w-full">
             <MdUnarchive /> Unarchive

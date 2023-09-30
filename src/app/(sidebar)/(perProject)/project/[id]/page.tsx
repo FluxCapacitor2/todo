@@ -45,7 +45,7 @@ export default function ProjectView({
   });
   const project = data?.me?.project;
 
-  if (!data || fetching) {
+  if (fetching) {
     // Loading UI (skeleton)
     return <ProjectSkeleton />;
   }

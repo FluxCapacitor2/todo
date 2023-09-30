@@ -70,6 +70,11 @@ export function extractTimeFromDate(date: Date) {
 }
 
 export function shortDateFormat(date: Date) {
+  if (!isFinite(date?.getTime())) {
+    console.trace("Tried to format non-finite date: ", date);
+    return "Invalid date";
+  }
+
   const now = new Date();
 
   const isThisYear = now.getFullYear() === date.getFullYear();

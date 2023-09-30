@@ -17,7 +17,7 @@ builder.prismaObject("User", {
     projects: t.prismaField({
       type: ["Project"],
       args: {
-        archived: t.arg.boolean({ defaultValue: false }),
+        archived: t.arg.boolean(),
       },
       resolve: (query, _parent, args, ctx, _info) =>
         prisma.project.findMany({

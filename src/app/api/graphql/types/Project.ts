@@ -99,7 +99,7 @@ builder.mutationField("removeCollaborator", (t) =>
 
 builder.mutationField("inviteCollaborator", (t) =>
   t.prismaField({
-    type: "Invitation",
+    type: "Project",
     args: {
       projectId: t.arg.string(),
       email: t.arg.string(),
@@ -123,13 +123,18 @@ builder.mutationField("inviteCollaborator", (t) =>
       ) {
         throw new Error("You've already invited this user!");
       }
-      return await prisma.invitation.create({
+      const result = await prisma.invitation.create({
         data: {
           senderId: context.userId,
           receiverId: otherUser.id,
           projectId: args.projectId!,
         },
+        include: {
+          project: true,
+        },
       });
+
+      return result.project;
     },
   })
 );

@@ -9,6 +9,7 @@ import { ListSkeleton } from "../(perProject)/list/[id]/ListSkeleton";
 const CompletedTasksQuery = graphql(`
   query completedTasks {
     me {
+      id
       tasks(completed: true) {
         id
         name

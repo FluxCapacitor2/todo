@@ -172,6 +172,8 @@ const DeleteTaskMutation = graphql(`
   mutation deleteTask($id: Int!) {
     deleteTask(id: $id) {
       id
+      sectionId
+      parentTaskId
     }
   }
 `);

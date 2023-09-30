@@ -33,7 +33,7 @@ export const GetProjectQuery = graphql(`
         id
         name
         archived
-        sections {
+        sections(archived: false) {
           projectId
           archived
           createdAt
@@ -63,6 +63,7 @@ export const UpdateSectionMutation = graphql(`
       id
       name
       archived
+      projectId
     }
   }
 `);
@@ -73,6 +74,7 @@ export const CreateSectionMutation = graphql(`
       id
       name
       archived
+      projectId
     }
   }
 `);
@@ -100,6 +102,7 @@ export const GetArchivedSectionsQuery = graphql(`
           id
           name
           archived
+          projectId
         }
       }
     }

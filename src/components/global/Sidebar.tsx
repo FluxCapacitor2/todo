@@ -245,7 +245,7 @@ const ProjectItem = ({
     session.status === "authenticated" &&
     ownerId !== (session.data as ExtSession).id;
 
-  const active = pathname?.startsWith(`/project/${id}`);
+  const active = pathname?.includes(`/${id}`);
 
   return (
     <Link href={`/project/${id}`} className="group">

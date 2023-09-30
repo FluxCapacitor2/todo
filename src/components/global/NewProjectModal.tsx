@@ -32,10 +32,13 @@ export const NewProject = ({
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!ref.current) return;
-    const projectId = await createNewProject({ name: ref.current.value });
-    ref.current.value = "";
-    setOpened(false);
-    router.push(`/project/${projectId}`);
+    const project = await createNewProject({ name: ref.current.value });
+    const projectId = project?.data?.createNewProject?.id;
+    if (projectId) {
+      ref.current.value = "";
+      setOpened(false);
+      router.push(`/project/${projectId}`);
+    }
   };
 
   return (

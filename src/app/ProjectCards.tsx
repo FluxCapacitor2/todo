@@ -68,7 +68,7 @@ const AcceptInvitationMutation = graphql(`
 
 export const RejectInvitationMutation = graphql(`
   mutation rejectInvitation($id: String!) {
-    acceptInvitation(id: $id) {
+    rejectInvitation(id: $id) {
       id
     }
   }

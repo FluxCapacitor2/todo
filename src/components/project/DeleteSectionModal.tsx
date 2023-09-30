@@ -14,6 +14,7 @@ const DeleteSectionMutation = graphql(`
   mutation deleteSection($id: Int!) {
     deleteSection(id: $id) {
       id
+      projectId
       name
       archived
     }

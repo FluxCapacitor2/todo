@@ -3,11 +3,18 @@ import { GetNotificationTokensQuery } from "@/app/(sidebar)/profile/Notification
 import { GetTimePresetsQuery } from "@/components/ui/DatePickerPopover";
 import { GraphCacheConfig } from "@/gql/graphql-graphcache";
 import { getBaseURL } from "@/lib/utils";
-import { cacheExchange } from "@urql/exchange-graphcache";
+import {
+  Cache,
+  Entity,
+  FieldArgs,
+  cacheExchange,
+} from "@urql/exchange-graphcache";
 import { makeDefaultStorage } from "@urql/exchange-graphcache/default-storage";
 import { refocusExchange } from "@urql/exchange-refocus";
+import { requestPolicyExchange } from "@urql/exchange-request-policy";
 import { retryExchange } from "@urql/exchange-retry";
-import { Client, fetchExchange } from "urql";
+import toast from "react-hot-toast";
+import { Client, errorExchange, fetchExchange } from "urql";
 
 const storage =
   typeof window !== "undefined" && process.env.NODE_ENV !== "development"
@@ -15,51 +22,52 @@ const storage =
         idbName: `graphcache-${
           process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ?? "local-dev"
         }`,
-        maxAge: 7, // The maximum age of the persisted data in days
+        maxAge: 14, // The maximum age of the persisted data in days
       })
     : undefined;
 
 const optimisticId = () => "optimistic-" + Math.random();
 
+// This function is explicitly typed to return "any" to avoid having to add a `ts-ignore` directive above every usage.
+function ensureDate(value: any): any {
+  if (value === null || value === undefined) {
+    return null;
+  } else if (typeof value === "string") {
+    if (isNaN(Date.parse(value))) {
+      throw new Error("Invalid date: " + value);
+    }
+    return new Date(value);
+  } else if (typeof value === "object") {
+    const type = Object.prototype.toString.call(value);
+    if (type === "[object Date]") {
+      return value as Date;
+    } else {
+      throw new Error("Unexpected object type: " + type);
+    }
+  } else {
+    throw new Error("Unexpected primitive type: " + typeof value);
+  }
+}
+
 const cache = cacheExchange<GraphCacheConfig>({
   schema,
   resolvers: {
     Task: {
-      //@ts-ignore
-      dueDate: (parent) => {
-        return parent.dueDate !== null
-          ? new Date(parent.dueDate as unknown as string)
-          : null;
-      },
-      //@ts-ignore
-      startDate: (parent) => {
-        return parent.startDate !== null
-          ? new Date(parent.startDate as unknown as string)
-          : null;
-      },
-      //@ts-ignore
-      createdAt: (parent) => new Date(parent.createdAt as unknown as string),
-      parentTask: (parent, _args, cache) => {
-        return {
-          __typename: "Task",
-          id: cache.resolve(parent, "parentTaskId")?.toString(),
-        };
-      },
+      dueDate: (parent) => ensureDate(parent.dueDate),
+      startDate: (parent) => ensureDate(parent.startDate),
+      createdAt: (parent) => ensureDate(parent.createdAt),
     },
     Reminder: {
-      //@ts-ignore
-      time: (parent) =>
-        typeof parent.time === "string" ? new Date(parent.time) : parent.time,
+      time: (parent) => ensureDate(parent.time),
       task: (parent, _args, cache) => {
         return {
           __typename: "Task",
-          id: cache.resolve(parent, "taskId")?.toString(),
+          id: parent.taskId?.toString(),
         };
       },
     },
     Project: {
-      //@ts-ignore
-      createdAt: (parent) => new Date(parent.createdAt as unknown as string),
+      createdAt: (parent) => ensureDate(parent.createdAt),
     },
   },
   optimistic: {
@@ -91,23 +99,41 @@ const cache = cacheExchange<GraphCacheConfig>({
         token: args.token!,
       };
     },
+    rejectInvitation: (args, cache, info) => {
+      return {
+        __typename: "Invitation",
+        id: args.id!,
+      };
+    },
+    createTask: (args, cache, info) => {
+      return {
+        __typename: "Task",
+        id: optimisticId(),
+        completed: false,
+        createdAt: new Date(),
+        description: args.description ?? "",
+        dueDate: args.dueDate,
+        name: args.name ?? "",
+        sectionId: args.sectionId,
+        updatedAt: new Date(),
+      };
+    },
+    deleteTask: (args, cache, info) => {
+      return {
+        __typename: "Task",
+        id: args.id!.toString(),
+      };
+    },
   },
   updates: {
     Mutation: {
-      createReminder: (result, args, cache, info) => {
-        const reminders = cache.resolve(
+      createReminder: (result, args, cache, info) =>
+        addToList(
+          cache,
           { __typename: "Task", id: result.createReminder.taskId! },
-          "reminders"
-        );
-
-        if (Array.isArray(reminders)) {
-          cache.link(
-            { __typename: "Task", id: result.createReminder.taskId! },
-            "reminders",
-            [...reminders, cache.keyOfEntity(result.createReminder)]
-          );
-        }
-      },
+          "reminders",
+          result.createReminder
+        ),
       deleteReminder: (result, args, cache, info) => {
         const taskId = cache
           .resolve(
@@ -187,11 +213,151 @@ const cache = cacheExchange<GraphCacheConfig>({
           );
         }
       },
+      rejectInvitation: (result, args, cache, info) => {
+        cache.invalidate({
+          __typename: "Invitation",
+          id: result.rejectInvitation.id!,
+        });
+      },
+      inviteCollaborator: (result, args, cache, info) =>
+        addToList(
+          cache,
+          { __typename: "Project", id: args.projectId! },
+          "collaborators",
+          {
+            __typename: "Collaborator",
+            id: result.inviteCollaborator.id!,
+          }
+        ),
+
+      createTask: (result, args, cache, info) =>
+        addToList(
+          cache,
+          { __typename: "Section", id: result.createTask.sectionId! },
+          "tasks",
+          { __typename: "Task", id: result.createTask.id! }
+        ),
+      deleteTask: (result, args, cache, info) => {
+        if (result.deleteTask.sectionId) {
+          removeFromList(
+            cache,
+            {
+              __typename: "Section",
+              id: result.deleteTask.sectionId,
+            },
+            "tasks",
+            { __typename: "Task", id: result.deleteTask.id! }
+          );
+        } else {
+          removeFromList(
+            cache,
+            {
+              __typename: "Task",
+              id: result.deleteTask.parentTaskId!,
+            },
+            "subTasks",
+            { __typename: "Task", id: result.deleteTask.id! }
+          );
+        }
+      },
+      updateSection: (result, args, cache, info) => {
+        const item = result.updateSection;
+        const projectEntity = {
+          __typename: "Project",
+          id: item.projectId!,
+        };
+        addToList(cache, projectEntity, "sections", item, {
+          archived: item.archived!,
+        });
+        removeFromList(cache, projectEntity, "sections", item, {
+          archived: !item.archived,
+        });
+      },
+      createNewProject: (result, args, cache, info) => {
+        const me = cache.resolve({ __typename: "Query" }, "me")?.toString();
+        const projects = cache.resolve(me, "projects", { archived: false });
+
+        if (!Array.isArray(projects)) {
+          return;
+        }
+
+        cache.link(me, "projects", { archived: false }, [
+          ...projects,
+          cache.keyOfEntity(result.createNewProject),
+        ]);
+      },
+      deleteSection: (result, args, cache, info) => {
+        removeFromList(
+          cache,
+          { __typename: "Project", id: result.deleteSection.projectId! },
+          "sections",
+          result.deleteSection,
+          { archived: false }
+        );
+        removeFromList(
+          cache,
+          {
+            __typename: "Project",
+            id: result.deleteSection.projectId!,
+          },
+          "sections",
+          result.deleteSection,
+          { archived: true }
+        );
+      },
+      createSection: (result, args, cache, info) =>
+        addToList(
+          cache,
+          { __typename: "Project", id: result.createSection.projectId! },
+          "sections",
+          result.createSection,
+          { archived: false }
+        ),
     },
   },
   // @ts-expect-error Storage can't be initialized without a browser environment, so it can be undefined here.
   storage,
 });
+
+function addToList(
+  cache: Cache,
+  parent: Entity,
+  listName: string,
+  item: Entity,
+  args?: FieldArgs
+) {
+  const list = cache.resolve(parent, listName, args);
+  console.log("Adding", item, "to", parent, ">", list, args ?? "(no args)");
+  if (!Array.isArray(list)) {
+    return;
+  }
+  const key = cache.keyOfEntity(item) as any;
+  if (list.includes(key)) {
+    return; // Prevent duplicates
+  }
+  cache.link(parent, listName, args, [...list, item]);
+}
+
+function removeFromList(
+  cache: Cache,
+  parent: Entity,
+  listName: string,
+  item: Entity,
+  args?: FieldArgs
+) {
+  const list = cache.resolve(parent, listName, args);
+  const key = cache.keyOfEntity(item);
+  console.log("Removing", key, "from", parent, ">", list, args ?? "(no args)");
+  if (!Array.isArray(list)) {
+    return;
+  }
+  cache.link(
+    parent,
+    listName,
+    args,
+    list.filter((item) => item !== key)
+  );
+}
 
 const retry = retryExchange({
   initialDelayMs: 500,
@@ -200,7 +366,37 @@ const retry = retryExchange({
   maxNumberAttempts: 3,
 });
 
+let lastError: string | undefined = undefined;
+let lastErrorTime = Date.now();
+
+const errors = errorExchange({
+  onError: (error, operation) => {
+    console.error(error);
+    error.graphQLErrors.forEach((error) => {
+      console.warn("GraphQL error (part of CombinedError):", error);
+      const message =
+        error.originalError?.message ??
+        // @ts-ignore Extensions aren't typed
+        error.extensions?.originalError?.message ??
+        "Unknown Error";
+
+      if (message !== lastError || Date.now() - lastErrorTime > 3_000) {
+        toast.error(message);
+        lastError = message;
+        lastErrorTime = Date.now();
+      }
+    });
+  },
+});
+
+const refetch = requestPolicyExchange({
+  shouldUpgrade: (op) => {
+    // TODO automatically refetch some queries
+    return false;
+  },
+});
+
 export const queryClient = new Client({
   url: getBaseURL() + "/api/graphql",
-  exchanges: [refocusExchange(), retry, cache, fetchExchange],
+  exchanges: [refocusExchange(), retry, cache, errors, refetch, fetchExchange],
 });

@@ -48,6 +48,7 @@ const ShareModalQuery = graphql(`
         invitations {
           id
           to {
+            id
             name
             email
             image
@@ -71,6 +72,7 @@ const ShareModalQuery = graphql(`
 const RemoveCollaboratorMutation = graphql(`
   mutation removeCollaborator($id: String!, $projectId: String!) {
     removeCollaborator(id: $id, projectId: $projectId) {
+      id
       collaborators {
         id
       }
@@ -81,6 +83,7 @@ const RemoveCollaboratorMutation = graphql(`
 const InviteCollaboratorMutation = graphql(`
   mutation inviteCollaborator($projectId: String!, $email: String!) {
     inviteCollaborator(projectId: $projectId, email: $email) {
+      id
       id
     }
   }
@@ -106,20 +109,15 @@ export const ShareModal = ({
   const collaborators = project?.collaborators;
   const invitations = project?.invitations;
 
-  const [removeCollaboratorStatus, remove] = useMutation(
+  const [{ fetching: removing }, remove] = useMutation(
     RemoveCollaboratorMutation
   );
-  const [inviteCollaboratorStatus, invite] = useMutation(
+  const [{ fetching: inviting }, invite] = useMutation(
     InviteCollaboratorMutation
   );
-  const [rejectInvitationResult, reject] = useMutation(
+  const [{ fetching: rejecting }, reject] = useMutation(
     RejectInvitationMutation
   );
-
-  const mutating =
-    removeCollaboratorStatus.fetching ||
-    inviteCollaboratorStatus.fetching ||
-    rejectInvitationResult.fetching;
 
   const add = () => {
     if (emailField.current) {
@@ -184,9 +182,19 @@ export const ShareModal = ({
                 <Button
                   variant="ghost"
                   onClick={() => remove({ id: c.id, projectId })}
+                  disabled={removing}
                 >
-                  <span className="sr-only">Remove collaborator</span>
-                  <MdCancel />
+                  {removing ? (
+                    <>
+                      <span className="sr-only">Removing...</span>
+                      <Spinner />
+                    </>
+                  ) : (
+                    <>
+                      <span className="sr-only">Remove collaborator</span>
+                      <MdCancel />
+                    </>
+                  )}
                 </Button>
               </Fragment>
             ))}
@@ -205,16 +213,29 @@ export const ShareModal = ({
                 <div className="grow">
                   <p className="text-lg font-bold">
                     {inv.to.name}
-                    <Badge className="ml-1 gap-1">
+                    <Badge className="ml-1 gap-1" variant="secondary">
                       <MdSend />
                       Invited
                     </Badge>
                   </p>
                   <p>{inv.to.email}</p>
                 </div>
-                <Button variant="ghost" onClick={() => reject({ id: inv.id })}>
-                  <span className="sr-only">Rescind invitation</span>
-                  <MdCancel />
+                <Button
+                  variant="ghost"
+                  onClick={() => reject({ id: inv.id })}
+                  disabled={rejecting}
+                >
+                  {rejecting ? (
+                    <>
+                      <Spinner />
+                      <span className="sr-only">Loading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <MdCancel />
+                      <span className="sr-only">Rescind invitation</span>
+                    </>
+                  )}
                 </Button>
               </Fragment>
             ))}
@@ -232,7 +253,7 @@ export const ShareModal = ({
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (!mutating) {
+              if (!inviting) {
                 add();
               }
             }}
@@ -245,10 +266,10 @@ export const ShareModal = ({
                 type="email"
                 required
                 className="flex-1"
-                disabled={mutating}
+                disabled={inviting}
               />
-              <Button type="submit" disabled={mutating}>
-                {mutating ? <Spinner /> : <MdAdd />}
+              <Button type="submit" disabled={inviting}>
+                {inviting ? <Spinner /> : <MdAdd />}
               </Button>
             </div>
           </form>

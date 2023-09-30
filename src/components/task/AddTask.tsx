@@ -147,7 +147,7 @@ const SectionsListQuery = graphql(`
       id
       project(id: $projectId) {
         id
-        sections {
+        sections(archived: false) {
           id
           name
         }
