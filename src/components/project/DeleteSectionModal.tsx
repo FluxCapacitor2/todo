@@ -7,7 +7,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useDeleteSection } from "@/hooks/section";
+import { graphql } from "@/gql";
+import { useMutation } from "urql";
+
+const DeleteSectionMutation = graphql(`
+  mutation deleteSection($id: Int!) {
+    deleteSection(id: $id) {
+      id
+      projectId
+      name
+      archived
+    }
+  }
+`);
 
 export const DeleteSectionModal = ({
   opened,
@@ -22,7 +34,8 @@ export const DeleteSectionModal = ({
   sectionId: number;
   sectionName: string;
 }) => {
-  const { deleteSection, isLoading } = useDeleteSection(projectId);
+  const [{ fetching }, deleteSection] = useMutation(DeleteSectionMutation);
+
   return (
     <Dialog open={opened} onOpenChange={setOpened}>
       <DialogContent>
@@ -40,8 +53,9 @@ export const DeleteSectionModal = ({
             await deleteSection({ id: sectionId });
             setOpened(false);
           }}
+          disabled={fetching}
         >
-          {isLoading && <Spinner />}
+          {fetching && <Spinner />}
           Delete Section &ldquo;{sectionName}&rdquo;
         </Button>
       </DialogContent>

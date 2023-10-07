@@ -1,26 +1,26 @@
 "use client";
 
+import { GetArchivedSectionsQuery, UpdateSectionMutation } from "@/app/queries";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useUpdateSection } from "@/hooks/section";
-import { trpc } from "@/util/trpc/trpc";
 import { toast } from "react-hot-toast";
 import { MdChecklist, MdUnarchive } from "react-icons/md";
+import { useMutation, useQuery } from "urql";
 
 export default function ArchivedView({
   params: { id: projectId },
 }: {
   params: { id: string };
 }) {
-  const { data, isLoading } = trpc.sections.getArchived.useQuery(projectId);
-  const { updateSection } = useUpdateSection(projectId);
+  const [{ data, fetching }] = useQuery({
+    query: GetArchivedSectionsQuery,
+    variables: { projectId },
+  });
+  const sections = data?.me?.project?.sections;
+  const [updateSectionStatus, updateSection] = useMutation(
+    UpdateSectionMutation
+  );
 
   const unarchive = (id: number) => {
     updateSection({ id, archived: false })
@@ -34,25 +34,22 @@ export default function ArchivedView({
 
   return (
     <>
-      {isLoading ? (
+      {fetching ? (
         <ArchivedSkeleton />
-      ) : data && data.length > 0 ? (
+      ) : sections && sections.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {data
+          {sections
             ?.filter((it) => it.archived)
             .map((section) => (
               <Card key={section.id}>
                 <CardHeader>
                   <CardTitle>{section.name}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p>{section._count?.tasks} tasks</p>
-                </CardContent>
                 <CardFooter>
                   <Button
                     variant="secondary"
                     className="w-full"
-                    onClick={() => unarchive(section.id)}
+                    onClick={() => unarchive(parseInt(section.id))}
                   >
                     <MdUnarchive /> Unarchive
                   </Button>
@@ -86,9 +83,6 @@ const ArchivedSkeleton = () => (
           </CardTitle>
         </CardHeader>
 
-        <CardContent>
-          <Skeleton className="h-6 w-24" />
-        </CardContent>
         <CardFooter>
           <Button variant="secondary" disabled className="w-full">
             <MdUnarchive /> Unarchive

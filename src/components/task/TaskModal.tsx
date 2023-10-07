@@ -1,12 +1,13 @@
 import { RemirrorEditor } from "@/components/ui/RemirrorEditor";
 import { Spinner } from "@/components/ui/Spinner";
-import { cn, isBetween, shortDateFormat } from "@/lib/utils";
-import { trpc } from "@/util/trpc/trpc";
-import { Task } from "@prisma/client";
+import { graphql } from "@/gql";
+import { Task } from "@/gql/graphql";
+import { RequireOf, cn, isBetween, shortDateFormat } from "@/lib/utils";
 import { differenceInSeconds, isAfter } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { ReactNode } from "react";
 import { MdArrowBack, MdError, MdStart } from "react-icons/md";
+import { useQuery } from "urql";
 import { DatePickerPopover } from "../ui/DatePickerPopover";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
@@ -23,7 +24,57 @@ import { AddSubtask } from "./AddTask";
 import { Reminders } from "./Reminders";
 import { TaskCard } from "./TaskCard";
 
-export const TaskModal = ({
+export const GetTaskQuery = graphql(`
+  query getTask($projectId: String!, $taskId: Int!) {
+    me {
+      id
+      project(id: $projectId) {
+        id
+        task(id: $taskId) {
+          id
+          name
+          description
+          parentTaskId
+          completed
+          dueDate
+          projectId
+          startDate
+          reminders {
+            id
+            taskId
+            time
+          }
+          subTasks {
+            id
+            name
+            description
+            completed
+            priority
+            createdAt
+            updatedAt
+            startDate
+            dueDate
+            sectionId
+            parentTaskId
+            ownerId
+            projectId
+          }
+          parentTask {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`);
+
+export const TaskModal = <
+  T extends Omit<
+    RequireOf<Task, "id" | "name" | "projectId" | "startDate" | "dueDate">,
+    "section" | "project" | "parentTask" | "subTasks" | "reminders"
+  >
+>({
   modalShown,
   setModalShown,
   task,
@@ -33,16 +84,17 @@ export const TaskModal = ({
 }: {
   modalShown: boolean;
   setModalShown: (shown: boolean) => void;
-  task: Task;
-  setTask: (task: Task) => void;
+  task: T;
+  setTask: (task: T) => void;
   isSaving: boolean;
   children?: ReactNode;
 }) => {
-  const { data: fullTask, isLoading: loadingSubTasks } =
-    trpc.tasks.get.useQuery(
-      { id: task.id },
-      { enabled: modalShown, refetchInterval: 30_000 }
-    );
+  const [{ data, fetching }] = useQuery({
+    query: GetTaskQuery,
+    variables: { taskId: parseInt(task.id!), projectId: task.projectId },
+    pause: !modalShown,
+  });
+  const fullTask = data?.me?.project?.task;
 
   return (
     <Sheet open={modalShown} onOpenChange={setModalShown}>
@@ -95,7 +147,7 @@ export const TaskModal = ({
           <RemirrorEditor
             className="mt-2"
             editable={!isSaving}
-            initialContent={task.description}
+            initialContent={task.description ?? ""}
             setContent={(content) => {
               if (content !== task.description) {
                 setTask({ ...task, description: content });
@@ -156,7 +208,11 @@ export const TaskModal = ({
             <p className="mb-2 text-sm text-muted-foreground">
               Schedule a notification linking to this task.
             </p>
-            <Reminders task={task} dueDate={task.dueDate} />
+            <Reminders
+              task={task}
+              initialReminders={fullTask?.reminders}
+              dueDate={task.dueDate}
+            />
           </section>
 
           {task.startDate &&
@@ -202,16 +258,24 @@ export const TaskModal = ({
               <>
                 <div className="grid gap-2">
                   {fullTask.subTasks.map((task) => (
-                    <TaskCard task={task} key={task.id} isListItem />
+                    <TaskCard
+                      task={{
+                        ...task,
+                        dueDate: task.dueDate ?? null,
+                        startDate: task.startDate ?? null,
+                      }}
+                      key={task.id}
+                      isListItem
+                    />
                   ))}
 
                   <AddSubtask
                     projectId={task.projectId}
-                    parentTaskId={task.id}
+                    parentTaskId={parseInt(task.id)}
                   />
                 </div>
               </>
-            ) : loadingSubTasks ? (
+            ) : fetching ? (
               <Spinner />
             ) : (
               <div className="flex items-center gap-2">

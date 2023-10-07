@@ -1,6 +1,6 @@
 import { ProjectMenu } from "@/app/(sidebar)/(perProject)/project/[id]/ProjectMenu";
+import { graphql } from "@/gql";
 import { ExtSession } from "@/pages/api/auth/[...nextauth]";
-import { trpc } from "@/util/trpc/trpc";
 import clsx from "clsx";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -16,6 +16,7 @@ import {
   MdGroups,
   MdMenu,
 } from "react-icons/md";
+import { useQuery } from "urql";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Skeleton } from "../ui/skeleton";
@@ -78,6 +79,19 @@ const HideOnRouteChange = ({ hide }: { hide: () => void }) => {
   return <></>;
 };
 
+export const ProjectsListQuery = graphql(`
+  query projectList {
+    me {
+      id
+      projects {
+        id
+        name
+        ownerId
+      }
+    }
+  }
+`);
+
 const SidebarContents = ({
   isModal,
   newProject,
@@ -90,9 +104,8 @@ const SidebarContents = ({
   const session = useSession();
   const pathname = usePathname();
 
-  const { data, isLoading, isError } = trpc.projects.list.useQuery(undefined, {
-    refetchInterval: 60_000 * 10, // 10 minutes
-  });
+  const [{ data, fetching, error }] = useQuery({ query: ProjectsListQuery });
+  const projects = data?.me?.projects;
 
   return (
     <nav
@@ -166,25 +179,25 @@ const SidebarContents = ({
         </div>
       </Link>
       <Divider />
-      {isLoading ? (
+      {fetching ? (
         <div className="flex w-full flex-col">
           {new Array(4).fill(undefined).map((_, i) => (
             <div
-              className="flex h-14 items-center gap-2 p-4 font-medium"
+              className="flex items-center gap-2 px-4 py-6 font-medium"
               key={i}
             >
-              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-5 w-36" />
             </div>
           ))}
         </div>
-      ) : isError ? (
+      ) : error !== undefined ? (
         <p className="flex items-center gap-2 p-4 font-bold text-red-500">
           <MdError />
           Error loading projects.
         </p>
       ) : (
         <>
-          {data?.map((project) => (
+          {projects?.map((project) => (
             <ProjectItem
               id={project.id}
               ownerId={project.ownerId}
@@ -232,7 +245,7 @@ const ProjectItem = ({
     session.status === "authenticated" &&
     ownerId !== (session.data as ExtSession).id;
 
-  const active = pathname?.startsWith(`/project/${id}`);
+  const active = pathname?.includes(`/${id}`);
 
   return (
     <Link href={`/project/${id}`} className="group">

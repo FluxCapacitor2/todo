@@ -1,6 +1,8 @@
-import { Task } from "@prisma/client";
+import { Task } from "@/gql/graphql";
 
-export function sortByDueDate<T extends Task>(tasks: T[]): T[] {
+export function sortByDueDate<T extends Pick<Task, "dueDate" | "createdAt">>(
+  tasks: T[]
+): T[] {
   const tasksWithDueDate = tasks.filter((task) => task.dueDate !== null);
   const tasksWithoutDueDate = tasks.filter((task) => task.dueDate === null);
 

@@ -1,17 +1,16 @@
-import { useCopyTaskURL, useDeleteTask } from "@/hooks/task";
-import { cn, shortDateFormat } from "@/lib/utils";
-import { Task } from "@prisma/client";
+import { graphql } from "@/gql";
+import { Task } from "@/gql/graphql";
+import { RequireOf, cn, shortDateFormat } from "@/lib/utils";
 import clsx from "clsx";
 import { isAfter } from "date-fns";
 import { useState } from "react";
 import {
   MdCalendarToday,
-  MdCheckCircleOutline,
-  MdContentCopy,
   MdDelete,
   MdRemoveCircle,
   MdToday,
 } from "react-icons/md";
+import { useMutation } from "urql";
 import { DatePickerPopover } from "../ui/DatePickerPopover";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -32,15 +31,25 @@ export const TaskCard = ({
   showCheckbox = true,
   readonly = false,
 }: {
-  task: Task;
+  task: Omit<
+    RequireOf<
+      Task,
+      | "id"
+      | "dueDate"
+      | "createdAt"
+      | "completed"
+      | "description"
+      | "name"
+      | "projectId"
+      | "startDate"
+    >,
+    "section" | "project"
+  >;
   isListItem?: boolean;
   details?: boolean;
   showCheckbox?: boolean;
   readonly?: boolean;
 }) => {
-  const subTasks =
-    "subTasks" in inTask ? (inTask.subTasks as { completed: boolean }[]) : [];
-
   const [modalShown, setModalShown] = useState(false);
 
   return (
@@ -134,18 +143,13 @@ export const TaskCard = ({
                       </div>
                     )}
 
-                    {subTasks.length > 0 && (
+                    {/* TODO: re-implement once subTask counts can be optimized */}
+                    {/* {!!task.subTaskCounts && (
                       <div className="mt-2 flex items-center gap-2">
                         <MdCheckCircleOutline />
-                        <p className="text-sm">
-                          {subTasks.reduce(
-                            (agg, it) => (it.completed ? agg + 1 : agg),
-                            0
-                          )}
-                          /{subTasks.length}
-                        </p>
+                        <p className="text-sm">{task.subTaskCounts}</p>
                       </div>
-                    )}
+                    )} */}
                   </CardContent>
                 </Card>
               </ContextMenuTrigger>
@@ -164,21 +168,33 @@ export const TaskCard = ({
   );
 };
 
-const TaskContextMenuItems = ({
+const DeleteTaskMutation = graphql(`
+  mutation deleteTask($id: Int!) {
+    deleteTask(id: $id) {
+      id
+      sectionId
+      parentTaskId
+    }
+  }
+`);
+
+const TaskContextMenuItems = <T extends Partial<Task>>({
   task,
   setTask,
   readonly = false,
 }: {
-  task: Task;
-  setTask: (task: Task) => void;
+  task: T;
+  setTask: (task: T) => void;
   readonly?: boolean;
 }) => {
-  const { deleteAsync } = useDeleteTask(task);
-  const { copy } = useCopyTaskURL(task);
+  const [_deleteTaskStatus, deleteTask] = useMutation(DeleteTaskMutation);
 
   return (
     <>
-      <ContextMenuItem onClick={() => deleteAsync(task.id)} disabled={readonly}>
+      <ContextMenuItem
+        onClick={() => deleteTask({ id: parseInt(task.id!) })}
+        disabled={readonly || !task.id}
+      >
         <MdDelete /> Delete Task
       </ContextMenuItem>
       {task.dueDate && (
@@ -197,9 +213,6 @@ const TaskContextMenuItems = ({
           <MdRemoveCircle /> Remove Start Date
         </ContextMenuItem>
       )}
-      <ContextMenuItem onClick={copy}>
-        <MdContentCopy /> Copy Link
-      </ContextMenuItem>
     </>
   );
 };

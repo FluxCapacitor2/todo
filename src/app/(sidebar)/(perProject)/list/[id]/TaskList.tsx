@@ -1,6 +1,7 @@
 import { TaskCard } from "@/components/task/TaskCard";
+import { Project, Section, Task } from "@/gql/graphql";
+import { RequireOf } from "@/lib/utils";
 import { sortByDueDate } from "@/util/sort";
-import type { Project, Section, Task } from "@prisma/client";
 import {
   addMonths,
   addWeeks,
@@ -19,9 +20,22 @@ export const TaskList = ({
   tasks: inTasks,
   readonly = false,
 }: {
-  tasks: (Task & {
-    project?: Pick<Project, "name">;
-    section: Pick<Section, "name"> | null | undefined;
+  tasks: (Omit<
+    RequireOf<
+      Task,
+      | "id"
+      | "dueDate"
+      | "createdAt"
+      | "completed"
+      | "description"
+      | "name"
+      | "projectId"
+      | "startDate"
+    >,
+    "section" | "project"
+  > & {
+    section: RequireOf<Section, "name" | "archived">;
+    project: RequireOf<Project, "name">;
   })[];
   readonly?: boolean;
 }) => {
@@ -55,7 +69,9 @@ export const TaskList = ({
   );
 };
 
-const group = <T extends Task>(tasks: T[]): Record<string, T[]> =>
+const group = <T extends Pick<Task, "dueDate">>(
+  tasks: T[]
+): Record<string, T[]> =>
   groupBy(tasks, (task): string => {
     if (!task.dueDate) {
       return "No Due Date";

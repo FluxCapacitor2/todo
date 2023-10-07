@@ -9,10 +9,19 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { trpc } from "@/util/trpc/trpc";
+import { graphql } from "@/gql";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useMutation } from "urql";
+
+const DeleteProjectMutation = graphql(`
+  mutation deleteProject($id: String!) {
+    deleteProject(id: $id) {
+      id
+    }
+  }
+`);
 
 export const DeleteModal = ({
   projectId,
@@ -25,14 +34,12 @@ export const DeleteModal = ({
   opened: boolean;
   setOpened: (opened: boolean) => void;
 }) => {
-  const { mutateAsync, isLoading } = trpc.projects.delete.useMutation();
   const router = useRouter();
-  const utils = trpc.useContext();
+
+  const [{ fetching }, _deleteProject] = useMutation(DeleteProjectMutation);
 
   const deleteProject = async () => {
-    await mutateAsync(projectId);
-    utils.projects.list.invalidate();
-    utils.projects.listArchived.invalidate();
+    await _deleteProject({ id: projectId });
     router.push("/projects");
     toast.success("Project deleted!");
     setOpened(false);
@@ -64,9 +71,9 @@ export const DeleteModal = ({
           variant="destructive"
           className="gap-2"
           onClick={deleteProject}
-          disabled={isLoading || !isCorrect}
+          disabled={fetching || !isCorrect}
         >
-          {isLoading && <Spinner />}
+          {fetching && <Spinner />}
           Delete Project
         </Button>
       </DialogContent>

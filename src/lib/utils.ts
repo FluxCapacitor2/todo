@@ -13,7 +13,20 @@ import {
   startOfTomorrow,
   startOfYesterday,
 } from "date-fns";
+import { NonUndefined } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
+
+/**
+ * Makes all properties in T optional, except for those specified in K.
+ */
+export type RequireOf<T, K extends keyof T> = Pick<
+  {
+    //todo: previously was [P in keyof T]-?: NonNullable<T[P]>;
+    [P in keyof T]-?: NonUndefined<T[P]>;
+  },
+  K
+> &
+  Partial<Omit<T, K>>;
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -57,6 +70,11 @@ export function extractTimeFromDate(date: Date) {
 }
 
 export function shortDateFormat(date: Date) {
+  if (!isFinite(date?.getTime())) {
+    console.trace("Tried to format non-finite date: ", date);
+    return "Invalid date";
+  }
+
   const now = new Date();
 
   const isThisYear = now.getFullYear() === date.getFullYear();

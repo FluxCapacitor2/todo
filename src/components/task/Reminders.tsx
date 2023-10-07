@@ -1,30 +1,51 @@
-import { useAddReminder, useRemoveReminder } from "@/hooks/reminder";
-import { shortDateFormat } from "@/lib/utils";
-import { trpc } from "@/util/trpc/trpc";
-import { Task } from "@prisma/client";
+import { graphql } from "@/gql";
+import { Reminder, Task } from "@/gql/graphql";
+import { RequireOf, shortDateFormat } from "@/lib/utils";
 import { MdClose, MdNotificationAdd, MdNotifications } from "react-icons/md";
+import { useMutation } from "urql";
 import { DatePickerPopover } from "../ui/DatePickerPopover";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 
+const CreateReminderMutation = graphql(`
+  mutation createReminder($taskId: Int!, $time: DateTime!) {
+    createReminder(taskId: $taskId, time: $time) {
+      taskId
+      id
+      time
+    }
+  }
+`);
+
+const DeleteReminderMutation = graphql(`
+  mutation deleteReminder($id: Int!) {
+    deleteReminder(id: $id) {
+      taskId
+      id
+      time
+    }
+  }
+`);
+
 export const Reminders = ({
   task,
+  initialReminders: reminders,
   dueDate,
 }: {
-  task: Task;
-  dueDate: Date | null;
+  task: RequireOf<Task, "id" | "projectId">;
+  initialReminders: Pick<Reminder, "id" | "time">[] | undefined;
+  dueDate: Date | null | undefined;
 }) => {
-  const { data: reminders } = trpc.notification.list.useQuery(task.id, {
-    enabled: task.id > 0,
-    refetchInterval: 120_000,
-  });
-
-  const { addReminder } = useAddReminder(task);
-  const { removeReminder } = useRemoveReminder(task);
+  const [addReminderStatus, addReminder] = useMutation(CreateReminderMutation);
+  const [deleteReminderStatus, deleteReminder] = useMutation(
+    DeleteReminderMutation
+  );
 
   return (
     <div className="flex flex-col gap-2">
-      <AddReminder add={(time) => addReminder({ taskId: task.id, time })} />
+      <AddReminder
+        add={(time) => addReminder({ taskId: parseInt(task.id), time })}
+      />
       {reminders?.map((reminder) => (
         <Card key={reminder.id}>
           <CardContent className="flex items-center px-4 py-2">
@@ -32,8 +53,7 @@ export const Reminders = ({
             <p>{shortDateFormat(reminder.time)}</p>
             <div className="grow" />
             <button
-              onClick={() => removeReminder(reminder.id)}
-              disabled={reminder.id < 0}
+              onClick={() => deleteReminder({ id: parseInt(reminder.id) })}
             >
               <span className="sr-only">Remove reminder</span>
               <MdClose />

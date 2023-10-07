@@ -39,7 +39,9 @@ export const HomePage = () => {
         <section className="space-y-2 px-6 py-24">
           <h1 className={`text-center text-6xl font-black`}>Todo App</h1>
           <div className="prose mx-auto max-w-2xl dark:prose-invert">
-            <p>A todo app built with Next.js, Prisma, tRPC, and TailwindCSS.</p>
+            <p>
+              A todo app built with Next.js, Prisma, GraphQL, and TailwindCSS.
+            </p>
           </div>
 
           <div className="mt-6 flex items-center justify-center gap-2">

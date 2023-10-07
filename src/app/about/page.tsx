@@ -2,28 +2,16 @@ import { TopNav } from "@/components/global/TopNav";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import {
+  SiGraphql,
   SiNextdotjs,
   SiPlanetscale,
   SiPrisma,
   SiReact,
   SiTailwindcss,
-  SiTrpc,
   SiVercel,
 } from "react-icons/si";
-import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
 export default async function Page() {
-  const readme = await (
-    await fetch(
-      "https://raw.githubusercontent.com/FluxCapacitor2/FluxCapacitor2/master/README.md",
-      {
-        next: {
-          revalidate: 86400,
-        },
-      }
-    )
-  ).text();
-
   return (
     <>
       <TopNav />
@@ -59,8 +47,19 @@ export default async function Page() {
               <tr>
                 <td>API</td>
                 <td>
-                  <SiTrpc className="mr-2 inline h-4 w-4 fill-[#2596BE]" />
-                  <Link href="https://trpc.io/">tRPC</Link>
+                  <SiGraphql className="mr-2 inline h-4 w-4 fill-[#E10098]" />
+                  <Link href="https://the-guild.dev/graphql/yoga-server">
+                    GraphQL Yoga
+                  </Link>
+                </td>
+              </tr>
+              <tr>
+                <td>API Client</td>
+                <td>
+                  <SiGraphql className="mr-2 inline h-4 w-4 fill-[#E10098]" />
+                  <Link href="https://formidable.com/open-source/urql/">
+                    urql
+                  </Link>
                 </td>
               </tr>
               <tr>
@@ -112,19 +111,6 @@ export default async function Page() {
               </tr>
             </tbody>
           </table>
-          <h2 className="text-left">About Me</h2>
-
-          <div className="overflow-hidden rounded-md bg-gray-100 shadow-md dark:bg-gray-900">
-            <div className="border-b border-gray-500 bg-gray-200 px-4 pt-0.5 dark:bg-gray-800">
-              <p className="my-2">
-                Sourced from my{" "}
-                <Link href="https://github.com/FluxCapacitor2/FluxCapacitor2/blob/master/README.md">
-                  GitHub profile
-                </Link>
-              </p>
-            </div>
-            <ReactMarkdown className="px-4">{readme}</ReactMarkdown>
-          </div>
         </div>
 
         {/* Extra padding at the bottom of the page*/}

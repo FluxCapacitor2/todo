@@ -1,24 +1,51 @@
-import { trpc } from "@/util/trpc/trpc";
-import { Task } from "@prisma/client";
-import { produce } from "immer";
+import { graphql } from "@/gql";
+import { Task } from "@/gql/graphql";
+import { RequireOf } from "@/lib/utils";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { useMutation } from "urql";
 import { useDebounce } from "use-debounce";
 
-export const TaskProvider = ({
+const UpdateTaskMutation = graphql(`
+  mutation updateTask($id: Int!) {
+    updateTask(id: $id) {
+      id
+      name
+      description
+      priority
+      createdAt
+      updatedAt
+      completed
+      startDate
+      dueDate
+      sectionId
+      parentTaskId
+      ownerId
+      projectId
+    }
+  }
+`);
+
+export const TaskProvider = <
+  T extends Omit<
+    RequireOf<Task, "id">,
+    "section" | "project" | "parentTask" | "reminders" | "subTasks"
+  >
+>({
   task: inTask,
   children,
 }: {
-  task: Task;
+  task: T;
   children: (value: {
-    task: Task;
-    setTask: (task: Task) => void;
+    task: T;
+    setTask: (task: T) => void;
     isSaving: boolean;
   }) => ReactNode;
 }) => {
   const [task, setTask] = useState(inTask);
   const initialRender = useRef(true);
-  const utils = trpc.useContext();
+
+  const [updateTaskState, updateTask] = useMutation(UpdateTaskMutation);
 
   useEffect(() => {
     setTask(inTask); // Force the task to update when new data is received
@@ -27,105 +54,19 @@ export const TaskProvider = ({
 
   const [lastRevision, setLastRevision] = useState(inTask);
 
-  const { mutateAsync: updateAsync, isLoading: isSaving } =
-    trpc.tasks.update.useMutation({
-      onMutate: ({ id, completed }) => {
-        const data = utils.tasks.get.getData({ id });
-        if (data?.parentTaskId) {
-          utils.tasks.get.cancel({ id });
-          utils.tasks.get.setData({ id: data.parentTaskId }, (task) =>
-            produce(task, (task) => {
-              if (!task) return task;
-              for (const subTask of task.subTasks) {
-                if (subTask.id === id) {
-                  if (completed !== undefined) {
-                    subTask.completed = completed;
-                  }
-                }
-              }
-            })
-          );
-        }
-
-        if (completed !== undefined) {
-          utils.tasks.listCompleted.invalidate();
-        }
-      },
-      onError: () => {
-        toast.error("There was an error saving that task!");
-        setTask(lastRevision); // Roll back the UI to the last known successful state
-      },
-      onSuccess: (data, variables) => {
-        setLastRevision(data);
-
-        const fullData = utils.tasks.get.getData({ id: data.id });
-        const parentTask = fullData?.parentTaskId
-          ? utils.tasks.get.getData({
-              id: fullData.parentTaskId,
-            })
-          : undefined;
-
-        if (
-          fullData?.parentTask &&
-          parentTask &&
-          fullData.parentTask.sectionId !== null
-        ) {
-          // Update the parent task's count of complete/incomplete subtasks
-          utils.projects.get.setData(data.projectId, (project) =>
-            produce(project, (project) => {
-              if (!project) return project;
-              for (const section of project.sections) {
-                for (const task of section.tasks) {
-                  if (task.id === data.parentTaskId) {
-                    const subTasks = parentTask.subTasks.length;
-                    const completedSubTasks = parentTask.subTasks.reduce(
-                      (acc, task) => acc + (task.completed ? 1 : 0),
-                      0
-                    );
-                    const newList = [];
-                    for (let i = 0; i < subTasks; i++) {
-                      newList.push({ completed: i < completedSubTasks });
-                    }
-                    task.subTasks = newList;
-                  }
-                }
-              }
-            })
-          );
-        }
-
-        if (variables.completed === true && data.sectionId !== null) {
-          // Refresh projects when completing top-level tasks,
-          // as completed tasks are hidden in the project view.
-          utils.projects.get.invalidate(data.projectId);
-
-          // Optimistic update
-          utils.projects.get.setData(data.projectId, (project) =>
-            produce(project, (project) => {
-              if (!project) return project;
-              for (const section of project.sections) {
-                section.tasks = section.tasks.filter(
-                  (it) => it.id !== variables.id
-                );
-              }
-            })
-          );
-        }
-
-        if (data.sectionId !== null) {
-          utils.projects.get.setData(data.projectId, (project) =>
-            produce(project, (project) => {
-              if (!project) return project;
-              for (const section of project.sections) {
-                for (let task of section.tasks) {
-                  task = { ...data, subTasks: task.subTasks };
-                }
-              }
-            })
-          );
-        }
-      },
-    });
+  const update = async (newValue: Parameters<typeof updateTask>[0]) => {
+    // console.log("update triggered with old=>new: ", task, newValue);
+    // TODO prevent infinite loop of updates!!
+    // Ideally, every update would just be in its own query since we have 'automatic' optimistic updates with URQL
+    const result = await updateTask(newValue);
+    if (result.error) {
+      toast.error("There was an error updating that task!");
+      setTask(lastRevision);
+    } else {
+      // @ts-ignore - TODO Try to get this working properly with a generic
+      setLastRevision(result.data!.updateTask!);
+    }
+  };
 
   const [debouncedTask] = useDebounce(task, 500, {
     leading: true,
@@ -138,13 +79,14 @@ export const TaskProvider = ({
       initialRender.current = false;
       return;
     } else {
-      updateAsync({
+      update({
         ...debouncedTask,
+        id: parseInt(debouncedTask.id!),
         dueDate: debouncedTask.dueDate ?? undefined,
         startDate: debouncedTask.startDate ?? undefined,
       });
     }
-  }, [debouncedTask, updateAsync]);
+  }, [debouncedTask]);
 
-  return <>{children({ task, setTask, isSaving })}</>;
+  return <>{children({ task, setTask, isSaving: updateTaskState.fetching })}</>;
 };

@@ -1,10 +1,11 @@
 "use client";
 
 import { ProjectMenu } from "@/app/(sidebar)/(perProject)/project/[id]/ProjectMenu";
+import { GetProjectMetaQuery } from "@/app/queries";
 import { cn } from "@/lib/utils";
-import { trpc } from "@/util/trpc/trpc";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useQuery } from "urql";
 import { Badge } from "../ui/badge";
 import {
   NavigationMenu,
@@ -22,17 +23,17 @@ export const ViewSelector = ({
   id: string;
   className: string;
 }) => {
-  const {
-    data: project,
-    isLoading,
-    isError,
-  } = trpc.projects.get.useQuery(id, { refetchInterval: 600_000 });
+  const [{ data, fetching }] = useQuery({
+    query: GetProjectMetaQuery,
+    variables: { id },
+  });
+  const project = data?.me?.project;
 
   const pathname = usePathname();
 
   return (
     <div className={cn("px-2", className)}>
-      {isLoading ? (
+      {fetching ? (
         <Skeleton className="mb-2 h-10 w-64" />
       ) : (
         <h1 className="mb-2 flex items-center gap-2 text-2xl font-bold">

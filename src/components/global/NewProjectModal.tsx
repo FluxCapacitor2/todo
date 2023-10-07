@@ -1,11 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { trpc } from "@/util/trpc/trpc";
+import { graphql } from "@/gql";
 import { useRouter } from "next/navigation";
 import { FormEvent, useRef } from "react";
 import { MdAddBox, MdCancel } from "react-icons/md";
+import { useMutation } from "urql";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Sheet, SheetClose, SheetContent, SheetTitle } from "../ui/sheet";
+
+const NewProjectMutation = graphql(`
+  mutation newProject($name: String!) {
+    createNewProject(name: $name) {
+      id
+    }
+  }
+`);
 
 export const NewProject = ({
   opened,
@@ -15,20 +24,21 @@ export const NewProject = ({
   setOpened: (arg0: boolean) => void;
 }) => {
   const ref = useRef<HTMLInputElement | null>(null);
-  const utils = trpc.useContext();
 
-  const { mutateAsync, isLoading } = trpc.projects.create.useMutation();
+  const [{ fetching }, createNewProject] = useMutation(NewProjectMutation);
 
   const router = useRouter();
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!ref.current) return;
-    const projectId = await mutateAsync({ name: ref.current.value });
-    ref.current.value = "";
-    setOpened(false);
-    utils.projects.list.invalidate();
-    router.push(`/project/${projectId}`);
+    const project = await createNewProject({ name: ref.current.value });
+    const projectId = project?.data?.createNewProject?.id;
+    if (projectId) {
+      ref.current.value = "";
+      setOpened(false);
+      router.push(`/project/${projectId}`);
+    }
   };
 
   return (
@@ -50,7 +60,7 @@ export const NewProject = ({
             maxLength={100}
           />
           <div className="flex gap-2">
-            <Button type="submit" disabled={isLoading} className="gap-1">
+            <Button type="submit" disabled={fetching} className="gap-1">
               <MdAddBox />
               Create
             </Button>
