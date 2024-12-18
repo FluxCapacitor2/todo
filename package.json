@@ -55,7 +55,7 @@
     "immer": "^10.0.2",
     "just-group-by": "^2.2.0",
     "lucide-react": "^0.279.0",
-    "next": "^13.5.7",
+    "next": "^15.1.1",
     "next-auth": "^4.24.10",
     "next-themes": "^0.2.1",
     "react": "18.2.0",
